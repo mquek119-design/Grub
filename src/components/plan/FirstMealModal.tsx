@@ -2,10 +2,9 @@
 
 import { useFormStatus } from 'react-dom';
 import { useActionState } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/media/Icon';
 import { FoodImage } from '@/components/media/FoodImage';
-import { Reveal } from '@/components/motion/Reveal';
 import { addMealToPlan, type PlanActionState } from '@/app/plan/actions';
 import { useModalA11y } from '@/components/ui/useModalA11y';
 import type { Recipe } from '@/lib/types';
@@ -15,6 +14,7 @@ const INITIAL: PlanActionState = { status: 'idle', message: '' };
 
 interface FirstMealModalProps {
   recipes: Recipe[];
+  weekStartDate: string;
 }
 
 /**
@@ -23,13 +23,35 @@ interface FirstMealModalProps {
  *
  * Dismissible but not closeable by clicking outside — modal backdrop catches that.
  */
-export function FirstMealModal({ recipes }: FirstMealModalProps) {
+export function FirstMealModal({ recipes, weekStartDate }: FirstMealModalProps) {
   const [dismissed, setDismissed] = useState(false);
+  const [preferenceLoaded, setPreferenceLoaded] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
-  const isVisible = !dismissed && recipes.length > 0;
+  const storageKey = `grub:first-meal-prompt:${weekStartDate}`;
+  const isVisible = preferenceLoaded && !dismissed && recipes.length > 0;
 
-  useModalA11y(dialogRef, isVisible, () => setDismissed(true));
+  useEffect(() => {
+    try {
+      setDismissed(window.localStorage.getItem(storageKey) === 'dismissed');
+    } catch {
+      setDismissed(false);
+    } finally {
+      setPreferenceLoaded(true);
+    }
+  }, [storageKey]);
+
+  const dismiss = useCallback(() => {
+    try {
+      window.localStorage.setItem(storageKey, 'dismissed');
+    } catch {
+      // The prompt can still be dismissed for this visit when storage is unavailable.
+    } finally {
+      setDismissed(true);
+    }
+  }, [storageKey]);
+
+  useModalA11y(dialogRef, isVisible, dismiss);
 
   if (!isVisible) return null;
 
@@ -48,23 +70,32 @@ export function FirstMealModal({ recipes }: FirstMealModalProps) {
         aria-modal="true"
         aria-labelledby="first-meal-title"
         tabIndex={-1}
-        className="fixed inset-x-0 bottom-0 z-50 flex items-end justify-center"
+        className="fixed inset-0 z-50 flex items-center justify-center p-sm md:p-lg"
       >
-        <div className="w-full max-w-md rounded-t-xl bg-surface-0 p-md shadow-lg animate-fade-in-up">
-          <Reveal>
-            <div className="flex flex-col gap-md">
+        <div className="flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col overflow-hidden rounded-xl bg-surface-0 p-md shadow-lg animate-fade-in-up md:max-h-[calc(100dvh-3rem)]">
+            <div className="flex min-h-0 flex-col gap-md">
               {/* Header */}
-              <div className="flex flex-col gap-xs">
-                <h2 id="first-meal-title" className="font-title-lg text-title-lg text-on-surface">
-                  Add your first meal
-                </h2>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">
-                  Start with one of these. You can add more later.
-                </p>
+              <div className="flex shrink-0 items-start justify-between gap-sm">
+                <div className="flex flex-col gap-xs">
+                  <h2 id="first-meal-title" className="font-title-lg text-title-lg text-on-surface">
+                    Add your first meal
+                  </h2>
+                  <p className="font-body-sm text-body-sm text-on-surface-variant">
+                    Start with one of these. You can add more later.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={dismiss}
+                  aria-label="Close first meal suggestions"
+                  className="grid size-10 shrink-0 place-items-center rounded-full text-on-surface-variant hover:bg-surface-container-low"
+                >
+                  <Icon name="close" />
+                </button>
               </div>
 
               {/* Recipe cards */}
-              <div className="flex flex-col gap-sm max-h-96 overflow-y-auto">
+              <div className="flex min-h-0 flex-1 flex-col gap-sm overflow-y-auto overscroll-contain pr-xs">
                 {shown.map((recipe, i) => (
                   <RecipeCard
                     key={recipe.id}
@@ -77,23 +108,20 @@ export function FirstMealModal({ recipes }: FirstMealModalProps) {
               </div>
 
               {/* Actions */}
-              <div className="flex gap-sm pt-sm">
+              <div className="flex shrink-0 gap-sm border-t border-surface-container-highest pt-md">
                 {selectedId && (
                   <AddMealButton
                     recipeId={selectedId}
                   />
                 )}
                 <button
-                  onClick={() => {
-                    setDismissed(true);
-                  }}
+                  onClick={dismiss}
                   className="flex-1 h-12 px-lg rounded-full border border-outline text-on-surface-variant font-semibold hover:bg-surface-container-lowest transition-colors"
                 >
                   {selectedId ? 'Skip for now' : 'Skip'}
                 </button>
               </div>
             </div>
-          </Reveal>
         </div>
       </div>
     </>

@@ -3,11 +3,10 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { PageShell } from '@/components/ui/PageShell';
-import { getCurrentUser, getHousemates, getLeftovers, getPantryItems } from '@/lib/queries';
+import { getCurrentUser, getPantryItems } from '@/lib/queries';
 import type { IngredientCategory, PantryItem } from '@/lib/types';
 import { PantryItemRow } from '@/components/pantry/PantryItemRow';
 import { AddPantryItem } from '@/components/pantry/AddPantryItem';
-import { LeftoversBoard } from '@/components/pantry/LeftoversBoard';
 
 export const metadata = { title: 'Pantry · Grub' };
 
@@ -60,11 +59,9 @@ function PantrySection({ title, items }: { title: string; items: PantryItem[] })
 }
 
 export default async function PantryPage() {
-  const [items, currentUser, leftovers, housemates] = await Promise.all([
+  const [items, currentUser] = await Promise.all([
     getPantryItems(),
     getCurrentUser(),
-    getLeftovers(),
-    getHousemates(),
   ]);
 
   const shared = items.filter((item) => item.isShared);
@@ -83,7 +80,6 @@ export default async function PantryPage() {
           title="Your cupboard is giving nothing"
           body="Probably accurate."
         />
-        <LeftoversBoard leftovers={leftovers} housemates={housemates} />
       </PageShell>
     );
   }
@@ -106,8 +102,6 @@ export default async function PantryPage() {
       )}
 
       <AddPantryItem />
-
-      <LeftoversBoard leftovers={leftovers} housemates={housemates} />
 
       <PantrySection title="Shared" items={shared} />
       <PantrySection title="Personal" items={personal} />

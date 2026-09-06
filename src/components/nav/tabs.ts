@@ -42,7 +42,7 @@ export const TABS: Tab[] = [
   {
     href: '/leftovers',
     label: 'Leftovers',
-    icon: 'ti-plate',
+    icon: 'takeout_dining',
     owns: ['/leftovers'],
   },
 ];

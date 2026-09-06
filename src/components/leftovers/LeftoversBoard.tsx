@@ -1,17 +1,18 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useFormState, useFormStatus } from 'react-dom';
 import { Avatar } from '@/components/avatars/Avatar';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { SubmitButton } from '@/components/ui/SubmitButton';
+import { useToast } from '@/components/ui/Toast';
 import { clsx } from '@/lib/clsx';
 import {
   addLeftover,
   clearLeftover,
   type LeftoverActionState,
-} from '@/app/pantry/leftoverActions';
+} from '@/app/leftovers/actions';
 import type { Leftover, User } from '@/lib/types';
 
 /**
@@ -20,7 +21,7 @@ import type { Leftover, User } from '@/lib/types';
  * No cost, no allocation, no claim history. The food was paid for by whoever
  * cooked it and offering it round is a gift — the moment this feature starts
  * tracking who owes whom for a bowl of chilli it has ruined the thing it was
- * for. Claiming just deletes the row.
+ * for. Taking a portion only reduces the count.
  */
 
 const INITIAL: LeftoverActionState = { status: 'idle', message: '' };
@@ -48,8 +49,13 @@ function countdown(daysLeft: number): { label: string; tone: 'ok' | 'soon' | 'go
 }
 
 function LeftoverRow({ leftover, cook }: { leftover: Leftover; cook: User | undefined }) {
-  const [, action] = useFormState(clearLeftover, INITIAL);
+  const [state, action] = useFormState(clearLeftover, INITIAL);
+  const { toast } = useToast();
   const { label, tone } = countdown(leftover.daysLeft);
+
+  useEffect(() => {
+    if (state.status === 'success') toast(state.message);
+  }, [state, toast]);
 
   return (
     <li
@@ -81,7 +87,7 @@ function LeftoverRow({ leftover, cook }: { leftover: Leftover; cook: User | unde
       <form action={action} className="shrink-0">
         <input type="hidden" name="leftoverId" value={leftover.id} />
         <SubmitButton variant="outline" size="sm">
-          {tone === 'gone' ? 'Bin it' : "I'll eat this"}
+          {tone === 'gone' ? 'Bin it' : 'Take a portion'}
         </SubmitButton>
       </form>
     </li>
@@ -102,14 +108,14 @@ export function LeftoversBoard({
   return (
     <Card className="flex flex-col gap-sm">
       <div className="min-w-0">
-        <h2 className="font-title-md text-title-md">Leftovers</h2>
+        <h2 className="font-title-md text-title-md">On the fridge</h2>
         <p className="font-body-sm text-body-sm text-on-surface-variant">
-          Cooked too much? Stick it up. Nobody owes anybody for leftovers — claiming just
-          takes it off the board.
+          Cooked too much? Add the spare portions here. Taking food reduces the count, and
+          nobody owes anybody for it.
         </p>
       </div>
 
-      {leftovers.length > 0 && (
+      {leftovers.length > 0 ? (
         <ul className="flex flex-col divide-y divide-surface-container-highest">
           {leftovers.map((leftover) => (
             <LeftoverRow
@@ -119,6 +125,13 @@ export function LeftoversBoard({
             />
           ))}
         </ul>
+      ) : (
+        <div className="rounded-lg bg-surface-container-low px-md py-lg text-center">
+          <p className="font-body-lg text-body-lg font-semibold">The fridge board is clear</p>
+          <p className="font-body-sm text-body-sm text-on-surface-variant">
+            Add anything worth saving from the bin.
+          </p>
+        </div>
       )}
 
       <form action={action} className="flex flex-col gap-sm">

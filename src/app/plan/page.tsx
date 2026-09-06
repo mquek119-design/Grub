@@ -161,7 +161,7 @@ export default async function PlanPage({
         <>
           {/* Show first-meal nudge if this week is empty and we're on this week */}
           {week === 'this' && plan.meals.length === 0 && (
-            <FirstMealModal recipes={recipes} />
+            <FirstMealModal recipes={recipes} weekStartDate={plan.weekStartDate} />
           )}
           <WeekPlan plan={plan} housemates={housemates} currentUser={currentUser} week={week} />
           <OverlapHints overlaps={plan.overlaps} />

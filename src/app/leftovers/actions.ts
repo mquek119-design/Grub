@@ -9,7 +9,6 @@ export interface LeftoverActionState {
   message: string;
 }
 
-const OK: LeftoverActionState = { status: 'idle', message: '' };
 const fail = (message: string): LeftoverActionState => ({ status: 'error', message });
 
 /** Default shelf life. Long enough to be useful, short enough to stay honest. */
@@ -63,16 +62,16 @@ export async function addLeftover(
     return fail(`${added.error.message}${hint}`);
   }
 
-  revalidatePath('/pantry');
+  revalidatePath('/leftovers');
   revalidatePath('/');
   return { status: 'success', message: `${description} is on the board.` };
 }
 
 /**
- * Claims or bins a dish. Either way the row goes.
+ * Takes one portion, or removes a past-date dish entirely.
  *
  * No "claimed by" bookkeeping: a claimed leftover is a plate of food and no
- * longer anybody's business. Anyone can remove anything — this is a note on a
+ * longer anybody's business. Anyone can take anything — this is a note on a
  * fridge door, and permissions on a fridge door are theatre.
  */
 export async function clearLeftover(
@@ -86,15 +85,32 @@ export async function clearLeftover(
   if (!id) return fail('Missing item.');
 
   const supabase = await createClient();
-  const removed = await supabase
+  const existing = await supabase
     .from('leftovers')
-    .delete()
+    .select('portions, eat_by')
     .eq('id', id)
-    .eq('house_id', me.houseId);
+    .eq('house_id', me.houseId)
+    .maybeSingle();
 
-  if (removed.error) return fail(removed.error.message);
+  if (existing.error) return fail(existing.error.message);
+  if (!existing.data) return fail('That leftover is already gone.');
 
-  revalidatePath('/pantry');
+  const today = new Date().toISOString().slice(0, 10);
+  const removeWholeDish = existing.data.portions <= 1 || existing.data.eat_by < today;
+  const changed = removeWholeDish
+    ? await supabase.from('leftovers').delete().eq('id', id).eq('house_id', me.houseId)
+    : await supabase
+        .from('leftovers')
+        .update({ portions: existing.data.portions - 1 })
+        .eq('id', id)
+        .eq('house_id', me.houseId);
+
+  if (changed.error) return fail(changed.error.message);
+
+  revalidatePath('/leftovers');
   revalidatePath('/');
-  return OK;
+  return {
+    status: 'success',
+    message: removeWholeDish ? 'Removed from the fridge board.' : 'One portion taken.',
+  };
 }
