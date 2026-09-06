@@ -33,7 +33,14 @@ hidden on `lg`, heading kept. Verified at 1440 and 375. Original spec below.
   panel; mobile unchanged; heading hierarchy intact; `npm run verify` clean.
 - **Effort:** ~1–2h.
 
-### 2. Deploy-safety for the Tesco order step
+### 2. Deploy-safety for the Tesco order step — ✅ done (2026-09-06)
+
+Added one production-safe ordering flag, server-action guards before every
+Tesco account side effect, and clear disabled-state guidance on the Basket and
+slot controls. Production defaults off; local development defaults on; a
+suitable non-serverless host can explicitly opt in. The vendored fork was not
+changed. Original spec below.
+
 - **Goal:** On Vercel the order/checkout step can't drive a browser (Option B).
   It must fail with a clear "this step runs on the collector's desktop" message,
   not a cryptic serverless crash.

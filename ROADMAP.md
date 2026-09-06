@@ -49,6 +49,10 @@ onboarding.
     Mobile unchanged.
 - **Deployment groundwork:** a `README.md` (there was none) and a cleaned-up
   `.env.example` (dropped the dead `TESCO_SESSION_PATH`).
+- **Tesco deploy safety:** production now disables basket sync, slot operations
+  and checkout before any side effect, with clear guidance to use the
+  collector's local instance. Supported non-serverless hosts can opt in with
+  `TESCO_ORDERING_ENABLED=true`.
 
 ---
 

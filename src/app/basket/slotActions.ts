@@ -5,6 +5,10 @@ import { getCurrentUser, getWeeklyPlan } from '@/lib/queries';
 import { createClient } from '@/lib/supabase/server';
 import { TescoProvider } from '../../../lib/tesco/providers/tesco';
 import { TescoAPI } from '../../../lib/tesco/providers/tesco/api';
+import {
+  isTescoOrderingEnabled,
+  TESCO_ORDERING_UNAVAILABLE_MESSAGE,
+} from '@/lib/tescoOrdering';
 
 export interface SlotOption {
   slotId: string;
@@ -41,6 +45,8 @@ const fail = (message: string): SlotActionState => ({ status: 'error', message }
 export async function listSlots(
   method: 'delivery' | 'collect' = 'delivery'
 ): Promise<SlotActionState> {
+  if (!isTescoOrderingEnabled()) return fail(TESCO_ORDERING_UNAVAILABLE_MESSAGE);
+
   const me = await getCurrentUser();
   if (!me.houseId) return fail('Join a house first.');
 
@@ -91,6 +97,8 @@ export async function chooseSlot(
   slot: SlotOption,
   method: 'delivery' | 'collect' = 'delivery'
 ): Promise<SlotActionState> {
+  if (!isTescoOrderingEnabled()) return fail(TESCO_ORDERING_UNAVAILABLE_MESSAGE);
+
   const me = await getCurrentUser();
   if (!me.houseId) return fail('Join a house first.');
 

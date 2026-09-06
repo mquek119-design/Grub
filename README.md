@@ -85,6 +85,12 @@ service, or a Playwright-on-serverless approach (`@sparticuz/chromium` etc.).
 This is a genuine architecture decision, not a config tweak — don't treat the
 first green Vercel build as the whole job done.
 
+Grub therefore disables Tesco account operations by default in production. The
+Basket page remains available for planning, pricing and splitting, but explains
+that syncing, slot booking and checkout run on the collector's local instance.
+Local development enables these operations automatically. A non-serverless host
+that supports the ordering runtime can opt in with `TESCO_ORDERING_ENABLED=true`.
+
 ## Testing
 
 `npm test` runs the unit suite (money arithmetic, the optimiser, unit

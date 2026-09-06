@@ -5,6 +5,7 @@ import { Avatar } from '@/components/avatars/Avatar';
 import { FoodImage } from '@/components/media/FoodImage';
 import { Icon } from '@/components/media/Icon';
 import { Card } from '@/components/ui/Card';
+import { Notice } from '@/components/ui/Notice';
 import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
 import { basketLineTotal, basketSavings, basketTotal } from '@/lib/calc';
@@ -12,6 +13,7 @@ import type { BasketItem, IngredientCategory, User } from '@/lib/types';
 import { updateBasketItemQuantity } from '@/app/basket/actions';
 import { checkTescoSession, syncBasketToTesco, startTescoCheckout } from '@/app/basket/tescoActions';
 import { BrandSwapModal } from '@/components/basket/BrandSwapModal';
+import { TESCO_ORDERING_UNAVAILABLE_MESSAGE } from '@/lib/tescoOrdering';
 
 /**
  * Basket review — the collector's screen before the order goes to Tesco.
@@ -37,9 +39,17 @@ interface BasketViewProps {
   isCollector: boolean;
   collectorName: string;
   planId?: string;
+  orderingEnabled: boolean;
 }
 
-export function BasketView({ items, housemates, isCollector, collectorName, planId }: BasketViewProps) {
+export function BasketView({
+  items,
+  housemates,
+  isCollector,
+  collectorName,
+  planId,
+  orderingEnabled,
+}: BasketViewProps) {
   const [quantities, setQuantities] = useState<Record<string, number>>(
     () => Object.fromEntries(items.map((item) => [item.id, item.quantity]))
   );
@@ -65,13 +75,15 @@ export function BasketView({ items, housemates, isCollector, collectorName, plan
   const [syncStatusMsg, setSyncStatusMsg] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!orderingEnabled) return;
+
     checkTescoSession()
       .then((res) => {
         setSessionAuth(Boolean(res.authenticated));
         setSessionExpiry(res.expiresAt);
       })
       .catch((err) => console.error('Tesco session check failed:', err));
-  }, []);
+  }, [orderingEnabled]);
 
   // Memoize housemates lookup Map to avoid recreation on every render
   const byId = useMemo(() => new Map(housemates.map((user) => [user.id, user])), [housemates]);
@@ -124,6 +136,11 @@ export function BasketView({ items, housemates, isCollector, collectorName, plan
   })();
 
   async function handleCheckoutClick() {
+    if (!orderingEnabled) {
+      setSyncStatusMsg(TESCO_ORDERING_UNAVAILABLE_MESSAGE);
+      return;
+    }
+
     if (!sessionAuth) {
       setSyncStatusMsg('Tesco session required. Please set up your Tesco session cookies in House Settings.');
       return;
@@ -442,7 +459,13 @@ export function BasketView({ items, housemates, isCollector, collectorName, plan
       })}
 
       {/* Persistent action bar — sits above the bottom nav on mobile. */}
-      {sessionAuth && sessionDaysLeft !== null && sessionDaysLeft <= 2 && (
+      {!orderingEnabled && (
+        <Notice tone="info" icon="computer" title="Checkout runs on the collector's desktop">
+          {TESCO_ORDERING_UNAVAILABLE_MESSAGE}
+        </Notice>
+      )}
+
+      {orderingEnabled && sessionAuth && sessionDaysLeft !== null && sessionDaysLeft <= 2 && (
         <div
           role="status"
           className="flex items-start gap-sm p-md rounded-lg bg-secondary-fixed/40 border border-secondary-container/40"
@@ -468,16 +491,20 @@ export function BasketView({ items, housemates, isCollector, collectorName, plan
           </div>
           <button
             type="button"
-            disabled={!isCollector || liveItems.length === 0 || isSyncing}
+            disabled={!orderingEnabled || !isCollector || liveItems.length === 0 || isSyncing}
             onClick={handleCheckoutClick}
             title={
-              isCollector
+              !orderingEnabled
+                ? TESCO_ORDERING_UNAVAILABLE_MESSAGE
+                : isCollector
                 ? undefined
                 : `Only ${collectorName} can place this week's order from their Tesco account.`
             }
             className="bg-secondary-container hover:bg-secondary text-on-secondary font-title-md text-title-md px-lg py-sm rounded-xl transition-colors flex-1 md:flex-none text-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSyncing
+            {!orderingEnabled
+              ? 'Open locally to checkout'
+              : isSyncing
               ? 'Syncing to Tesco...'
               : isCollector
                 ? 'Proceed to Checkout'

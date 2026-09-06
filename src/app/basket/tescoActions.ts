@@ -9,6 +9,10 @@ import {
   saveTescoSessionToDb,
   loadTescoSessionFromDb,
 } from '@/lib/supabase/tescoSession';
+import {
+  isTescoOrderingEnabled,
+  TESCO_ORDERING_UNAVAILABLE_MESSAGE,
+} from '@/lib/tescoOrdering';
 
 export interface TescoActionState {
   status: 'idle' | 'success' | 'error';
@@ -73,6 +77,8 @@ export async function importTescoSession(cookiesJson: string): Promise<TescoActi
 
 /** Synchronizes this week's basket items to Tesco's online trolley. */
 export async function syncBasketToTesco(planId: string): Promise<TescoActionState> {
+  if (!isTescoOrderingEnabled()) return fail(TESCO_ORDERING_UNAVAILABLE_MESSAGE);
+
   const me = await getCurrentUser();
   if (!me.houseId) return fail('Join a house first.');
 
@@ -180,6 +186,8 @@ export async function syncBasketToTesco(planId: string): Promise<TescoActionStat
  * was scoped to a plan when it is not.
  */
 export async function startTescoCheckout(): Promise<TescoActionState> {
+  if (!isTescoOrderingEnabled()) return fail(TESCO_ORDERING_UNAVAILABLE_MESSAGE);
+
   const me = await getCurrentUser();
   if (!me.houseId) return fail('Join a house first.');
 
@@ -223,4 +231,3 @@ export async function startTescoCheckout(): Promise<TescoActionState> {
     return fail(`Checkout preview error: ${err?.message || 'Could not fetch checkout preview'}`);
   }
 }
-

@@ -11,6 +11,7 @@ import { MinimumOrderBar } from '@/components/basket/MinimumOrderBar';
 import { AddItemPanel } from '@/components/basket/AddItemPanel';
 import { ORDER_MINIMUMS } from '@/lib/orderMinimums';
 import { basketTotal } from '@/lib/calc';
+import { isTescoOrderingEnabled } from '@/lib/tescoOrdering';
 import {
   getBasketItems,
   getHouse,
@@ -42,6 +43,7 @@ export default async function BasketPage() {
   // claim the minimum was met on the strength of items worth an unknown amount.
   const pricedTotal = basketTotal(items.filter((item) => !item.needsPackData));
   const method = plan?.slot?.method ?? house.fulfillmentMethod;
+  const tescoOrderingEnabled = isTescoOrderingEnabled();
 
   return (
     // Extra bottom padding clears the fixed total/checkout bar.
@@ -81,6 +83,7 @@ export default async function BasketPage() {
               : null
           }
           isCollector={collector?.id === currentUser.id}
+          orderingEnabled={tescoOrderingEnabled}
         />
       )}
 
@@ -131,6 +134,7 @@ export default async function BasketPage() {
           isCollector={collector?.id === currentUser.id}
           collectorName={collector?.name ?? 'The collector'}
           planId={plan?.id}
+          orderingEnabled={tescoOrderingEnabled}
         />
         </>
       )}

@@ -7,6 +7,8 @@ import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
 import { describeMatch, hasPreference, suggestSlot, type SlotPreference } from '@/lib/slotMatching';
 import { chooseSlot, listSlots, type SlotActionState, type SlotOption } from '@/app/basket/slotActions';
+import { TESCO_ORDERING_UNAVAILABLE_MESSAGE } from '@/lib/tescoOrdering';
+import { Notice } from '@/components/ui/Notice';
 
 /**
  * Choosing the delivery or collection slot for this week's order.
@@ -24,10 +26,12 @@ export function SlotPicker({
   preference,
   bookedSlot,
   isCollector,
+  orderingEnabled,
 }: {
   preference: SlotPreference;
   bookedSlot: { startsAt: string | null; charge: number; method: string } | null;
   isCollector: boolean;
+  orderingEnabled: boolean;
 }) {
   // Open on the preferred method when there is one, else delivery.
   const [method, setMethod] = useState<'delivery' | 'collect'>(
@@ -42,13 +46,15 @@ export function SlotPicker({
 
   const load = useCallback(
     (target: 'delivery' | 'collect') => {
+      if (!orderingEnabled) return;
+
       startTransition(async () => {
         const result = await listSlots(target);
         setState(result);
         setLoadedFor(target);
       });
     },
-    []
+    [orderingEnabled]
   );
 
   // Reload when the collector switches method, but never fetch on first render:
@@ -122,7 +128,7 @@ export function SlotPicker({
             type="button"
             role="tab"
             aria-selected={method === option}
-            disabled={!isCollector || pending}
+            disabled={!orderingEnabled || !isCollector || pending}
             onClick={() => setMethod(option)}
             className={clsx(
               'flex-1 px-md py-2 rounded font-body-sm text-body-sm transition-colors disabled:opacity-60',
@@ -136,7 +142,11 @@ export function SlotPicker({
         ))}
       </div>
 
-      {!isCollector ? (
+      {!orderingEnabled ? (
+        <Notice tone="info" icon="computer">
+          {TESCO_ORDERING_UNAVAILABLE_MESSAGE}
+        </Notice>
+      ) : !isCollector ? (
         <p className="font-body-sm text-body-sm text-on-surface-variant">
           Only the collector can book the slot — it uses their Tesco account.
         </p>
