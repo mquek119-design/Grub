@@ -12,7 +12,11 @@ priority. Nothing here invents a figure or touches `lib/tesco/` or `mockups/`.
 
 ## P1 — do first (high value, low risk, unblocked)
 
-### 1. Login page desktop layout
+### 1. Login page desktop layout — ✅ done (2026-09-06)
+Extracted the brand panel into `src/components/nav/AuthShell.tsx`; both
+`onboarding/layout.tsx` and a new `login/layout.tsx` use it. Login's logo mark
+hidden on `lg`, heading kept. Verified at 1440 and 375. Original spec below.
+
 - **Goal:** `/login` fills a desktop screen like the onboarding flow now does,
   instead of a narrow centred column in a sea of oat.
 - **Approach:** Extract the Forest brand panel currently inline in
