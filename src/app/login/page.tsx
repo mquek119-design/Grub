@@ -20,7 +20,9 @@ export default async function LoginPage({
   return (
     <main className="min-h-screen flex flex-col justify-center px-margin-mobile py-xl max-w-md mx-auto gap-lg">
       <div className="flex flex-col gap-sm">
-        <LogoMark className="h-16 w-auto" />
+        {/* Hidden on desktop, where the AuthShell brand panel carries the mark;
+            the heading stays so the page keeps its h1. */}
+        <LogoMark className="h-16 w-auto lg:hidden" />
         <h1
           className="font-headline-lg text-headline-lg text-primary"
           style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
