@@ -10,10 +10,10 @@
 do $$
 declare
   -- ↓↓↓ REPLACE THESE with real auth.users UUIDs before running ↓↓↓
-  maya_id  uuid := '00000000-0000-0000-0000-000000000001';
-  sarah_id uuid := '00000000-0000-0000-0000-000000000002';
-  mike_id  uuid := '00000000-0000-0000-0000-000000000003';
-  alex_id  uuid := '00000000-0000-0000-0000-000000000004';
+  maya_id  uuid := '3e77fee1-40d3-4dc1-9901-a5073d49e347';
+  sarah_id uuid := 'dd481535-cd1e-4650-9a98-161a5e629a35';
+  mike_id  uuid := '826b8dc8-0a01-4630-98cb-f2af2b5507ba';
+  alex_id  uuid := '582ce496-ef64-478b-9e99-e433533f04ff';
 
   v_house_id uuid;
   v_plan_id  uuid;
