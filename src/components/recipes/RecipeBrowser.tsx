@@ -16,6 +16,7 @@ import { addMealToPlan, type PlanActionState } from '@/app/plan/actions';
 import type { MealType, Recipe, Weekday } from '@/lib/types';
 import type { WeekChoice } from '@/lib/weeks';
 import { MEAL_TYPES, MEAL_TYPE_ICONS, MEAL_TYPE_LABELS, WEEKDAYS, WEEKDAY_LABELS } from '@/lib/types';
+import { useToast } from '@/components/ui/Toast';
 
 /**
  * The house recipe book, and the way meals get planned.
@@ -127,12 +128,15 @@ function QuickAddSheet({
   const [state, action] = useActionState(addMealToPlan, INITIAL);
   const [day, setDay] = useState<Weekday>(initialDay);
   const [mealType, setMealType] = useState<MealType>('dinner');
+  const { toast } = useToast();
 
   // Close on success only. Staying open after an error is the point — the
   // message is inside the sheet.
   useEffect(() => {
-    if (state.status === 'success') onPlanned();
-  }, [state, onPlanned]);
+    if (state.status !== 'success') return;
+    toast(`Added ${recipe.title} to ${WEEKDAY_LABELS[day]}.`);
+    onPlanned();
+  }, [day, onPlanned, recipe.title, state.status, toast]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">

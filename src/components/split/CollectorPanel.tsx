@@ -5,6 +5,7 @@ import { Avatar } from '@/components/avatars/Avatar';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { useToast } from '@/components/ui/Toast';
 import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
 import { confirmPaymentReceived, disputePayment } from '@/app/split/actions';
@@ -39,15 +40,24 @@ export function CollectorPanel({
 }) {
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const { toast } = useToast();
 
   const outstanding = splits.filter((entry) => entry.status !== 'confirmed');
   const owed = outstanding.reduce((sum, entry) => sum + entry.amount, 0);
 
-  function run(fn: () => Promise<{ status: string; message: string }>) {
+  function run(
+    fn: () => Promise<{ status: string; message: string }>,
+    successMessage?: string
+  ) {
     setMessage(null);
     startTransition(async () => {
       const result = await fn();
-      setMessage({ ok: result.status !== 'error', text: result.message });
+      if (result.status === 'error') {
+        setMessage({ ok: false, text: result.message });
+        return;
+      }
+
+      toast(successMessage ?? result.message);
     });
   }
 
@@ -76,7 +86,7 @@ export function CollectorPanel({
         pending={isPending}
         pendingLabel="Posting…"
         icon="receipt_long"
-        onClick={() => run(postSplit)}
+        onClick={() => run(postSplit, 'Split posted.')}
         className="self-start"
       >
         {splits.length > 0 ? 'Re-post the split' : 'Post the split'}

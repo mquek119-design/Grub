@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { Icon } from '@/components/media/Icon';
 import { notifyPaymentSent, undoPaymentNotification } from '@/app/split/actions';
 import type { User } from '@/lib/types';
+import { useToast } from '@/components/ui/Toast';
 
 /**
  * Payment details display + "I've Paid".
@@ -36,6 +37,7 @@ export function PayPanel({
 }) {
   const [notified, setNotified] = useState(isNotified);
   const [isPending, startTransition] = useTransition();
+  const { toast } = useToast();
 
   const rows: { label: string; value: string; mono: boolean }[] = [];
   if (payment.bankName) rows.push({ label: 'Bank', value: payment.bankName, mono: false });
@@ -50,7 +52,12 @@ export function PayPanel({
     setNotified(true);
     if (splitId) {
       startTransition(async () => {
-        await notifyPaymentSent(splitId);
+        const result = await notifyPaymentSent(splitId);
+        if (result.status === 'error') {
+          setNotified(false);
+          return;
+        }
+        toast(result.message);
       });
     }
   }
@@ -59,7 +66,12 @@ export function PayPanel({
     setNotified(false);
     if (splitId) {
       startTransition(async () => {
-        await undoPaymentNotification(splitId);
+        const result = await undoPaymentNotification(splitId);
+        if (result.status === 'error') {
+          setNotified(true);
+          return;
+        }
+        toast(result.message);
       });
     }
   }

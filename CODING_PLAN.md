@@ -61,7 +61,13 @@ changed. Original spec below.
 
 ## P2 — feedback & learnability (unblocked)
 
-### 3. Toast notifications
+### 3. Toast notifications — ✅ done (2026-09-06)
+
+Added an app-wide accessible toast provider with timed, button and Escape-key
+dismissal. Completed meal adds, split posting, payer notifications and
+collector confirmations now acknowledge success; corrective errors stay inline
+beside the action that needs attention. Original spec below.
+
 - **Goal:** The app is silent when something saves. A brief confirmation
   ("Added to Monday", "Split posted") makes actions feel real.
 - **Approach:** A client `ToastProvider` + `<Toaster>` mounted once in

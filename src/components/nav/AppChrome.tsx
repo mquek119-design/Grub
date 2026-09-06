@@ -8,6 +8,7 @@ import type { User } from '@/lib/types';
 import { BottomNav } from './BottomNav';
 import { TopAppBar } from './TopAppBar';
 import { ViewAsBanner } from './ViewAsBanner';
+import { ToastProvider } from '@/components/ui/Toast';
 
 // The Supabase realtime client (postgrest, auth, websocket) is a meaningful
 // chunk of JS that every other component on this chrome does without. Code-split
@@ -49,11 +50,15 @@ export function AppChrome({
     BARE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
   if (isBare) {
-    return <div className="min-h-screen">{children}</div>;
+    return (
+      <ToastProvider>
+        <div className="min-h-screen">{children}</div>
+      </ToastProvider>
+    );
   }
 
   return (
-    <>
+    <ToastProvider>
       {/* First focusable thing on the page: lets a keyboard user jump past the
           app bar and bottom nav straight to the content, rather than tabbing
           through the whole chrome on every navigation. Hidden until focused. */}
@@ -71,6 +76,6 @@ export function AppChrome({
         {children}
       </div>
       <BottomNav basketHasUpdates />
-    </>
+    </ToastProvider>
   );
 }

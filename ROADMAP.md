@@ -47,12 +47,16 @@ onboarding.
   - A shared desktop **brand panel** (`onboarding/layout.tsx`) so the whole
     onboarding flow fills a desktop screen instead of a narrow centred column.
     Mobile unchanged.
+  - The same panel now lives in `AuthShell` and covers the login page as well.
 - **Deployment groundwork:** a `README.md` (there was none) and a cleaned-up
   `.env.example` (dropped the dead `TESCO_SESSION_PATH`).
 - **Tesco deploy safety:** production now disables basket sync, slot operations
   and checkout before any side effect, with clear guidance to use the
   collector's local instance. Supported non-serverless hosts can opt in with
   `TESCO_ORDERING_ENABLED=true`.
+- **Action feedback:** an accessible app-wide toast layer now confirms meal
+  adds, posted splits and payment-status changes, with automatic, button and
+  Escape-key dismissal.
 
 ---
 
@@ -63,7 +67,6 @@ onboarding.
 | **`bookSlot()`** | Coded, never executed | Reserving a slot is untried against the live Tesco API. Needs a real session. |
 | **Reconciliation vs. a real delivery** | Fully implemented, exercised only via `/dev` → Simulate delivery | Has never met an actual Tesco van. Money rules are unit-tested but unproven in the wild. |
 | **Ingredient de-duplication** | `canonicalName()` folds case/plurals/qualifiers; `/dev` merge tool handles mid-string variants | `canonical_name` still has **no unique index** — existing rows collide. Add the constraint once the merge tool reports clean. |
-| **Login page desktop layout** | Still a narrow centred column | Sits outside `onboarding/layout.tsx`, so it didn't get the desktop brand-panel treatment. Same sparse look the onboarding flow had. |
 | **Push notifications** | Copy exists (`FEATURES.md`), `NEXT_PUBLIC_VAPID_PUBLIC_KEY` is read, subscribe route exists | No service worker, no manifest, no keys set. Deliberately parked for MVP (see below). |
 
 ---
@@ -84,8 +87,6 @@ onboarding.
   running signed-in session — see Blocked.
 - **In-app help / first-run tips** — tab guidance inside the app, beyond the
   onboarding page.
-- **Toast notifications** — the app is currently silent when something saves
-  (added a meal, posted a split). A confirmation toast would help.
 - **Richer new-house empty states** — the empty states exist and are honest
   (Feed, Plan, Recipes, plus `FirstMealModal`), but the very first ten minutes
   are still the weakest stretch of the product.
@@ -113,12 +114,12 @@ onboarding.
 1. **Deployment prep + first deploy** — the single highest-value milestone;
    nothing else matters until real housemates can reach it. Decide the Node
    version, wire Vercel + Supabase, deploy.
-2. **Login page desktop pass** — quick, finishes the desktop-layout work the
-   onboarding flow started.
+2. **In-app first-run tips** — the next learnability improvement after action
+   feedback.
 3. **Live a11y testing of the authenticated routes** — needs a session (see
    Blocked); do it once one's available.
-4. **Toast notifications / in-app tips** — polish that makes the app feel
-   responsive and learnable.
+4. **Richer new-house empty states** — make the first useful action obvious
+   without filling the house with invented data.
 5. **The Tesco-dependent unknowns** (`bookSlot`, real reconciliation) — can
    only be truly closed once there's a real order against a real delivery.
 

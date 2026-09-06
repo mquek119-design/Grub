@@ -2,13 +2,14 @@
 
 import { useFormStatus } from 'react-dom';
 import { useActionState } from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Icon } from '@/components/media/Icon';
 import { FoodImage } from '@/components/media/FoodImage';
 import { Reveal } from '@/components/motion/Reveal';
 import { addMealToPlan, type PlanActionState } from '@/app/plan/actions';
 import { useModalA11y } from '@/components/ui/useModalA11y';
 import type { Recipe } from '@/lib/types';
+import { useToast } from '@/components/ui/Toast';
 
 const INITIAL: PlanActionState = { status: 'idle', message: '' };
 
@@ -152,7 +153,12 @@ interface AddMealButtonProps {
 }
 
 function AddMealButton({ recipeId }: AddMealButtonProps) {
-  const [_state, formAction] = useActionState(addMealToPlan, INITIAL);
+  const [state, formAction] = useActionState(addMealToPlan, INITIAL);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    if (state.status === 'success') toast('First meal added to Monday.');
+  }, [state.status, toast]);
 
   return (
     <form
