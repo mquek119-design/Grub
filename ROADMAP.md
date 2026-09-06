@@ -57,6 +57,8 @@ onboarding.
 - **Action feedback:** an accessible app-wide toast layer now confirms meal
   adds, posted splits and payment-status changes, with automatic, button and
   Escape-key dismissal.
+- **First-run guidance:** Feed, Plan, Basket and Split each explain their role
+  once, with independent local dismissal and a storage-safe fallback.
 
 ---
 
@@ -85,8 +87,6 @@ onboarding.
   shipped so far is *static* a11y, correct by construction and build-verified.
   Plan / Recipes / Basket / Split have never been keyboard/axe-tested against a
   running signed-in session — see Blocked.
-- **In-app help / first-run tips** — tab guidance inside the app, beyond the
-  onboarding page.
 - **Richer new-house empty states** — the empty states exist and are honest
   (Feed, Plan, Recipes, plus `FirstMealModal`), but the very first ten minutes
   are still the weakest stretch of the product.
@@ -114,13 +114,11 @@ onboarding.
 1. **Deployment prep + first deploy** — the single highest-value milestone;
    nothing else matters until real housemates can reach it. Decide the Node
    version, wire Vercel + Supabase, deploy.
-2. **In-app first-run tips** — the next learnability improvement after action
-   feedback.
-3. **Live a11y testing of the authenticated routes** — needs a session (see
+2. **Live a11y testing of the authenticated routes** — needs a session (see
    Blocked); do it once one's available.
-4. **Richer new-house empty states** — make the first useful action obvious
+3. **Richer new-house empty states** — make the first useful action obvious
    without filling the house with invented data.
-5. **The Tesco-dependent unknowns** (`bookSlot`, real reconciliation) — can
+4. **The Tesco-dependent unknowns** (`bookSlot`, real reconciliation) — can
    only be truly closed once there's a real order against a real delivery.
 
 ---

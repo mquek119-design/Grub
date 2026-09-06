@@ -7,6 +7,7 @@ import { Notice } from '@/components/ui/Notice';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { PageShell } from '@/components/ui/PageShell';
+import { FirstRunTip } from '@/components/ui/FirstRunTip';
 import { MinimumOrderBar } from '@/components/basket/MinimumOrderBar';
 import { AddItemPanel } from '@/components/basket/AddItemPanel';
 import { ORDER_MINIMUMS } from '@/lib/orderMinimums';
@@ -56,6 +57,8 @@ export default async function BasketPage() {
             : "Built from this week's plan."
         }
       />
+
+      <FirstRunTip tab="basket" />
 
       <BuildBasketPanel
         hasBasket={items.length > 0}

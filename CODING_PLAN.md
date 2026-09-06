@@ -85,7 +85,13 @@ beside the action that needs attention. Original spec below.
   announced; `npm run verify` clean.
 - **Effort:** ~3–4h (the provider is quick; the value is in the wiring).
 
-### 4. In-app first-run tips
+### 4. In-app first-run tips — ✅ done (2026-09-06)
+
+Added one non-blocking guide to Feed, Plan, Basket and Split. Each tab persists
+its own dismissal in `localStorage`, avoids a hydration flash for returning
+viewers, and still renders and dismisses normally when browser storage throws.
+Original spec below.
+
 - **Goal:** Short, dismissible guidance on each tab explaining what it's for,
   beyond the one-time onboarding walkthrough.
 - **Approach:** A `<FirstRunTip>` client component keyed per tab, dismissal

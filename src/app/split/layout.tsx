@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Notice } from '@/components/ui/Notice';
 import { PageShell } from '@/components/ui/PageShell';
 import { SubTabs } from '@/components/ui/SubTabs';
+import { FirstRunTip } from '@/components/ui/FirstRunTip';
 import { getWeeklyPlan } from '@/lib/queries';
 import type { PlanStatus } from '@/lib/types';
 
@@ -56,6 +57,8 @@ export default async function SplitLayout({ children }: { children: ReactNode })
       >
         {STAGE_NOTE[status]}
       </Notice>
+
+      <FirstRunTip tab="split" />
 
       {children}
     </PageShell>

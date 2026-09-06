@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Notice } from '@/components/ui/Notice';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { PageShell } from '@/components/ui/PageShell';
+import { FirstRunTip } from '@/components/ui/FirstRunTip';
 import { formatPence } from '@/lib/money';
 import {
   getCurrentUser,
@@ -83,6 +84,7 @@ export default async function PlanPage({
     return (
       <PageShell>
         <PageHeader title="Your Week" subtitle="Shop's in. This is what you're working with." />
+        <FirstRunTip tab="plan" />
         {switcher}
         <ReopenPlanningBanner status={thisWeek.status} />
         <KitchenPanel plan={thisWeek} recipes={recipes} currentUser={currentUser} />
@@ -100,6 +102,8 @@ export default async function PlanPage({
             : `Say what you fancy before ${cutoff}. After that it's whatever everyone else wanted.`
         }
       />
+
+      <FirstRunTip tab="plan" />
 
       {switcher}
 
