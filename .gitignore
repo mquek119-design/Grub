@@ -15,6 +15,12 @@ next-env.d.ts
 # Playwright MCP screenshots, traces and session output
 .playwright-mcp/
 
+# Generated test/audit output — regenerated on demand, never source
+dev-server.log
+/test-results/
+/.accessibility-audit/
+/lighthouse-reports/
+
 # Claude Code: settings.json is shared and reviewed, settings.local.json is not.
 # The local file accumulates whatever was clicked through at a prompt — one-off
 # compound commands, paths from one machine — so it is per-developer noise
