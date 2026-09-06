@@ -65,11 +65,14 @@ onboarding.
 
 ## Not started / planned
 
-- **Deployment (the big one).** No deployed environment exists. To ship to
-  Vercel: set the Supabase env vars in Vercel, point the Supabase Site URL /
-  redirect URLs at the production domain, and decide a Node version
-  (`engines` field in `package.json` is currently unset). README covers the
-  outline.
+- **Deployment (the big one).** No deployed environment exists yet, but the
+  code-side prep is done: Node pinned to `22.x`, `README.md` carries an
+  actionable Vercel checklist, and the Tesco/Playwright serverless limit is
+  documented. **What's left is dashboard work only the owner can do:** import
+  the repo into Vercel, set the Supabase env vars there, point the Supabase
+  Site URL / redirect URLs at the production domain, run migrations on the prod
+  project. Then decide how to handle the Tesco order step (Playwright doesn't
+  run in a standard Vercel function — see the README caveat).
 - **Live accessibility testing of the authenticated screens.** Everything
   shipped so far is *static* a11y, correct by construction and build-verified.
   Plan / Recipes / Basket / Split have never been keyboard/axe-tested against a
