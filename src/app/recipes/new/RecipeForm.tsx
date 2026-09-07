@@ -9,6 +9,7 @@ import { SubmitButton as FormSubmitButton } from '@/components/ui/SubmitButton';
 import { createRecipe, updateRecipe, type RecipeFormState } from '../actions';
 import { parseIngredientLine, type ParsedIngredient } from '@/lib/parseIngredient';
 import { IngredientAutocomplete } from '@/components/recipes/IngredientAutocomplete';
+import { compressImageFile } from '@/lib/imageCompression';
 
 const INITIAL: RecipeFormState = { status: 'idle', message: '' };
 
@@ -71,7 +72,7 @@ export function RecipeForm({ prefill }: { prefill?: RecipePrefill }) {
   const [removeImage, setRemoveImage] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
 
-  function handlePhotoChange(file: File | null) {
+  async function handlePhotoChange(file: File | null) {
     setPhotoError(undefined);
     if (!file) return;
     if (!file.type.startsWith('image/')) {
@@ -85,7 +86,18 @@ export function RecipeForm({ prefill }: { prefill?: RecipePrefill }) {
       return;
     }
     setRemoveImage(false);
-    setPhotoPreview(URL.createObjectURL(file));
+
+    try {
+      const compressed = await compressImageFile(file);
+      if (typeof DataTransfer !== 'undefined' && photoInputRef.current) {
+        const dt = new DataTransfer();
+        dt.items.add(compressed);
+        photoInputRef.current.files = dt.files;
+      }
+      setPhotoPreview(URL.createObjectURL(compressed));
+    } catch {
+      setPhotoPreview(URL.createObjectURL(file));
+    }
   }
 
   // Live preview so a mis-parsed line is obvious before saving, not after.
