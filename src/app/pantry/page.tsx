@@ -73,41 +73,66 @@ export default async function PantryPage() {
 
   if (items.length === 0) {
     return (
-      <PageShell>
+      <PageShell wide>
         <PageHeader
           title="House Pantry"
           subtitle="What you already have, so the shop doesn't buy it twice."
         />
         <EmptyState
-          icon="ti-package"
-          title="Your cupboard is giving nothing"
-          body="Probably accurate."
+          icon="inventory_2"
+          title="Your cupboard is empty"
+          body="Add staple ingredients here so the basket optimiser knows not to re-buy them."
         />
       </PageShell>
     );
   }
 
   return (
-    <PageShell>
+    <PageShell wide>
       <PageHeader
         title="House Pantry"
         subtitle="What you already have. The optimiser skips these when building the basket."
       />
 
-      {lowCount > 0 && (
-        <Card accent="secondary" className="flex items-center gap-sm">
-          <Icon name="warning" filled className="text-secondary" />
-          <p className="font-body-sm text-body-sm">
-            <strong>{lowCount}</strong> shared item{lowCount === 1 ? ' is' : 's are'} running low
-            and will be added to this week&apos;s basket.
-          </p>
-        </Card>
-      )}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
+        {/* Left Column: Shared & Personal Pantry Lists */}
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-lg min-w-0">
+          {lowCount > 0 && (
+            <Card accent="secondary" className="flex items-center gap-sm">
+              <Icon name="warning" filled className="text-secondary shrink-0" />
+              <p className="font-body-sm text-body-sm text-on-surface">
+                <strong>{lowCount}</strong> shared item{lowCount === 1 ? ' is' : 's are'} running low
+                and will be added to this week&apos;s basket automatically.
+              </p>
+            </Card>
+          )}
 
-      <AddPantryItem />
+          <PantrySection title="Shared House Staples" items={shared} />
+          {personal.length > 0 && <PantrySection title="Your Personal Shelf" items={personal} />}
+        </div>
 
-      <PantrySection title="Shared" items={shared} />
-      <PantrySection title="Personal" items={personal} />
+        {/* Right Column: Add Item & Optimiser Info */}
+        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-lg lg:sticky lg:top-[90px]">
+          <AddPantryItem />
+
+          <Card className="flex flex-col gap-sm bg-surface-container-low/60 border-dashed">
+            <h3 className="font-title-sm text-title-sm text-on-surface flex items-center gap-xs">
+              <Icon name="auto_awesome" className="text-primary text-sm" />
+              Pantry Optimiser
+            </h3>
+            <ul className="space-y-xs text-body-sm text-on-surface-variant">
+              <li className="flex items-start gap-xs">
+                <Icon name="check" className="text-primary text-xs mt-1 shrink-0" />
+                <span>Ingredients marked as in-stock are automatically deducted from the house basket.</span>
+              </li>
+              <li className="flex items-start gap-xs">
+                <Icon name="check" className="text-primary text-xs mt-1 shrink-0" />
+                <span>Items marked as low stock are added back to the order when building next week&apos;s shop.</span>
+              </li>
+            </ul>
+          </Card>
+        </div>
+      </div>
     </PageShell>
   );
 }

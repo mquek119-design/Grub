@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 import { Avatar } from '@/components/avatars/Avatar';
 import { InviteLink } from '@/components/settings/InviteLink';
+import { Icon } from '@/components/media/Icon';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -30,67 +31,95 @@ export default async function SettingsPage() {
   ]);
 
   return (
-    <PageShell>
+    <PageShell wide>
       <PageHeader title="House Settings" subtitle={house.name} />
 
-      <section className="flex flex-col gap-sm">
-        <h2 className="font-title-md text-title-md">Members</h2>
-        <Card padded={false} className="overflow-hidden">
-          <ul className="divide-y divide-surface-container-highest">
-            {housemates.map((user) => (
-              <li key={user.id} className="p-md flex items-center gap-md">
-                <Avatar user={user} size="md" />
-                <div className="flex-grow min-w-0">
-                  <p className="font-body-lg text-body-lg font-semibold truncate">{user.name}</p>
-                  <p className="font-body-sm text-body-sm text-on-surface-variant truncate">
-                    {user.room ?? 'No room set'}
-                    {user.dietaryPreferences.length > 0 &&
-                      ` · ${user.dietaryPreferences.join(', ')}`}
-                  </p>
-                </div>
-                <div className="flex gap-xs shrink-0">
-                  {user.id === collector?.id && <Badge tone="solid-primary">Collector</Badge>}
-                  {user.isAdmin && <Badge tone="primary">Admin</Badge>}
-                </div>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </section>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
+        {/* Left Column: Tesco & House Routines */}
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-lg min-w-0">
+          <section className="flex flex-col gap-sm">
+            <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs">
+              <Icon name="key" className="text-primary text-lg" />
+              Tesco Session & Credentials
+            </h2>
+            <TescoSessionPanel />
+          </section>
 
-      <section className="flex flex-col gap-sm">
-        <h2 className="font-title-md text-title-md">Invite Housemates</h2>
-        <Card className="flex flex-col gap-sm">
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Share this code. Anyone who joins can plan meals and see the split.
-          </p>
-          <InviteLink inviteCode={house.inviteCode} />
-        </Card>
-      </section>
+          <section className="flex flex-col gap-sm">
+            <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs">
+              <Icon name="local_shipping" className="text-primary text-lg" />
+              Fulfillment & Slot Preferences
+            </h2>
+            <FulfillmentSettingsPanel house={house} />
+            <SlotPreferencePanel house={house} />
+          </section>
 
-      <section className="flex flex-col gap-sm">
-        <h2 className="font-title-md text-title-md">Tesco Session & Credentials</h2>
-        <TescoSessionPanel />
-      </section>
+          <section className="flex flex-col gap-sm">
+            <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs">
+              <Icon name="event_repeat" className="text-primary text-lg" />
+              Weekly Rotation & Routine
+            </h2>
+            <RoutinePanel house={house} housemates={housemates} collectorId={collector?.id ?? null} />
+          </section>
 
-      <section className="flex flex-col gap-sm">
-        <h2 className="font-title-md text-title-md">Tesco Fulfillment Options</h2>
-        <FulfillmentSettingsPanel house={house} />
-      </section>
+          <section className="flex flex-col gap-sm">
+            <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs">
+              <Icon name="shopping_basket" className="text-primary text-lg" />
+              Shared Household Staples
+            </h2>
+            <Card className="flex flex-col gap-md">
+              <SharedStaplesToggle enabled={house.sharedStaplesEnabled} />
+              <div className="border-t border-surface-container-highest pt-md">
+                <StaplesPanel staples={staples} splitEqually={house.sharedStaplesEnabled} />
+              </div>
+            </Card>
+          </section>
+        </div>
 
-      <SlotPreferencePanel house={house} />
+        {/* Right Column: Members & Invite Link */}
+        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-lg lg:sticky lg:top-[90px]">
+          <section className="flex flex-col gap-sm">
+            <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs">
+              <Icon name="group" className="text-primary text-lg" />
+              House Members
+            </h2>
+            <Card padded={false} className="overflow-hidden">
+              <ul className="divide-y divide-surface-container-highest">
+                {housemates.map((user) => (
+                  <li key={user.id} className="p-md flex items-center gap-md hover:bg-surface-container-low/40 transition-colors">
+                    <Avatar user={user} size="md" />
+                    <div className="flex-grow min-w-0">
+                      <p className="font-body-lg text-body-lg font-semibold truncate text-on-surface">{user.name}</p>
+                      <p className="font-body-sm text-body-sm text-on-surface-variant truncate">
+                        {user.room ? `Room ${user.room}` : 'No room set'}
+                        {user.dietaryPreferences.length > 0 &&
+                          ` · ${user.dietaryPreferences.join(', ')}`}
+                      </p>
+                    </div>
+                    <div className="flex gap-xs shrink-0">
+                      {user.id === collector?.id && <Badge tone="solid-primary">Collector</Badge>}
+                      {user.isAdmin && <Badge tone="primary">Admin</Badge>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          </section>
 
-      <RoutinePanel house={house} housemates={housemates} collectorId={collector?.id ?? null} />
-
-      <section className="flex flex-col gap-sm">
-        <h2 className="font-title-md text-title-md">Shared Staples</h2>
-        <Card className="flex flex-col gap-md">
-          <SharedStaplesToggle enabled={house.sharedStaplesEnabled} />
-          <div className="border-t border-surface-container-highest pt-md">
-            <StaplesPanel staples={staples} splitEqually={house.sharedStaplesEnabled} />
-          </div>
-        </Card>
-      </section>
+          <section className="flex flex-col gap-sm">
+            <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs">
+              <Icon name="person_add" className="text-primary text-lg" />
+              Invite Housemates
+            </h2>
+            <Card className="flex flex-col gap-sm">
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                Share this code. Anyone who joins can plan meals and see the split.
+              </p>
+              <InviteLink inviteCode={house.inviteCode} />
+            </Card>
+          </section>
+        </div>
+      </div>
     </PageShell>
   );
 }
