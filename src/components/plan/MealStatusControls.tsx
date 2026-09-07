@@ -1,6 +1,6 @@
 'use client';
 
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
 import { Icon } from '@/components/media/Icon';
 import { useSubmitState } from '@/components/ui/SubmitButton';
 import { clsx } from '@/lib/clsx';
@@ -96,8 +96,8 @@ export function MealStatusControls({
   day: Weekday;
   weekStartDate: string;
 }) {
-  const [statusState, statusAction] = useFormState(setMealStatus, INITIAL);
-  const [bailState, bailAction] = useFormState(bailFromMeal, INITIAL);
+  const [statusState, statusAction] = useActionState(setMealStatus, INITIAL);
+  const [bailState, bailAction] = useActionState(bailFromMeal, INITIAL);
   const error = [statusState, bailState].find((state) => state.status === 'error');
   const dayIsPast = isDayPast(weekStartDate, day);
 

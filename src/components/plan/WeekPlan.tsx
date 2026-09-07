@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useMemo, memo } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useState, useMemo, memo, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Avatar } from '@/components/avatars/Avatar';
 import { MealOptionsSheet } from '@/components/plan/MealOptionsSheet';
 import { DietaryWarning } from '@/components/plan/DietaryWarning';
@@ -120,8 +120,8 @@ const MealRow = memo(function MealRow({
    */
   cutoffPassed: boolean;
 }) {
-  const [, joinAction] = useFormState(joinMeal, INITIAL);
-  const [, leaveAction] = useFormState(leaveMeal, INITIAL);
+  const [, joinAction] = useActionState(joinMeal, INITIAL);
+  const [, leaveAction] = useActionState(leaveMeal, INITIAL);
   const [optionsOpen, setOptionsOpen] = useState(false);
 
   // Memoize housemates lookup Map to avoid recreation on every render
@@ -351,7 +351,7 @@ export function WeekPlan({
             // animating up to full and then dimming, which would fight itself.
             // No meal figure lives on this card, so this breaks no money rule.
             className={clsx(
-              'rounded-xl border bg-surface-container-lowest shadow-ambient-card overflow-hidden',
+              'rounded-xl border bg-surface-container-lowest shadow-ambient-card',
               isToday ? 'border-primary/40' : 'border-surface-container-highest',
               isPast ? 'opacity-70' : 'animate-fade-in-up'
             )}
@@ -359,7 +359,7 @@ export function WeekPlan({
           >
             <header
               className={clsx(
-                'flex items-center justify-between gap-sm px-md py-sm border-b',
+                'flex items-center justify-between gap-sm px-md py-sm border-b rounded-t-xl',
                 isToday
                   ? 'bg-primary-fixed border-primary/20'
                   : cutoffPassed && !locked

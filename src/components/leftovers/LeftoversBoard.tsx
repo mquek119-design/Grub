@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useEffect, useMemo, useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Avatar } from '@/components/avatars/Avatar';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -49,7 +49,7 @@ function countdown(daysLeft: number): { label: string; tone: 'ok' | 'soon' | 'go
 }
 
 function LeftoverRow({ leftover, cook }: { leftover: Leftover; cook: User | undefined }) {
-  const [state, action] = useFormState(clearLeftover, INITIAL);
+  const [state, action] = useActionState(clearLeftover, INITIAL);
   const { toast } = useToast();
   const { label, tone } = countdown(leftover.daysLeft);
 
@@ -101,7 +101,7 @@ export function LeftoversBoard({
   leftovers: Leftover[];
   housemates: User[];
 }) {
-  const [state, action] = useFormState(addLeftover, INITIAL);
+  const [state, action] = useActionState(addLeftover, INITIAL);
   // Memoize housemates lookup Map to avoid recreation on every render
   const byId = useMemo(() => new Map(housemates.map((user) => [user.id, user])), [housemates]);
 

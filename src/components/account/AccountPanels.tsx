@@ -1,7 +1,6 @@
 'use client';
 
-import { useFormState } from 'react-dom';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useActionState } from 'react';
 import { Icon } from '@/components/media/Icon';
 import { Button } from '@/components/ui/Button';
 import { SubmitButton } from '@/components/ui/SubmitButton';
@@ -62,7 +61,7 @@ function Status({ state }: { state: AccountActionState }) {
  * validating a sort code, and Revolut or Monzo links must work just as well.
  */
 export function PaymentDetailsPanel({ user }: { user: User }) {
-  const [state, action] = useFormState(updatePaymentDetails, INITIAL);
+  const [state, action] = useActionState(updatePaymentDetails, INITIAL);
   const payment = user.payment;
 
   return (
@@ -158,7 +157,7 @@ export function PaymentDetailsPanel({ user }: { user: User }) {
 
 /** Dietary preferences. The same field the Plan tab writes. */
 export function DietaryPanel({ user }: { user: User }) {
-  const [state, action] = useFormState(updateDietaryPreferences, INITIAL);
+  const [state, action] = useActionState(updateDietaryPreferences, INITIAL);
   const custom = user.dietaryPreferences.filter((p) => !COMMON_PREFERENCES.includes(p));
 
   return (

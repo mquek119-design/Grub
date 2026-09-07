@@ -1,6 +1,7 @@
 'use client';
 
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState } from 'react';
+import { useFormStatus } from 'react-dom';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { IconSubmitButton, SubmitButton } from '@/components/ui/SubmitButton';
@@ -46,7 +47,7 @@ function AddButton() {
 }
 
 function FrequencySelect({ staple }: { staple: HouseStaple }) {
-  const [, action] = useFormState(updateStapleFrequency, INITIAL);
+  const [, action] = useActionState(updateStapleFrequency, INITIAL);
   return (
     <form action={action}>
       <input type="hidden" name="stapleId" value={staple.id} />
@@ -67,7 +68,7 @@ function FrequencySelect({ staple }: { staple: HouseStaple }) {
 }
 
 function RemoveButton({ stapleId }: { stapleId: string }) {
-  const [, action] = useFormState(removeStaple, INITIAL);
+  const [, action] = useActionState(removeStaple, INITIAL);
   return (
     <form action={action}>
       <input type="hidden" name="stapleId" value={stapleId} />
@@ -84,7 +85,7 @@ export function StaplesPanel({
   /** Mirrors `houses.shared_staples_enabled`, the toggle directly above. */
   splitEqually: boolean;
 }) {
-  const [state, action] = useFormState(addStaple, INITIAL);
+  const [state, action] = useActionState(addStaple, INITIAL);
 
   return (
     <div className="flex flex-col gap-sm">

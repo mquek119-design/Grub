@@ -1,7 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
-import { useFormState } from 'react-dom';
+import { useState, useTransition, useActionState } from 'react';
 import { Icon } from '@/components/media/Icon';
 import { Notice } from '@/components/ui/Notice';
 import { Button } from '@/components/ui/Button';
@@ -133,7 +132,7 @@ function CookOfferResponseButton({
   onRespond,
   disabled,
 }: CookOfferResponseButtonProps) {
-  const [_state, formAction] = useFormState(respondToCookOffer, INITIAL);
+  const [_state, formAction] = useActionState(respondToCookOffer, INITIAL);
 
   const handleAction = async (formData: FormData) => {
     await formAction(formData);

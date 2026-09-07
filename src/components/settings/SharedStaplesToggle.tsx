@@ -1,6 +1,6 @@
 'use client';
 
-import { useFormState } from 'react-dom';
+import { useActionState } from 'react';
 import { clsx } from '@/lib/clsx';
 import { updateSharedStaples, type StapleActionState } from '@/app/settings/stapleActions';
 
@@ -14,7 +14,7 @@ const INITIAL: StapleActionState = { status: 'idle', message: '' };
  * setting and silently reset on every reload.
  */
 export function SharedStaplesToggle({ enabled }: { enabled: boolean }) {
-  const [state, action] = useFormState(updateSharedStaples, INITIAL);
+  const [state, action] = useActionState(updateSharedStaples, INITIAL);
 
   return (
     <form action={action} className="flex items-center justify-between gap-md">

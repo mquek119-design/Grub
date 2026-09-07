@@ -1,8 +1,7 @@
 'use client';
 
-import { useFormState } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useActionState } from 'react';
 import { Icon } from '@/components/media/Icon';
 import { Card } from '@/components/ui/Card';
 import { SubmitButton as FormSubmitButton } from '@/components/ui/SubmitButton';
@@ -35,7 +34,7 @@ function SubmitButton() {
  * — particularly the lines that could not be read.
  */
 export function ImportRecipeCard() {
-  const [state, action] = useFormState(importRecipeFromUrl, INITIAL);
+  const [state, action] = useActionState(importRecipeFromUrl, INITIAL);
   const router = useRouter();
 
   useEffect(() => {

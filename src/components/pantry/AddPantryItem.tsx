@@ -1,7 +1,6 @@
 'use client';
 
-import { useFormState } from 'react-dom';
-import { useState } from 'react';
+import { useState, useActionState } from 'react';
 import { Icon } from '@/components/media/Icon';
 import { Card } from '@/components/ui/Card';
 import { SubmitButton } from '@/components/ui/SubmitButton';
@@ -20,7 +19,7 @@ const FIELD =
  * real household and the optimiser overbuys every week.
  */
 export function AddPantryItem() {
-  const [state, action] = useFormState(addPantryItem, INITIAL);
+  const [state, action] = useActionState(addPantryItem, INITIAL);
   const [open, setOpen] = useState(false);
 
   if (!open) {

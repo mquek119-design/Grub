@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useFormState } from 'react-dom';
+import { createPortal } from 'react-dom';
+import { useEffect, useState, useMemo, useActionState } from 'react';
 import { Avatar } from '@/components/avatars/Avatar';
 import { Icon } from '@/components/media/Icon';
 import { Button } from '@/components/ui/Button';
@@ -177,10 +177,10 @@ function CookChoice({
   diners: User[];
   currentUser: User;
 }) {
-  const [offerState, offerAction] = useFormState(offerCook, INITIAL);
-  const [respondState, respondAction] = useFormState(respondToCookOffer, INITIAL);
-  const [claimState, claimAction] = useFormState(claimCook, INITIAL);
-  const [standDownState, standDownAction] = useFormState(standDownAsCook, INITIAL);
+  const [offerState, offerAction] = useActionState(offerCook, INITIAL);
+  const [respondState, respondAction] = useActionState(respondToCookOffer, INITIAL);
+  const [claimState, claimAction] = useActionState(claimCook, INITIAL);
+  const [standDownState, standDownAction] = useActionState(standDownAsCook, INITIAL);
 
   // Memoize diners lookup Map to avoid recreation on every render
   const byId = useMemo(() => new Map(diners.map((user) => [user.id, user])), [diners]);
@@ -276,7 +276,7 @@ function CookChoice({
 }
 
 function GuestChoice({ meal, mine }: { meal: PlannedMeal; mine: { guests?: number; guestsCovered?: boolean } }) {
-  const [state, action] = useFormState(setGuests, INITIAL);
+  const [state, action] = useActionState(setGuests, INITIAL);
   const guests = mine.guests ?? 0;
   const covered = mine.guestsCovered ?? true;
 
@@ -333,7 +333,7 @@ function GuestChoice({ meal, mine }: { meal: PlannedMeal; mine: { guests?: numbe
 }
 
 function CapacityChoice({ meal, mouths }: { meal: PlannedMeal; mouths: number }) {
-  const [state, action] = useFormState(setMealCapacity, INITIAL);
+  const [state, action] = useActionState(setMealCapacity, INITIAL);
   const floor = Math.max(1, mouths);
   const max = meal.maxDiners;
 
@@ -424,7 +424,7 @@ function DinerList({
   currentUser: User;
   canRemove: boolean;
 }) {
-  const [state, action] = useFormState(removeFromMeal, INITIAL);
+  const [state, action] = useActionState(removeFromMeal, INITIAL);
 
   return (
     <div className="flex flex-col gap-xs">
@@ -485,9 +485,16 @@ export function MealOptionsSheet({
 }) {
   const mine = meal.participants.find((participant) => participant.userId === currentUser.id);
   const isOwner = canSetCapacity(meal, currentUser.id);
+  const [mounted, setMounted] = useState(false);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center">
       <button
         type="button"
         aria-label="Close"
@@ -531,6 +538,7 @@ export function MealOptionsSheet({
           Done
         </Button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
