@@ -479,8 +479,8 @@ export function BasketView({
         </div>
       )}
 
-      <div className="fixed bottom-[76px] md:bottom-0 left-0 w-full bg-surface-container-lowest border-t border-surface-container-highest p-md shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-40">
-        <div className="max-w-4xl mx-auto flex items-center justify-between gap-md px-margin-mobile md:px-margin-desktop">
+      <div className="fixed bottom-[76px] lg:bottom-6 left-0 lg:left-1/2 lg:-translate-x-1/2 w-full lg:w-[calc(100%-3rem)] lg:max-w-7xl bg-surface-container-lowest/95 backdrop-blur border-t lg:border border-surface-container-highest p-md lg:rounded-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.08)] lg:shadow-elevated-card z-40 transition-all">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-md px-margin-mobile md:px-margin-desktop">
           <div className="flex flex-col">
             <span className="font-label-caps text-label-caps text-on-surface-variant">
               {actualTotalCost !== null ? 'Tesco Actual Total' : 'Estimated Total'}
@@ -500,7 +500,7 @@ export function BasketView({
                 ? undefined
                 : `Only ${collectorName} can place this week's order from their Tesco account.`
             }
-            className="bg-secondary-container hover:bg-secondary text-on-secondary font-title-md text-title-md px-lg py-sm rounded-xl transition-colors flex-1 md:flex-none text-center disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-primary hover:bg-primary/90 text-on-primary font-title-md text-title-md px-lg py-sm rounded-xl transition-all shadow-sm flex-1 sm:flex-none text-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {!orderingEnabled
               ? 'Open locally to checkout'

@@ -14,7 +14,7 @@ export default async function LeftoversPage() {
   const [leftovers, housemates] = await Promise.all([getLeftovers(), getHousemates()]);
 
   return (
-    <PageShell>
+    <PageShell wide>
       <PageHeader
         title="Leftovers"
         subtitle="Put spare portions on the fridge board before they disappear at the back of a shelf."

@@ -178,7 +178,7 @@ export default async function SplitPage() {
           )}
         </div>
 
-        <div className="lg:col-span-5 flex flex-col gap-md">
+        <div className="lg:col-span-5 flex flex-col gap-md lg:sticky lg:top-[90px]">
           {isCollector ? (
             <>
               <CollectorPanel splits={postedSplits} basketIsEmpty={basket.length === 0} planStatus={plan?.status ?? 'planning'} />

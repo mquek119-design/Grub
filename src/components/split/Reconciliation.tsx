@@ -121,237 +121,248 @@ export function Reconciliation({
   const difference = actualTotal - plannedTotal;
 
   return (
-    <fieldset disabled={!isCollector || isPending} className="flex min-w-0 flex-col gap-lg">
-      <Card className="flex flex-col gap-sm">
-        <div className="flex items-start justify-between gap-md">
-          <div>
-            <h2 className="font-title-md text-title-md">Corrected Total</h2>
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Planned {formatPence(plannedTotal)} · Refunded {formatPence(refunded)}
-            </p>
-          </div>
-          <div className="text-right shrink-0">
-            <p className="font-numeric-data text-headline-lg-mobile text-primary">
-              {formatPence(actualTotal)}
-            </p>
-            <p
-              className={clsx(
-                'font-numeric-data text-[12px]',
-                difference > 0 ? 'text-error' : difference < 0 ? 'text-primary' : 'text-on-surface-variant'
-              )}
-            >
-              {difference === 0
-                ? 'matches plan'
-                : `${difference > 0 ? '+' : ''}${formatPence(difference)} vs plan`}
-            </p>
-          </div>
-        </div>
-        {substitutionDelta !== 0 && (
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Substitutions account for{' '}
-            <strong className="font-numeric-data">{formatPence(substitutionDelta)}</strong> of the
-            difference.
-          </p>
-        )}
-      </Card>
+    <fieldset disabled={!isCollector || isPending} className="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start min-w-0">
+      {/* Left Column: Received Items & Substitutions */}
+      <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-lg min-w-0">
+        <section className="flex flex-col gap-sm">
+          <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs">
+            <Icon name="check_circle" className="text-primary text-lg" />
+            Received Items
+          </h2>
+          <Card padded={false} className="overflow-hidden">
+            <ul className="divide-y divide-surface-container-highest">
+              {items.map((item) => {
+                const isReceived = received[item.basketItemId];
+                const quantity = quantities[item.basketItemId] ?? 0;
+                const isShort = isReceived && quantity < item.expectedQuantity;
 
-      <section className="flex flex-col gap-sm">
-        <h2 className="font-title-md text-title-md">Received Items</h2>
-        <Card padded={false} className="overflow-hidden">
-          <ul className="divide-y divide-surface-container-highest">
-            {items.map((item) => {
-              const isReceived = received[item.basketItemId];
-              const quantity = quantities[item.basketItemId] ?? 0;
-              const isShort = isReceived && quantity < item.expectedQuantity;
-
-              return (
-                <li key={item.basketItemId} className="p-md flex items-center gap-md">
-                  <button
-                    type="button"
-                    role="checkbox"
-                    aria-checked={isReceived}
-                    aria-label={`${item.name} received`}
-                    onClick={() => toggleItemReceived(item.basketItemId)}
-                    className={clsx(
-                      'w-11 h-11 border-2 rounded flex items-center justify-center shrink-0 transition-colors',
-                      isReceived ? 'bg-primary border-primary' : 'border-outline'
-                    )}
-                  >
-                    <Icon
-                      name="check"
-                      className={clsx('text-white text-[16px]', !isReceived && 'opacity-0')}
-                    />
-                  </button>
-
-                  <div className="flex-grow min-w-0">
-                    <p
+                return (
+                  <li key={item.basketItemId} className="p-md flex items-center gap-md hover:bg-surface-container-low/30 transition-colors">
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={isReceived}
+                      aria-label={`${item.name} received`}
+                      onClick={() => toggleItemReceived(item.basketItemId)}
                       className={clsx(
-                        'font-body-lg text-body-lg truncate',
-                        !isReceived && 'line-through text-on-surface-variant'
+                        'w-11 h-11 border-2 rounded flex items-center justify-center shrink-0 transition-colors',
+                        isReceived ? 'bg-primary border-primary' : 'border-outline'
                       )}
                     >
-                      {item.name}
-                    </p>
-                    <p className="font-body-sm text-body-sm text-on-surface-variant">
-                      Ordered {item.expectedQuantity} @ {formatPence(item.price)}
-                      {isShort && (
-                        <span className="text-secondary font-semibold"> · short delivered</span>
-                      )}
-                    </p>
-                  </div>
+                      <Icon
+                        name="check"
+                        className={clsx('text-white text-[16px]', !isReceived && 'opacity-0')}
+                      />
+                    </button>
 
-                  {isReceived ? (
-                    <div className="flex items-center gap-2 bg-surface-container rounded-lg p-1 shrink-0">
-                      <button
-                        type="button"
-                        aria-label={`Decrease received ${item.name}`}
-                        onClick={() =>
-                          setItemQuantity(
-                            item.basketItemId,
-                            Math.max(0, (quantities[item.basketItemId] ?? 0) - 1)
-                          )
-                        }
-                        className="w-11 h-11 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                    <div className="flex-grow min-w-0">
+                      <p
+                        className={clsx(
+                          'font-body-lg text-body-lg truncate text-on-surface font-medium',
+                          !isReceived && 'line-through text-on-surface-variant'
+                        )}
                       >
-                        <Icon name="remove" className="text-[16px]" />
-                      </button>
-                      <span className="font-numeric-data text-numeric-data w-4 text-center tabular-nums">
-                        {quantity}
-                      </span>
-                      <button
-                        type="button"
-                        aria-label={`Increase received ${item.name}`}
-                        onClick={() =>
-                          setItemQuantity(
-                            item.basketItemId,
-                            (quantities[item.basketItemId] ?? 0) + 1
-                          )
-                        }
-                        className="w-11 h-11 flex items-center justify-center text-primary hover:bg-primary-container hover:text-on-primary-container rounded focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
-                      >
-                        <Icon name="add" className="text-[16px]" />
-                      </button>
-                    </div>
-                  ) : (
-                    <Badge tone="error" className="shrink-0">
-                      Refunded
-                    </Badge>
-                  )}
-                </li>
-              );
-            })}
-          </ul>
-        </Card>
-      </section>
-
-      <section className="flex flex-col gap-sm">
-        <div className="flex items-center justify-between gap-sm">
-          <h2 className="font-title-md text-title-md">Substitutions</h2>
-          {pending > 0 && <Badge tone="secondary">{pending} to review</Badge>}
-        </div>
-
-        {substitutions.length === 0 ? (
-          <Card>
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Tesco substituted nothing this week.
-            </p>
-          </Card>
-        ) : (
-          <ul className="flex flex-col gap-sm">
-            {substitutions.map((sub) => {
-              const decision = decisions[sub.id];
-              const delta = sub.receivedPrice - sub.orderedPrice;
-
-              return (
-                <li key={sub.id}>
-                  <Card
-                    accent={
-                      decision === 'accepted'
-                        ? 'primary'
-                        : decision === 'rejected'
-                          ? 'error'
-                          : 'secondary'
-                    }
-                    className="flex flex-col gap-md"
-                  >
-                    <div className="flex flex-col gap-xs">
-                      <p className="font-body-sm text-body-sm text-on-surface-variant line-through">
-                        {sub.orderedName} · {formatPence(sub.orderedPrice)}
+                        {item.name}
                       </p>
-                      <p className="font-body-lg text-body-lg font-semibold flex items-center gap-xs flex-wrap">
-                        <Icon name="swap_horiz" className="text-secondary" />
-                        {sub.receivedName} · {formatPence(sub.receivedPrice)}
-                        <span
+                      <p className="font-body-sm text-body-sm text-on-surface-variant">
+                        Ordered {item.expectedQuantity} @ {formatPence(item.price)}
+                        {isShort && (
+                          <span className="text-secondary font-semibold"> · short delivered</span>
+                        )}
+                      </p>
+                    </div>
+
+                    {isReceived ? (
+                      <div className="flex items-center gap-2 bg-surface-container rounded-lg p-1 shrink-0">
+                        <button
+                          type="button"
+                          aria-label={`Decrease received ${item.name}`}
+                          onClick={() =>
+                            setItemQuantity(
+                              item.basketItemId,
+                              Math.max(0, (quantities[item.basketItemId] ?? 0) - 1)
+                            )
+                          }
+                          className="w-11 h-11 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                        >
+                          <Icon name="remove" className="text-[16px]" />
+                        </button>
+                        <span className="font-numeric-data text-numeric-data w-4 text-center tabular-nums">
+                          {quantity}
+                        </span>
+                        <button
+                          type="button"
+                          aria-label={`Increase received ${item.name}`}
+                          onClick={() =>
+                            setItemQuantity(
+                              item.basketItemId,
+                              (quantities[item.basketItemId] ?? 0) + 1
+                            )
+                          }
+                          className="w-11 h-11 flex items-center justify-center text-primary hover:bg-primary-container hover:text-on-primary-container rounded focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                        >
+                          <Icon name="add" className="text-[16px]" />
+                        </button>
+                      </div>
+                    ) : (
+                      <Badge tone="error" className="shrink-0">
+                        Refunded
+                      </Badge>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </Card>
+        </section>
+
+        <section className="flex flex-col gap-sm">
+          <div className="flex items-center justify-between gap-sm">
+            <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs">
+              <Icon name="swap_horiz" className="text-secondary text-lg" />
+              Substitutions
+            </h2>
+            {pending > 0 && <Badge tone="secondary">{pending} to review</Badge>}
+          </div>
+
+          {substitutions.length === 0 ? (
+            <Card>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                Tesco substituted nothing this week.
+              </p>
+            </Card>
+          ) : (
+            <ul className="flex flex-col gap-sm">
+              {substitutions.map((sub) => {
+                const decision = decisions[sub.id];
+                const delta = sub.receivedPrice - sub.orderedPrice;
+
+                return (
+                  <li key={sub.id}>
+                    <Card
+                      accent={
+                        decision === 'accepted'
+                          ? 'primary'
+                          : decision === 'rejected'
+                            ? 'error'
+                            : 'secondary'
+                      }
+                      className="flex flex-col gap-md"
+                    >
+                      <div className="flex flex-col gap-xs">
+                        <p className="font-body-sm text-body-sm text-on-surface-variant line-through">
+                          {sub.orderedName} · {formatPence(sub.orderedPrice)}
+                        </p>
+                        <p className="font-body-lg text-body-lg font-semibold flex items-center gap-xs flex-wrap">
+                          <Icon name="swap_horiz" className="text-secondary" />
+                          {sub.receivedName} · {formatPence(sub.receivedPrice)}
+                          <span
+                            className={clsx(
+                              'font-numeric-data text-[12px]',
+                              delta > 0 ? 'text-error' : 'text-primary'
+                            )}
+                          >
+                            ({delta > 0 ? '+' : ''}
+                            {formatPence(delta)})
+                          </span>
+                        </p>
+                      </div>
+
+                      <div className="flex gap-sm">
+                        <button
+                          type="button"
+                          onClick={() => handleDecision(sub.id, 'accepted')}
                           className={clsx(
-                            'font-numeric-data text-[12px]',
-                            delta > 0 ? 'text-error' : 'text-primary'
+                            'flex-1 h-11 md:h-11 rounded-lg font-semibold text-[14px] flex items-center justify-center gap-xs transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                            decision === 'accepted'
+                              ? 'bg-primary text-on-primary'
+                              : 'border border-primary text-primary hover:bg-primary/10'
                           )}
                         >
-                          ({delta > 0 ? '+' : ''}
-                          {formatPence(delta)})
-                        </span>
-                      </p>
-                    </div>
+                          <Icon name="check" className="text-[18px]" />
+                          Accept
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDecision(sub.id, 'rejected')}
+                          className={clsx(
+                            'flex-1 h-11 md:h-11 rounded-lg font-semibold text-[14px] flex items-center justify-center gap-xs transition-colors focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2',
+                            decision === 'rejected'
+                              ? 'bg-error text-on-error'
+                              : 'border border-error text-error hover:bg-error-container'
+                          )}
+                        >
+                          <Icon name="close" className="text-[18px]" />
+                          Reject
+                        </button>
+                      </div>
+                    </Card>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
+      </div>
 
-                    <div className="flex gap-sm">
-                      <button
-                        type="button"
-                        onClick={() => handleDecision(sub.id, 'accepted')}
-                        className={clsx(
-                          'flex-1 h-11 md:h-11 rounded-lg font-semibold text-[14px] flex items-center justify-center gap-xs transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
-                          decision === 'accepted'
-                            ? 'bg-primary text-on-primary'
-                            : 'border border-primary text-primary hover:bg-primary/10'
-                        )}
-                      >
-                        <Icon name="check" className="text-[18px]" />
-                        Accept
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDecision(sub.id, 'rejected')}
-                        className={clsx(
-                          'flex-1 h-11 md:h-11 rounded-lg font-semibold text-[14px] flex items-center justify-center gap-xs transition-colors focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2',
-                          decision === 'rejected'
-                            ? 'bg-error text-on-error'
-                            : 'border border-error text-error hover:bg-error-container'
-                        )}
-                      >
-                        <Icon name="close" className="text-[18px]" />
-                        Reject
-                      </button>
-                    </div>
-                  </Card>
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </section>
+      {/* Right Column: Corrected Total & Finalise Action */}
+      <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-lg lg:sticky lg:top-[90px]">
+        <Card accent="primary" className="flex flex-col gap-sm">
+          <div className="flex items-start justify-between gap-md border-b border-surface-container-highest pb-md">
+            <div>
+              <h2 className="font-title-md text-title-md text-on-surface">Corrected Total</h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+                Planned {formatPence(plannedTotal)} · Refunded {formatPence(refunded)}
+              </p>
+            </div>
+            <div className="text-right shrink-0">
+              <p className="font-numeric-data text-headline-lg-mobile text-primary font-bold">
+                {formatPence(actualTotal)}
+              </p>
+              <p
+                className={clsx(
+                  'font-numeric-data text-[12px] font-semibold',
+                  difference > 0 ? 'text-error' : difference < 0 ? 'text-primary' : 'text-on-surface-variant'
+                )}
+              >
+                {difference === 0
+                  ? 'matches plan'
+                  : `${difference > 0 ? '+' : ''}${formatPence(difference)} vs plan`}
+              </p>
+            </div>
+          </div>
 
-      <section className="flex flex-col gap-sm">
-        <p className="font-body-sm text-body-sm text-on-surface-variant">
-          These are item totals. The booked delivery or collection charge is added separately to the split.
-        </p>
-      </section>
+          {substitutionDelta !== 0 && (
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              Substitutions account for{' '}
+              <strong className="font-numeric-data text-on-surface">{formatPence(substitutionDelta)}</strong> of the
+              difference.
+            </p>
+          )}
 
-      {error && <p role="alert" className="text-body-sm text-error">{error}</p>}
+          <p className="font-body-sm text-[12px] text-on-surface-variant/80">
+            Delivery charge is calculated separately in the split summary.
+          </p>
 
-      <button
-        type="button"
-        disabled={!isCollector || !planId || pending > 0 || finalised || isPending}
-        onClick={handleFinalise}
-        className="w-full h-12 bg-primary text-on-primary font-title-md text-title-md rounded-lg flex items-center justify-center gap-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        <Icon name={finalised ? 'check_circle' : 'gavel'} filled={finalised} />
-        {finalised
-          ? 'Split finalised'
-          : pending > 0
-            ? `Review ${pending} substitution${pending === 1 ? '' : 's'} first`
-            : isCollector
-              ? 'Finalise Corrected Split'
-              : 'Collector finalises the split'}
-      </button>
+          {error && <p role="alert" className="text-body-sm text-error bg-error-container/30 p-xs rounded-lg">{error}</p>}
+
+          <button
+            type="button"
+            disabled={!isCollector || !planId || pending > 0 || finalised || isPending}
+            onClick={handleFinalise}
+            className="w-full h-12 bg-primary text-on-primary font-title-md text-title-md rounded-xl flex items-center justify-center gap-sm hover:opacity-90 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm mt-xs"
+          >
+            <Icon name={finalised ? 'check_circle' : 'gavel'} filled={finalised} />
+            {finalised
+              ? 'Split Finalised'
+              : pending > 0
+                ? `Review ${pending} substitution${pending === 1 ? '' : 's'} first`
+                : isCollector
+                  ? 'Finalise Corrected Split'
+                  : 'Collector finalises the split'}
+          </button>
+        </Card>
+      </div>
     </fieldset>
   );
 }
