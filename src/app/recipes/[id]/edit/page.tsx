@@ -46,6 +46,7 @@ export default async function EditRecipePage({ params }: { params: { id: string 
           tags: recipe.tags.join(', '),
           sourceUrl: recipe.sourceUrl ?? '',
           proTip: recipe.proTip ?? '',
+          imageUrl: recipe.imageUrl,
         }}
       />
 

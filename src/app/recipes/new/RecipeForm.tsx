@@ -1,7 +1,9 @@
 'use client';
 
 import { useActionState } from 'react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { FoodImage } from '@/components/media/FoodImage';
+import { Icon } from '@/components/media/Icon';
 import { Card } from '@/components/ui/Card';
 import { SubmitButton as FormSubmitButton } from '@/components/ui/SubmitButton';
 import { createRecipe, updateRecipe, type RecipeFormState } from '../actions';
@@ -39,9 +41,13 @@ export interface RecipePrefill {
   tags?: string;
   sourceUrl?: string;
   proTip?: string;
+  imageUrl?: string | null;
   /** Imported lines the parser could not read — shown so they aren't lost. */
   unparsed?: string[];
 }
+
+/** Max photo size accepted by the recipe-images bucket policy — see 0025. */
+const MAX_IMAGE_MB = 5;
 
 export function RecipeForm({ prefill }: { prefill?: RecipePrefill }) {
   // Editing reuses the same form: the fields are identical, and keeping one
@@ -60,6 +66,27 @@ export function RecipeForm({ prefill }: { prefill?: RecipePrefill }) {
   const [sourceUrl, setSourceUrl] = useState(prefill?.sourceUrl ?? '');
   const [proTip, setProTip] = useState(prefill?.proTip ?? '');
   const [validationErrors, setValidationErrors] = useState<{ servings?: string; cookTime?: string }>({});
+  const [photoPreview, setPhotoPreview] = useState<string | null>(prefill?.imageUrl ?? null);
+  const [photoError, setPhotoError] = useState<string | undefined>();
+  const [removeImage, setRemoveImage] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  function handlePhotoChange(file: File | null) {
+    setPhotoError(undefined);
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      setPhotoError('That file is not an image.');
+      if (photoInputRef.current) photoInputRef.current.value = '';
+      return;
+    }
+    if (file.size > MAX_IMAGE_MB * 1024 * 1024) {
+      setPhotoError(`Photo is too large — ${MAX_IMAGE_MB}MB max.`);
+      if (photoInputRef.current) photoInputRef.current.value = '';
+      return;
+    }
+    setRemoveImage(false);
+    setPhotoPreview(URL.createObjectURL(file));
+  }
 
   // Live preview so a mis-parsed line is obvious before saving, not after.
   const lines = ingredientsText.split('\n');
@@ -155,6 +182,48 @@ export function RecipeForm({ prefill }: { prefill?: RecipePrefill }) {
           </span>
         </Card>
       )}
+      <div className="flex flex-col gap-xs">
+        <span className="font-body-sm text-body-sm font-semibold">Photo</span>
+        <div className="flex items-center gap-md">
+          <FoodImage
+            seed={prefill?.recipeId ?? title ?? 'recipe'}
+            src={removeImage ? null : photoPreview}
+            alt="Recipe photo preview"
+            className="w-20 h-20 rounded-lg text-[24px] shrink-0"
+          />
+          <div className="flex flex-col gap-xs">
+            <input
+              ref={photoInputRef}
+              type="file"
+              name="image"
+              accept="image/*"
+              onChange={(e) => handlePhotoChange(e.target.files?.[0] ?? null)}
+              className="text-body-sm text-on-surface-variant file:mr-sm file:h-9 file:px-md file:rounded-full file:border-0 file:bg-secondary-container file:text-on-secondary file:font-semibold file:cursor-pointer"
+            />
+            {photoPreview && !removeImage && (
+              <button
+                type="button"
+                onClick={() => {
+                  setRemoveImage(true);
+                  setPhotoPreview(null);
+                  if (photoInputRef.current) photoInputRef.current.value = '';
+                }}
+                className="self-start flex items-center gap-1 text-body-sm text-on-surface-variant hover:text-error"
+              >
+                <Icon name="close" className="text-[16px]" />
+                Remove photo
+              </button>
+            )}
+            {photoError && (
+              <p role="alert" className="font-body-sm text-[12px] text-error">
+                {photoError}
+              </p>
+            )}
+          </div>
+        </div>
+        <input type="hidden" name="removeImage" value={removeImage ? 'true' : 'false'} />
+      </div>
+
       <label className="flex flex-col gap-xs">
         <span className="font-body-sm text-body-sm font-semibold">
           Title <span aria-hidden="true" className="text-error">*</span>

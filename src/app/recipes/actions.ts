@@ -30,6 +30,47 @@ function asCategory(value: FormDataEntryValue | null): IngredientCategory {
   return (CATEGORIES as string[]).includes(raw) ? (raw as IngredientCategory) : 'cupboard';
 }
 
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
+/**
+ * Uploads a recipe photo, or does nothing if the field was left empty.
+ *
+ * Keyed `{houseId}/{recipeId}` with no extension — the content type is set
+ * explicitly, so `upsert: true` overwrites the same object on a re-upload
+ * rather than leaving an orphaned file behind from the previous format.
+ * A global recipe (no house) has nowhere the storage policy will let it
+ * write, so it is refused here with the same message rather than a raw
+ * storage error.
+ */
+async function uploadRecipeImage(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  houseId: string,
+  recipeId: string,
+  file: File
+): Promise<{ url: string } | { error: string }> {
+  if (!file.type.startsWith('image/')) {
+    return { error: 'That file is not an image.' };
+  }
+  if (file.size > MAX_IMAGE_BYTES) {
+    return { error: 'Photo is too large — 5MB max.' };
+  }
+
+  const path = `${houseId}/${recipeId}`;
+  const uploaded = await supabase.storage
+    .from('recipe-images')
+    .upload(path, file, { contentType: file.type, upsert: true });
+
+  if (uploaded.error) {
+    return { error: `Could not save the photo: ${uploaded.error.message}` };
+  }
+
+  const { data } = supabase.storage.from('recipe-images').getPublicUrl(path);
+  // Storage serves whatever was uploaded last from this key, so a stale
+  // browser or CDN cache must be told the URL changed even though the path
+  // did not.
+  return { url: `${data.publicUrl}?v=${Date.now()}` };
+}
+
 /**
  * Search for ingredients by canonical name, for autocomplete suggestions.
  * Returns distinct canonical names (one suggestion per unique ingredient),
@@ -199,6 +240,19 @@ export async function createRecipe(
     return { status: 'error', message: linkResult.error.message };
   }
 
+  // Uploaded after the row exists — the storage key is the recipe id. The
+  // recipe itself is already saved at this point, so a failed photo upload
+  // (too large, wrong type) does not lose everything else that was typed in —
+  // it just leaves the recipe on the tinted-tile fallback, same as if no
+  // photo had been chosen. Re-uploading from the edit page tries again.
+  const image = formData.get('image');
+  if (image instanceof File && image.size > 0) {
+    const uploaded = await uploadRecipeImage(supabase, me.houseId, recipe.data.id, image);
+    if (!('error' in uploaded)) {
+      await supabase.from('recipes').update({ image_url: uploaded.url }).eq('id', recipe.data.id);
+    }
+  }
+
   revalidatePath('/recipes');
   revalidatePath('/plan');
   redirect(`/recipes/${recipe.data.id}`);
@@ -246,6 +300,20 @@ export async function updateRecipe(
   const supabase = await createClient();
   const category = asCategory(formData.get('category'));
 
+  // A new photo wins over "remove" if a form somehow sent both; removal only
+  // applies when there is nothing new to replace it with. Uploaded before the
+  // main update so a failed photo (too large, wrong type) does not also lose
+  // every other edit on the form — it just leaves the existing photo in place.
+  let imagePatch: { image_url?: string | null } = {};
+  const image = formData.get('image');
+  if (image instanceof File && image.size > 0) {
+    const uploaded = await uploadRecipeImage(supabase, me.houseId, recipeId, image);
+    if (!('error' in uploaded)) imagePatch = { image_url: uploaded.url };
+  } else if (formData.get('removeImage') === 'true') {
+    await supabase.storage.from('recipe-images').remove([`${me.houseId}/${recipeId}`]);
+    imagePatch = { image_url: null };
+  }
+
   const updated = await supabase
     .from('recipes')
     .update({
@@ -263,6 +331,7 @@ export async function updateRecipe(
         .map((step) => step.trim())
         .filter(Boolean),
       pro_tip: String(formData.get('proTip') ?? '').trim() || null,
+      ...imagePatch,
     })
     .eq('id', recipeId)
     .eq('house_id', me.houseId);

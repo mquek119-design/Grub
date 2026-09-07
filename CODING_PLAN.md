@@ -201,7 +201,16 @@ probably accurate", etc.), landed by earlier commits (`8cf5564`,
 
 ## P4 — larger, later
 
-### 7. Real recipe images (uploads)
+### 7. Real recipe images (uploads) — ✅ done (2026-09-07)
+
+`supabase/migrations/0025_recipe_image_uploads.sql` adds the public
+`recipe-images` bucket, keyed `{houseId}/{recipeId}` with RLS scoped to the
+uploader's own house. `RecipeForm` gained a photo field (preview, 5MB/
+image-type validation, remove) wired through `createRecipe`/`updateRecipe`
+in `src/app/recipes/actions.ts`; a failed upload never loses the rest of the
+form. `recipes.image_url` and `FoodImage`'s `src` passthrough already
+existed — this was the missing write path. Original spec below.
+
 - **Goal:** Let a recipe carry a real photo instead of the deterministic tinted
   tile.
 - **Approach:** A Supabase Storage bucket + RLS, an upload control on the recipe
