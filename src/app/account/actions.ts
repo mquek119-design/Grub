@@ -276,7 +276,11 @@ export async function deleteAccount(alsoDeleteHouse = false): Promise<AccountAct
     .eq('user_id', me.id)
     .eq('settled', false);
 
-  const unsettledExpenses = shares.error ? [] : (shares.data ?? []);
+  // Fail closed, exactly as the splits check above does: a query error must
+  // never read as "nothing owed" and let a delete cascade away expense debt
+  // that nobody was told about.
+  if (shares.error) return fail(`Could not check your balances: ${shares.error.message}`);
+  const unsettledExpenses = shares.data ?? [];
 
   const owedTotal =
     owed.reduce((sum, row) => sum + row.amount, 0) +
