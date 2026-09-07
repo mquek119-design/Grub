@@ -148,3 +148,43 @@ verification. Leave these alone.
 ### Product decision needed before building
 - Dietary-conflict warning (#2 above) and GDPR export (#3) — small, worth doing
   for a real launch; confirm you want them before I build.
+
+---
+
+## Round 2 — live sweep (2026-09-07, via read-only DB + running server)
+
+Prompted by "test all routes, keep going until nothing new is found." Static
+review can't see these; the live DB and a route sweep can.
+
+### Route sweep (dev server, signed out)
+All 27 routes + robots/sitemap/OG: **no 500s**. Every protected route 307s to
+`/login?next=…`; public routes 200. One quirk: an unknown path signed-out also
+redirects to `/login` rather than the custom 404, so `not-found.tsx` is only
+reachable when signed in. Low priority. Signed-**in** render testing still
+blocked on a saved session (T1.2) — HTTP redirect ≠ render-tested.
+
+### Missing DELETE policies (RLS on, no policy → silent 0-row deletes) — FIXED
+Found by auditing every table's policies against the app's actual `.delete()`
+calls. Same class three times over:
+- `ingredients` → merge tool could never delete the loser row. **Fixed: `0026`.**
+- `profiles` → `deleteAccount()` self-delete always 0 rows, so **account
+  deletion was fully broken for everyone** ("that account is not yours to
+  remove"). **Fixed: `0027`.**
+- `splits` → `postSplit()` cleanup of zeroed-out debts silently no-opped,
+  leaving phantom debt rows. **Fixed: `0027`.**
+`houses` has no DELETE policy **intentionally** (delete_house RPC) — not a bug.
+
+### Other confirmed findings
+- **`/dev` is not admin-gated** — only checks `houseId`, so any housemate can
+  reach "Clear everything" / "Reset demo data". CLAUDE.md calls it a one-person
+  workbench where half the buttons delete the house. Should be admin-gated or
+  hidden in prod. **Not yet fixed — needs a call.**
+- **Dietary clashes never surfaced** — recipes carry `dietary_tags`, accounts
+  carry constraints, nothing warns of a clash/allergy at planning time. Gap.
+- **Account-deletion money guard failed open** on an `expense_shares` query
+  error (`shares.error ? [] : …`) while splits failed closed. **Fixed.**
+- `MISSING_FEATURES_AUDIT.md` (separate) additionally flags: a non-atomic
+  leftover decrement race (low stakes, free board — not yet fixed), and an
+  order-confirmation state defect where `syncBasketToTesco` sets `ordered`
+  before a real purchase (**HIGH risk, money+week state — needs design, do not
+  fix casually**).
