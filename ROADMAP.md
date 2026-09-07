@@ -1,6 +1,9 @@
 # Grub — Roadmap & Current State
 
-_Last updated: 2026-09-06. Read `CLAUDE.md` first — it is the authoritative
+_**Superseded where it disagrees with `PLAN.md` (2026-09-07)**, which is the
+current consolidated view of everything unfinished. This file is kept for the
+historical narrative but its status lines are partly stale (the app is now
+deployed and the suite is 169 tests). Last substantive update: 2026-09-06._ Read `CLAUDE.md` first — it is the authoritative
 source for architecture and product rules. This file is the forward-looking
 "what's done, what's half-built, what's next" view. For the per-feature
 implementation detail (approach, files, acceptance, effort), see
