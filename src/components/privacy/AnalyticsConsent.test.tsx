@@ -23,7 +23,7 @@ it('accepts, persists and excludes private and token-bearing URLs', async () => 
   for (const path of ['/split', '/auth/callback?code=secret', '/welcome?email=private', '/recipes/123']) {
     expect(filter({ type: 'pageview', url: `https://grubhouse.uk${path}` })).toBeNull();
   }
-  fireEvent.click(screen.getByRole('button', { name: 'Privacy choices' }));
+  fireEvent(window, new Event('grub:open-privacy'));
   expect(screen.getByRole('button', { name: 'Reject analytics' })).toBeTruthy();
 });
 

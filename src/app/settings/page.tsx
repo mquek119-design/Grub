@@ -13,6 +13,7 @@ import { SlotPreferencePanel } from '@/components/settings/SlotPreferencePanel';
 import { RoutinePanel } from '@/components/settings/RoutinePanel';
 import { StaplesPanel } from '@/components/settings/StaplesPanel';
 import { SharedStaplesToggle } from '@/components/settings/SharedStaplesToggle';
+import { ManagePrivacyButton } from '@/components/privacy/ManagePrivacyButton';
 
 export const metadata = { title: 'House Settings · Grub', description: 'Manage housemates, shared staples, and the weekly rotation.' };
 
@@ -73,6 +74,10 @@ export default async function SettingsPage() {
                 <StaplesPanel staples={staples} splitEqually={house.sharedStaplesEnabled} />
               </div>
             </Card>
+          </section>
+
+          <section className="pt-sm pb-md">
+            <ManagePrivacyButton />
           </section>
         </div>
 

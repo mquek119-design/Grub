@@ -22,9 +22,16 @@ export function AnalyticsConsent() {
       setChoice(saved === 'accepted' || saved === 'rejected' ? saved : null);
       setReady(true);
     }
+    function handleOpenEvent() {
+      setOpen(true);
+    }
     restore();
     window.addEventListener('storage', restore);
-    return () => window.removeEventListener('storage', restore);
+    window.addEventListener('grub:open-privacy', handleOpenEvent);
+    return () => {
+      window.removeEventListener('storage', restore);
+      window.removeEventListener('grub:open-privacy', handleOpenEvent);
+    };
   }, []);
 
   function choose(value: 'accepted' | 'rejected') {
@@ -58,8 +65,6 @@ export function AnalyticsConsent() {
             </div>
           </div>
         </section>
-      ) : ready ? (
-        <button type="button" onClick={() => setOpen(true)} className="fixed bottom-[100px] md:bottom-3 left-3 z-[60] rounded-full border border-outline-variant bg-surface-0 px-3 min-h-11 text-xs text-on-surface focus-visible:outline focus-visible:outline-2">Privacy choices</button>
       ) : null}
     </>
   );

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { FoodImage } from '@/components/media/FoodImage';
 import { Icon } from '@/components/media/Icon';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
@@ -6,7 +7,7 @@ import { Notice } from '@/components/ui/Notice';
 import { MealStatusControls } from '@/components/plan/MealStatusControls';
 import { perishablesAmong, suggestFromIngredients } from '@/lib/suggestions';
 import type { PlannedMeal, Recipe, User, WeeklyPlan } from '@/lib/types';
-import { MEAL_TYPES, MEAL_TYPE_LABELS, WEEKDAYS, WEEKDAY_LABELS } from '@/lib/types';
+import { MEAL_TYPES, MEAL_TYPE_ICONS, MEAL_TYPE_LABELS, WEEKDAYS, WEEKDAY_LABELS } from '@/lib/types';
 
 /**
  * The week after the shop arrives.
@@ -77,26 +78,46 @@ export function KitchenPanel({
         const skipped = meal.status === 'skipped';
 
         return (
-          <Card key={meal.id} className="flex flex-col gap-sm">
-            <div className="flex items-start justify-between gap-sm">
-              <div className="min-w-0">
-                <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
-                  {WEEKDAY_LABELS[meal.day]} · {MEAL_TYPE_LABELS[meal.mealType]}
-                </span>
-                <h3 className="font-title-md text-title-md truncate">
+          <Card key={meal.id} className="flex flex-col gap-md border border-surface-container-highest shadow-sm">
+            <div className="flex items-start gap-md min-w-0">
+              <Link
+                href={`/recipes/${meal.recipeId}`}
+                className="shrink-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <FoodImage
+                  seed={meal.recipeId}
+                  src={recipe?.imageUrl}
+                  alt={meal.recipeTitle}
+                  className="w-16 h-16 rounded-xl object-cover text-[24px] shadow-sm"
+                />
+              </Link>
+
+              <div className="min-w-0 flex-1 flex flex-col justify-center">
+                <div className="flex items-center gap-xs flex-wrap">
+                  <span className="font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center gap-xs">
+                    <Icon name={MEAL_TYPE_ICONS[meal.mealType]} className="text-xs" />
+                    {WEEKDAY_LABELS[meal.day]} · {MEAL_TYPE_LABELS[meal.mealType]}
+                  </span>
+                  {meal.status === 'cooked' ? (
+                    <Badge tone="solid-primary">COOKED</Badge>
+                  ) : meal.status === 'swapped' ? (
+                    <Badge tone="primary">SWAPPED</Badge>
+                  ) : skipped ? (
+                    <Badge tone="neutral">SKIPPED</Badge>
+                  ) : null}
+                </div>
+
+                <h3 className="font-title-md text-title-md truncate mt-0.5 font-bold text-on-surface">
                   <Link href={`/recipes/${meal.recipeId}`} className="hover:underline">
                     {meal.recipeTitle}
                   </Link>
                 </h3>
-              </div>
 
-              {meal.status === 'cooked' ? (
-                <Badge tone="solid-primary">COOKED</Badge>
-              ) : meal.status === 'swapped' ? (
-                <Badge tone="primary">SWAPPED</Badge>
-              ) : skipped ? (
-                <Badge tone="neutral">SKIPPED</Badge>
-              ) : null}
+                <p className="font-body-sm text-[12px] text-on-surface-variant flex items-center gap-xs mt-1">
+                  <Icon name="groups" className="text-sm" />
+                  <span>{meal.participants.length} in for this meal</span>
+                </p>
+              </div>
             </div>
 
             <MealStatusControls
@@ -111,7 +132,7 @@ export function KitchenPanel({
               <div className="flex flex-col gap-sm pt-sm border-t border-surface-container-highest">
                 <p className="font-body-sm text-body-sm text-on-surface-variant">
                   You&apos;ve got{' '}
-                  <strong className="text-on-surface">
+                  <strong className="text-on-surface font-semibold">
                     {recipe.ingredients.map((ingredient) => ingredient.name).join(', ')}
                   </strong>
                   .
@@ -131,7 +152,7 @@ export function KitchenPanel({
 
                 {suggestions.length > 0 ? (
                   <>
-                    <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
+                    <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-semibold">
                       What else you could make
                     </span>
                     <ul className="flex flex-col gap-xs">

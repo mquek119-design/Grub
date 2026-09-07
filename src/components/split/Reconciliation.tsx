@@ -4,6 +4,7 @@ import { useMemo, useState, useTransition } from 'react';
 import { Icon } from '@/components/media/Icon';
 import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
 import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
 import type {
@@ -13,7 +14,9 @@ import type {
   SubstitutionDecision,
 } from '@/lib/types';
 import {
+  addSubstitution,
   finaliseReconciliation,
+  updateItemPrice,
   updateItemReceived,
   updateSubstitutionDecision,
 } from '@/app/split/actions';
@@ -48,6 +51,16 @@ export function Reconciliation({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  // Price & Weight adjustment modal state
+  const [editingItem, setEditingItem] = useState<ReconciliationItem | null>(null);
+  const [editPriceInput, setEditPriceInput] = useState<string>('');
+
+  // Add substitution modal state
+  const [isAddSubOpen, setIsAddSubOpen] = useState(false);
+  const [subTargetItemId, setSubTargetItemId] = useState<string>('');
+  const [subReceivedName, setSubReceivedName] = useState<string>('');
+  const [subReceivedPriceInput, setSubReceivedPriceInput] = useState<string>('');
+
   function toggleItemReceived(basketItemId: string) {
     setFinalised(false);
     const nextState = !received[basketItemId];
@@ -80,6 +93,63 @@ export function Reconciliation({
       const result = await updateSubstitutionDecision(subId, decision);
       setError(result.status === 'error' ? result.message : null);
       if (result.status === 'error') setDecisions((prev) => ({ ...prev, [subId]: previousDecision }));
+    });
+  }
+
+  function handleSavePriceEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editingItem) return;
+    const pounds = parseFloat(editPriceInput);
+    if (isNaN(pounds) || pounds < 0) {
+      setError('Please enter a valid price in pounds (e.g. 0.35)');
+      return;
+    }
+    const newPricePence = Math.round(pounds * 100);
+    setFinalised(false);
+    startTransition(async () => {
+      const result = await updateItemPrice(editingItem.basketItemId, newPricePence);
+      if (result.status === 'error') setError(result.message);
+      else {
+        setEditingItem(null);
+        setError(null);
+      }
+    });
+  }
+
+  function handleSaveNewSubstitution(e: React.FormEvent) {
+    e.preventDefault();
+    const targetItem = items.find((i) => i.basketItemId === subTargetItemId);
+    if (!targetItem) {
+      setError('Please select an ordered item to substitute.');
+      return;
+    }
+    if (!subReceivedName.trim()) {
+      setError('Please enter the replacement item name.');
+      return;
+    }
+    const pounds = parseFloat(subReceivedPriceInput);
+    if (isNaN(pounds) || pounds < 0) {
+      setError('Please enter a valid replacement price in pounds.');
+      return;
+    }
+    const replacementPricePence = Math.round(pounds * 100);
+
+    setFinalised(false);
+    startTransition(async () => {
+      const result = await addSubstitution(
+        targetItem.basketItemId,
+        targetItem.name,
+        targetItem.price,
+        subReceivedName.trim(),
+        replacementPricePence
+      );
+      if (result.status === 'error') setError(result.message);
+      else {
+        setIsAddSubOpen(false);
+        setSubReceivedName('');
+        setSubReceivedPriceInput('');
+        setError(null);
+      }
     });
   }
 
@@ -125,11 +195,17 @@ export function Reconciliation({
       {/* Left Column: Received Items & Substitutions */}
       <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-lg min-w-0">
         <section className="flex flex-col gap-sm">
-          <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs">
-            <Icon name="check_circle" className="text-primary text-lg" />
-            Received Items
-          </h2>
-          <Card padded={false} className="overflow-hidden">
+          <div className="flex items-center justify-between gap-sm">
+            <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs">
+              <Icon name="check_circle" className="text-primary text-lg" />
+              Received Items ({items.length})
+            </h2>
+            <span className="text-xs text-on-surface-variant font-medium">
+              Click &apos;Edit Price/Weight&apos; for weighted loose produce
+            </span>
+          </div>
+
+          <Card padded={false} className="overflow-hidden border border-surface-container-highest">
             <ul className="divide-y divide-surface-container-highest">
               {items.map((item) => {
                 const isReceived = received[item.basketItemId];
@@ -137,7 +213,7 @@ export function Reconciliation({
                 const isShort = isReceived && quantity < item.expectedQuantity;
 
                 return (
-                  <li key={item.basketItemId} className="p-md flex items-center gap-md hover:bg-surface-container-low/30 transition-colors">
+                  <li key={item.basketItemId} className="px-md py-sm flex items-center gap-sm hover:bg-surface-container-low/30 transition-colors">
                     <button
                       type="button"
                       role="checkbox"
@@ -145,35 +221,48 @@ export function Reconciliation({
                       aria-label={`${item.name} received`}
                       onClick={() => toggleItemReceived(item.basketItemId)}
                       className={clsx(
-                        'w-11 h-11 border-2 rounded flex items-center justify-center shrink-0 transition-colors',
+                        'w-8 h-8 border-2 rounded flex items-center justify-center shrink-0 transition-colors',
                         isReceived ? 'bg-primary border-primary' : 'border-outline'
                       )}
                     >
                       <Icon
                         name="check"
-                        className={clsx('text-white text-[16px]', !isReceived && 'opacity-0')}
+                        className={clsx('text-white text-[14px]', !isReceived && 'opacity-0')}
                       />
                     </button>
 
-                    <div className="flex-grow min-w-0">
+                    <div className="flex-grow min-w-0 flex flex-col">
                       <p
                         className={clsx(
-                          'font-body-lg text-body-lg truncate text-on-surface font-medium',
+                          'font-body-md text-body-md truncate text-on-surface font-semibold leading-snug',
                           !isReceived && 'line-through text-on-surface-variant'
                         )}
                       >
                         {item.name}
                       </p>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant">
-                        Ordered {item.expectedQuantity} @ {formatPence(item.price)}
+                      <div className="flex items-center gap-xs text-[12px] text-on-surface-variant flex-wrap">
+                        <span>Ordered {item.expectedQuantity} @ {formatPence(item.price)}</span>
                         {isShort && (
-                          <span className="text-secondary font-semibold"> · short delivered</span>
+                          <span className="text-secondary font-bold"> · short delivered</span>
                         )}
-                      </p>
+                        {isCollector && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingItem(item);
+                              setEditPriceInput((item.price / 100).toFixed(2));
+                            }}
+                            className="text-primary hover:underline font-bold text-[11px] ml-xs flex items-center gap-0.5"
+                          >
+                            <Icon name="edit" className="text-xs" />
+                            Edit Price/Weight
+                          </button>
+                        )}
+                      </div>
                     </div>
 
                     {isReceived ? (
-                      <div className="flex items-center gap-2 bg-surface-container rounded-lg p-1 shrink-0">
+                      <div className="flex items-center gap-1 bg-surface-container rounded-lg p-0.5 shrink-0">
                         <button
                           type="button"
                           aria-label={`Decrease received ${item.name}`}
@@ -183,11 +272,11 @@ export function Reconciliation({
                               Math.max(0, (quantities[item.basketItemId] ?? 0) - 1)
                             )
                           }
-                          className="w-11 h-11 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                          className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded focus-visible:ring-2 focus-visible:ring-primary"
                         >
-                          <Icon name="remove" className="text-[16px]" />
+                          <Icon name="remove" className="text-[14px]" />
                         </button>
-                        <span className="font-numeric-data text-numeric-data w-4 text-center tabular-nums">
+                        <span className="font-numeric-data text-numeric-data w-4 text-center tabular-nums text-sm font-bold">
                           {quantity}
                         </span>
                         <button
@@ -199,9 +288,9 @@ export function Reconciliation({
                               (quantities[item.basketItemId] ?? 0) + 1
                             )
                           }
-                          className="w-11 h-11 flex items-center justify-center text-primary hover:bg-primary-container hover:text-on-primary-container rounded focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                          className="w-8 h-8 flex items-center justify-center text-primary hover:bg-primary-container hover:text-on-primary-container rounded focus-visible:ring-2 focus-visible:ring-primary"
                         >
-                          <Icon name="add" className="text-[16px]" />
+                          <Icon name="add" className="text-[14px]" />
                         </button>
                       </div>
                     ) : (
@@ -217,18 +306,36 @@ export function Reconciliation({
         </section>
 
         <section className="flex flex-col gap-sm">
-          <div className="flex items-center justify-between gap-sm">
+          <div className="flex items-center justify-between gap-sm flex-wrap">
             <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs">
               <Icon name="swap_horiz" className="text-secondary text-lg" />
               Substitutions
             </h2>
-            {pending > 0 && <Badge tone="secondary">{pending} to review</Badge>}
+            <div className="flex items-center gap-xs">
+              {pending > 0 && <Badge tone="secondary">{pending} to review</Badge>}
+              {isCollector && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  icon="add"
+                  onClick={() => {
+                    if (items.length > 0) setSubTargetItemId(items[0].basketItemId);
+                    setIsAddSubOpen(true);
+                  }}
+                >
+                  Log Tesco Substitution
+                </Button>
+              )}
+            </div>
           </div>
 
           {substitutions.length === 0 ? (
-            <Card>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
-                Tesco substituted nothing this week.
+            <Card className="flex flex-col gap-xs bg-surface-container-low/40">
+              <p className="font-body-sm text-body-sm text-on-surface-variant font-medium">
+                No substitutions recorded for this order yet.
+              </p>
+              <p className="text-xs text-on-surface-variant">
+                If Tesco swapped an item or added a replacement before delivery, click <strong>&quot;Log Tesco Substitution&quot;</strong> to update who pays what.
               </p>
             </Card>
           ) : (
@@ -247,16 +354,16 @@ export function Reconciliation({
                             ? 'error'
                             : 'secondary'
                       }
-                      className="flex flex-col gap-md"
+                      className="flex flex-col gap-sm p-sm"
                     >
                       <div className="flex flex-col gap-xs">
-                        <p className="font-body-sm text-body-sm text-on-surface-variant line-through">
-                          {sub.orderedName} · {formatPence(sub.orderedPrice)}
+                        <p className="font-body-sm text-xs text-on-surface-variant line-through">
+                          Ordered: {sub.orderedName} · {formatPence(sub.orderedPrice)}
                         </p>
-                        <div className="flex items-center gap-xs flex-wrap mt-0.5">
-                          <span className="font-body-lg text-body-lg font-semibold flex items-center gap-xs text-on-surface">
+                        <div className="flex items-center gap-xs flex-wrap">
+                          <span className="font-body-md text-body-md font-bold flex items-center gap-xs text-on-surface">
                             <Icon name="swap_horiz" className="text-secondary" />
-                            {sub.receivedName} · {formatPence(sub.receivedPrice)}
+                            Delivered: {sub.receivedName} · {formatPence(sub.receivedPrice)}
                           </span>
                           <span
                             className={clsx(
@@ -269,32 +376,32 @@ export function Reconciliation({
                         </div>
                       </div>
 
-                      <div className="flex gap-sm">
+                      <div className="flex gap-sm mt-xs">
                         <button
                           type="button"
                           onClick={() => handleDecision(sub.id, 'accepted')}
                           className={clsx(
-                            'flex-1 h-11 md:h-11 rounded-lg font-semibold text-[14px] flex items-center justify-center gap-xs transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+                            'flex-1 h-9 rounded-lg font-semibold text-xs flex items-center justify-center gap-xs transition-colors focus-visible:ring-2 focus-visible:ring-primary',
                             decision === 'accepted'
                               ? 'bg-primary text-on-primary'
                               : 'border border-primary text-primary hover:bg-primary/10'
                           )}
                         >
-                          <Icon name="check" className="text-[18px]" />
-                          Accept
+                          <Icon name="check" className="text-[16px]" />
+                          Accept Replacement
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDecision(sub.id, 'rejected')}
                           className={clsx(
-                            'flex-1 h-11 md:h-11 rounded-lg font-semibold text-[14px] flex items-center justify-center gap-xs transition-colors focus-visible:ring-2 focus-visible:ring-error focus-visible:ring-offset-2',
+                            'flex-1 h-9 rounded-lg font-semibold text-xs flex items-center justify-center gap-xs transition-colors focus-visible:ring-2 focus-visible:ring-error',
                             decision === 'rejected'
                               ? 'bg-error text-on-error'
                               : 'border border-error text-error hover:bg-error-container'
                           )}
                         >
-                          <Icon name="close" className="text-[18px]" />
-                          Reject
+                          <Icon name="close" className="text-[16px]" />
+                          Reject & Refund
                         </button>
                       </div>
                     </Card>
@@ -364,6 +471,129 @@ export function Reconciliation({
           </button>
         </Card>
       </div>
+
+      {/* Edit Price / Weight Modal */}
+      {editingItem && (
+        <div className="fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm flex items-center justify-center p-md">
+          <div className="bg-surface-0 border border-surface-container-highest rounded-2xl p-md max-w-md w-full shadow-xl flex flex-col gap-md">
+            <div className="flex items-center justify-between">
+              <h3 className="font-title-md text-title-md font-bold text-on-surface">
+                Adjust Price / Weight
+              </h3>
+              <button
+                type="button"
+                onClick={() => setEditingItem(null)}
+                className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface"
+              >
+                <Icon name="close" />
+              </button>
+            </div>
+
+            <p className="text-xs text-on-surface-variant">
+              Adjust the actual delivered unit price for <strong>{editingItem.name}</strong> (e.g. for loose onions or weighted produce).
+            </p>
+
+            <form onSubmit={handleSavePriceEdit} className="flex flex-col gap-md">
+              <label className="flex flex-col gap-xs text-xs font-semibold text-on-surface">
+                Actual Unit Price (£)
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={editPriceInput}
+                  onChange={(e) => setEditPriceInput(e.target.value)}
+                  className="px-md h-11 border border-outline rounded-lg text-sm bg-surface-container-lowest focus:ring-2 focus:ring-primary"
+                  placeholder="0.35"
+                  required
+                />
+              </label>
+
+              <div className="flex justify-end gap-sm">
+                <Button type="button" variant="outline" onClick={() => setEditingItem(null)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Save Price</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Log Substitution Modal */}
+      {isAddSubOpen && (
+        <div className="fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm flex items-center justify-center p-md">
+          <div className="bg-surface-0 border border-surface-container-highest rounded-2xl p-md max-w-md w-full shadow-xl flex flex-col gap-md">
+            <div className="flex items-center justify-between">
+              <h3 className="font-title-md text-title-md font-bold text-on-surface flex items-center gap-xs">
+                <Icon name="swap_horiz" className="text-secondary" />
+                Log Tesco Substitution
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsAddSubOpen(false)}
+                className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-on-surface"
+              >
+                <Icon name="close" />
+              </button>
+            </div>
+
+            <p className="text-xs text-on-surface-variant">
+              Record a replacement item Tesco sent for an ordered line item.
+            </p>
+
+            <form onSubmit={handleSaveNewSubstitution} className="flex flex-col gap-md">
+              <label className="flex flex-col gap-xs text-xs font-semibold text-on-surface">
+                Ordered Item
+                <select
+                  value={subTargetItemId}
+                  onChange={(e) => setSubTargetItemId(e.target.value)}
+                  className="px-md h-11 border border-outline rounded-lg text-sm bg-surface-container-lowest focus:ring-2 focus:ring-primary"
+                  required
+                >
+                  {items.map((item) => (
+                    <option key={item.basketItemId} value={item.basketItemId}>
+                      {item.name} ({formatPence(item.price)})
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="flex flex-col gap-xs text-xs font-semibold text-on-surface">
+                Tesco Delivered Replacement Name
+                <input
+                  type="text"
+                  value={subReceivedName}
+                  onChange={(e) => setSubReceivedName(e.target.value)}
+                  className="px-md h-11 border border-outline rounded-lg text-sm bg-surface-container-lowest focus:ring-2 focus:ring-primary"
+                  placeholder="e.g. Tesco Shallots 300g"
+                  required
+                />
+              </label>
+
+              <label className="flex flex-col gap-xs text-xs font-semibold text-on-surface">
+                Replacement Price (£)
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={subReceivedPriceInput}
+                  onChange={(e) => setSubReceivedPriceInput(e.target.value)}
+                  className="px-md h-11 border border-outline rounded-lg text-sm bg-surface-container-lowest focus:ring-2 focus:ring-primary"
+                  placeholder="e.g. 1.20"
+                  required
+                />
+              </label>
+
+              <div className="flex justify-end gap-sm">
+                <Button type="button" variant="outline" onClick={() => setIsAddSubOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">Log Substitution</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </fieldset>
   );
 }

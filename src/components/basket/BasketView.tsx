@@ -186,7 +186,7 @@ export function BasketView({
   }
 
   return (
-    <>
+    <div className="pb-[140px] flex flex-col gap-md">
     {selectedSwapItem && (
       <BrandSwapModal
         isOpen={isSwapModalOpen}
@@ -512,7 +512,7 @@ export function BasketView({
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 

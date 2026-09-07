@@ -275,3 +275,57 @@ export async function finaliseReconciliation(planId: string): Promise<SplitActio
 
   return { status: 'success', message: 'Delivery check saved.' };
 }
+
+/** Logs a Tesco substitution manually during delivery check. */
+export async function addSubstitution(
+  basketItemId: string,
+  orderedName: string,
+  orderedPrice: number,
+  receivedName: string,
+  receivedPrice: number
+): Promise<SplitActionState> {
+  const me = await getCurrentUser();
+  if (!me.houseId) return fail('Join a house first.');
+  const refusal = await prepareDeliveryEdit(basketItemId);
+  if (refusal) return fail(refusal);
+
+  const supabase = await createClient();
+  const { error } = await supabase.from('substitutions').insert({
+    basket_item_id: basketItemId,
+    ordered_name: orderedName,
+    ordered_price: Math.max(0, orderedPrice),
+    received_name: receivedName,
+    received_price: Math.max(0, receivedPrice),
+    decision: 'accepted',
+  });
+
+  if (error) return fail(error.message);
+
+  revalidatePath('/split/reconcile');
+  revalidatePath('/split');
+  return { status: 'success', message: 'Substitution logged.' };
+}
+
+/** Updates unit price / weight-based price for a basket item during delivery check. */
+export async function updateItemPrice(
+  basketItemId: string,
+  newUnitPrice: number
+): Promise<SplitActionState> {
+  const me = await getCurrentUser();
+  if (!me.houseId) return fail('Join a house first.');
+  const refusal = await prepareDeliveryEdit(basketItemId);
+  if (refusal) return fail(refusal);
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('basket_items')
+    .update({ unit_price: Math.max(0, newUnitPrice) })
+    .eq('id', basketItemId);
+
+  if (error) return fail(error.message);
+
+  revalidatePath('/split/reconcile');
+  revalidatePath('/split');
+  revalidatePath('/basket');
+  return { status: 'success', message: 'Price updated.' };
+}
