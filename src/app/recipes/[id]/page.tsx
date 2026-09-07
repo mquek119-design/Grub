@@ -11,8 +11,9 @@ import { getRecipe } from '@/lib/queries';
 // generateStaticParams would run without a session at build time.
 export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({ params }: { params: { id: string } }) {
-  const recipe = await getRecipe(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const recipe = await getRecipe(id);
   return {
     title: recipe ? `${recipe.title} · Grub` : 'Recipe · Grub',
     description: recipe
@@ -21,8 +22,10 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-export default async function RecipePage({ params }: { params: { id: string } }) {
-  const recipe = await getRecipe(params.id);
+export default async function RecipePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const recipe = await getRecipe(id);
+
   if (!recipe) notFound();
 
   return (

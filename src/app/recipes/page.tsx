@@ -31,22 +31,23 @@ export const dynamic = 'force-dynamic';
 export default async function RecipesPage({
   searchParams,
 }: {
-  searchParams?: { day?: string; week?: string; dietary?: string };
+  searchParams?: Promise<{ day?: string; week?: string; dietary?: string }>;
 }) {
   const currentUser = await getCurrentUser();
   if (!currentUser.houseId) redirect('/onboarding');
 
   const [recipes, plan] = await Promise.all([getRecipes(), getWeeklyPlan()]);
 
-  const requested = String(searchParams?.day ?? '');
+  const params = searchParams ? await searchParams : {};
+  const requested = String(params.day ?? '');
   const planningForDay = (WEEKDAYS as string[]).includes(requested)
     ? (requested as Weekday)
     : undefined;
 
-  const week = parseWeekChoice(searchParams?.week);
+  const week = parseWeekChoice(params.week);
 
   // Parse dietary filters from the URL (comma-separated list)
-  const dietaryParam = String(searchParams?.dietary ?? '');
+  const dietaryParam = String(params.dietary ?? '');
   const initialDietaryFilters = dietaryParam
     ? dietaryParam.split(',').map((f) => f.trim())
     : [];

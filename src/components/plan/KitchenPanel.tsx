@@ -72,126 +72,128 @@ export function KitchenPanel({
         it moves anyone&apos;s money.
       </Notice>
 
-      {myMeals.map((meal) => {
-        const mine = meal.participants.find((p) => p.userId === currentUser.id);
-        const { recipe, suggestions, perishables } = suggestionsFor(meal, recipes);
-        const skipped = meal.status === 'skipped';
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-md">
+        {myMeals.map((meal) => {
+          const mine = meal.participants.find((p) => p.userId === currentUser.id);
+          const { recipe, suggestions, perishables } = suggestionsFor(meal, recipes);
+          const skipped = meal.status === 'skipped';
 
-        return (
-          <Card key={meal.id} className="flex flex-col gap-md border border-surface-container-highest shadow-sm">
-            <div className="flex items-start gap-md min-w-0">
-              <Link
-                href={`/recipes/${meal.recipeId}`}
-                className="shrink-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-              >
-                <FoodImage
-                  seed={meal.recipeId}
-                  src={recipe?.imageUrl}
-                  alt={meal.recipeTitle}
-                  className="w-16 h-16 rounded-xl object-cover text-[24px] shadow-sm"
-                />
-              </Link>
+          return (
+            <Card key={meal.id} className="flex flex-col gap-md border border-surface-container-highest shadow-sm">
+              <div className="flex items-start gap-md min-w-0">
+                <Link
+                  href={`/recipes/${meal.recipeId}`}
+                  className="shrink-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <FoodImage
+                    seed={meal.recipeId}
+                    src={recipe?.imageUrl}
+                    alt={meal.recipeTitle}
+                    className="w-16 h-16 rounded-xl object-cover text-[24px] shadow-sm"
+                  />
+                </Link>
 
-              <div className="min-w-0 flex-1 flex flex-col justify-center">
-                <div className="flex items-center gap-xs flex-wrap">
-                  <span className="font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center gap-xs">
-                    <Icon name={MEAL_TYPE_ICONS[meal.mealType]} className="text-xs" />
-                    {WEEKDAY_LABELS[meal.day]} · {MEAL_TYPE_LABELS[meal.mealType]}
-                  </span>
-                  {meal.status === 'cooked' ? (
-                    <Badge tone="solid-primary">COOKED</Badge>
-                  ) : meal.status === 'swapped' ? (
-                    <Badge tone="primary">SWAPPED</Badge>
-                  ) : skipped ? (
-                    <Badge tone="neutral">SKIPPED</Badge>
-                  ) : null}
+                <div className="min-w-0 flex-1 flex flex-col justify-center">
+                  <div className="flex items-center gap-xs flex-wrap">
+                    <span className="font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center gap-xs">
+                      <Icon name={MEAL_TYPE_ICONS[meal.mealType]} className="text-xs" />
+                      {WEEKDAY_LABELS[meal.day]} · {MEAL_TYPE_LABELS[meal.mealType]}
+                    </span>
+                    {meal.status === 'cooked' ? (
+                      <Badge tone="solid-primary">COOKED</Badge>
+                    ) : meal.status === 'swapped' ? (
+                      <Badge tone="primary">SWAPPED</Badge>
+                    ) : skipped ? (
+                      <Badge tone="neutral">SKIPPED</Badge>
+                    ) : null}
+                  </div>
+
+                  <h3 className="font-title-md text-title-md truncate mt-0.5 font-bold text-on-surface">
+                    <Link href={`/recipes/${meal.recipeId}`} className="hover:underline">
+                      {meal.recipeTitle}
+                    </Link>
+                  </h3>
+
+                  <p className="font-body-sm text-[12px] text-on-surface-variant flex items-center gap-xs mt-1">
+                    <Icon name="groups" className="text-sm" />
+                    <span>{meal.participants.length} in for this meal</span>
+                  </p>
                 </div>
-
-                <h3 className="font-title-md text-title-md truncate mt-0.5 font-bold text-on-surface">
-                  <Link href={`/recipes/${meal.recipeId}`} className="hover:underline">
-                    {meal.recipeTitle}
-                  </Link>
-                </h3>
-
-                <p className="font-body-sm text-[12px] text-on-surface-variant flex items-center gap-xs mt-1">
-                  <Icon name="groups" className="text-sm" />
-                  <span>{meal.participants.length} in for this meal</span>
-                </p>
               </div>
-            </div>
 
-            <MealStatusControls
-              mealId={meal.id}
-              status={meal.status}
-              bailed={Boolean(mine?.bailed)}
-              day={meal.day}
-              weekStartDate={plan.weekStartDate}
-            />
+              <MealStatusControls
+                mealId={meal.id}
+                status={meal.status}
+                bailed={Boolean(mine?.bailed)}
+                day={meal.day}
+                weekStartDate={plan.weekStartDate}
+              />
 
-            {skipped && recipe && (
-              <div className="flex flex-col gap-sm pt-sm border-t border-surface-container-highest">
-                <p className="font-body-sm text-body-sm text-on-surface-variant">
-                  You&apos;ve got{' '}
-                  <strong className="text-on-surface font-semibold">
-                    {recipe.ingredients.map((ingredient) => ingredient.name).join(', ')}
-                  </strong>
-                  .
-                </p>
-
-                {perishables.length > 0 && (
-                  <p className="flex items-start gap-xs font-body-sm text-body-sm text-secondary">
-                    <Icon name="schedule" className="text-[18px] mt-0.5" />
-                    <span>
-                      {perishables.map((ingredient) => ingredient.name).join(', ')}{' '}
-                      {perishables.length === 1 ? 'is' : 'are'} fresh — use{' '}
-                      {perishables.length === 1 ? 'it' : 'them'} before{' '}
-                      {perishables.length === 1 ? 'it goes' : 'they go'} off.
-                    </span>
-                  </p>
-                )}
-
-                {suggestions.length > 0 ? (
-                  <>
-                    <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-semibold">
-                      What else you could make
-                    </span>
-                    <ul className="flex flex-col gap-xs">
-                      {suggestions.map((suggestion) => (
-                        <li key={suggestion.recipe.id}>
-                          <Link
-                            href={`/recipes/${suggestion.recipe.id}`}
-                            className="flex items-center justify-between gap-sm px-md py-sm rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors"
-                          >
-                            <span className="min-w-0">
-                              <span className="font-body-lg text-body-lg font-semibold block truncate">
-                                {suggestion.recipe.title}
-                              </span>
-                              <span className="font-body-sm text-[12px] text-on-surface-variant">
-                                Uses {suggestion.have.length} of what you have
-                                {suggestion.missing.length > 0
-                                  ? ` · still need ${suggestion.missing
-                                      .map((ingredient) => ingredient.name)
-                                      .join(', ')}`
-                                  : ' · nothing else needed'}
-                              </span>
-                            </span>
-                            <Icon name="chevron_right" className="text-on-surface-variant shrink-0" />
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                ) : (
+              {skipped && recipe && (
+                <div className="flex flex-col gap-sm pt-sm border-t border-surface-container-highest">
                   <p className="font-body-sm text-body-sm text-on-surface-variant">
-                    Nothing in the book uses enough of this. Add a recipe and it’ll turn up here next
-                    time this happens.
+                    You&apos;ve got{' '}
+                    <strong className="text-on-surface font-semibold">
+                      {recipe.ingredients.map((ingredient) => ingredient.name).join(', ')}
+                    </strong>
+                    .
                   </p>
-                )}
-              </div>
-            )}
-          </Card>
-        );
-      })}
+
+                  {perishables.length > 0 && (
+                    <p className="flex items-start gap-xs font-body-sm text-body-sm text-secondary">
+                      <Icon name="schedule" className="text-[18px] mt-0.5" />
+                      <span>
+                        {perishables.map((ingredient) => ingredient.name).join(', ')}{' '}
+                        {perishables.length === 1 ? 'is' : 'are'} fresh — use{' '}
+                        {perishables.length === 1 ? 'it' : 'them'} before{' '}
+                        {perishables.length === 1 ? 'it goes' : 'they go'} off.
+                      </span>
+                    </p>
+                  )}
+
+                  {suggestions.length > 0 ? (
+                    <>
+                      <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-semibold">
+                        What else you could make
+                      </span>
+                      <ul className="flex flex-col gap-xs">
+                        {suggestions.map((suggestion) => (
+                          <li key={suggestion.recipe.id}>
+                            <Link
+                              href={`/recipes/${suggestion.recipe.id}`}
+                              className="flex items-center justify-between gap-sm px-md py-sm rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors"
+                            >
+                              <span className="min-w-0">
+                                <span className="font-body-lg text-body-lg font-semibold block truncate">
+                                  {suggestion.recipe.title}
+                                </span>
+                                <span className="font-body-sm text-[12px] text-on-surface-variant">
+                                  Uses {suggestion.have.length} of what you have
+                                  {suggestion.missing.length > 0
+                                    ? ` · still need ${suggestion.missing
+                                        .map((ingredient) => ingredient.name)
+                                        .join(', ')}`
+                                    : ' · nothing else needed'}
+                                </span>
+                              </span>
+                              <Icon name="chevron_right" className="text-on-surface-variant shrink-0" />
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  ) : (
+                    <p className="font-body-sm text-body-sm text-on-surface-variant">
+                      Nothing in the book uses enough of this. Add a recipe and it’ll turn up here next
+                      time this happens.
+                    </p>
+                  )}
+                </div>
+              )}
+            </Card>
+          );
+        })}
+      </div>
     </div>
   );
 }

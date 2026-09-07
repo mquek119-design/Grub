@@ -11,8 +11,9 @@ import { formatPenceBare } from '@/lib/money';
 export const dynamic = 'force-dynamic';
 export const metadata = { title: 'Edit Recipe · Grub', description: 'Edit recipe details and ingredients.' };
 
-export default async function EditRecipePage({ params }: { params: { id: string } }) {
-  const recipe = await getRecipe(params.id);
+export default async function EditRecipePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const recipe = await getRecipe(id);
   if (!recipe) notFound();
 
   return (

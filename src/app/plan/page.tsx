@@ -27,28 +27,16 @@ export const metadata = { title: 'Plan · Grub', description: 'Plan this week\'s
 // The cutoff deadline shown here moves with the clock.
 export const dynamic = 'force-dynamic';
 
-/**
- * Two weeks, and they are different kinds of thing.
- *
- * **This week** is what the house is eating. Once the shop is placed it stops
- * being a plan and becomes a record: the food is bought, the split is settled,
- * and the screen shows what you have rather than asking what you want.
- *
- * **Next week** is still a decision, and stays editable regardless — you should
- * be able to think about Thursday while this week is still in the fridge.
- *
- * Only this week can be shopped. The Basket, Split and Feed all mean the
- * current week; a second open plan must never quietly become the one costed.
- */
 export default async function PlanPage({
   searchParams,
 }: {
-  searchParams?: { week?: string };
+  searchParams?: Promise<{ week?: string }>;
 }) {
   const currentUser = await getCurrentUser();
   if (!currentUser.houseId) redirect('/onboarding');
 
-  const week = parseWeekChoice(searchParams?.week);
+  const resolvedParams = searchParams ? await searchParams : {};
+  const week = parseWeekChoice(resolvedParams.week);
 
   const [thisWeek, nextWeek, recipes, housemates] = await Promise.all([
     getWeeklyPlan(),
@@ -66,9 +54,6 @@ export default async function PlanPage({
     minute: '2-digit',
   });
 
-  // Once the shop is placed the question stops being "what do you fancy?" —
-  // the food is bought. Deliberately unnamed in the UI: housemates experience
-  // one screen that changes with the week, not a mode they have to understand.
   const thisWeekLocked = thisWeek.status === 'ordered' || thisWeek.status === 'delivered';
   const showKitchen = week === 'this' && thisWeekLocked;
 
@@ -82,7 +67,7 @@ export default async function PlanPage({
 
   if (showKitchen) {
     return (
-      <PageShell>
+      <PageShell wide>
         <PageHeader title="Your Week" subtitle="Shop's in. This is what you're working with." />
         <FirstRunTip tab="plan" />
         {switcher}
@@ -109,9 +94,6 @@ export default async function PlanPage({
 
       {week === 'this' && <ReopenPlanningBanner status={thisWeek.status} />}
 
-      {/* Only shown once there is a real figure behind it — the optimiser's
-          own-brand and pooling deltas, never an estimate. Next week has no
-          basket, so it has no savings to report. */}
       {week === 'this' && plan.sharedSavings > 0 && (
         <div className="flex items-center justify-between gap-md px-md py-3 rounded-xl bg-primary text-on-primary shadow-ambient-card">
           <span className="flex items-center gap-sm font-label-caps text-label-caps uppercase tracking-wider">
@@ -143,7 +125,6 @@ export default async function PlanPage({
         </>
       ) : (
         <>
-          {/* Show first-meal nudge if this week is empty and we're on this week */}
           {week === 'this' && plan.meals.length === 0 && (
             <FirstMealModal recipes={recipes} weekStartDate={plan.weekStartDate} />
           )}
