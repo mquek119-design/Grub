@@ -239,6 +239,8 @@ export async function seedDemoData(): Promise<SeedResult> {
       continue;
     }
 
+    const offerTargetId = entry.cookOfferTo ? idByName.get(entry.cookOfferTo.toLowerCase()) : undefined;
+
     const meal = await supabase
       .from('planned_meals')
       .insert({
@@ -249,6 +251,8 @@ export async function seedDemoData(): Promise<SeedResult> {
         is_shared: diners.length > 1,
         created_by: diners[0],
         cooked_by_user_id: diners[0],
+        ...(offerTargetId ? { cook_offer_to: offerTargetId } : {}),
+        ...(entry.maxDiners ? { max_diners: entry.maxDiners } : {}),
       })
       .select('id')
       .single();

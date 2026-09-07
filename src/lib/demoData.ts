@@ -300,6 +300,10 @@ interface DemoMeal {
   diners: string[];
   /** Optional +1, so the guest weighting is visible without setting it up. */
   guests?: { who: string; count: number; covered: boolean };
+  /** Optional cook offer/hand-over target. */
+  cookOfferTo?: string;
+  /** Optional capacity cap. */
+  maxDiners?: number;
 }
 
 export const DEMO_SCHEDULE: DemoMeal[] = [
@@ -316,7 +320,7 @@ export const DEMO_SCHEDULE: DemoMeal[] = [
 
   // --- Wed: three solo dinners, and the stir fry vs green curry pair shares
   //     no ingredient at all — this is the day the conflict warning fires. ---
-  { day: 'wed', mealType: 'dinner', recipe: 'Beef stir fry noodles', diners: ['me'] },
+  { day: 'wed', mealType: 'dinner', recipe: 'Beef stir fry noodles', diners: ['me'], maxDiners: 3 },
   { day: 'wed', mealType: 'dinner', recipe: 'Thai Green Curry', diners: ['Maya'] },
   { day: 'wed', mealType: 'dinner', recipe: 'Chicken Caesar Salad', diners: ['Alex'] },
 
@@ -326,6 +330,7 @@ export const DEMO_SCHEDULE: DemoMeal[] = [
     mealType: 'dinner',
     recipe: 'Spaghetti Bolognese',
     diners: ['me', 'Alex', 'Maya', 'Sam'],
+    cookOfferTo: 'me', // Alex asked me to cook Thursday dinner!
   },
   {
     day: 'fri',

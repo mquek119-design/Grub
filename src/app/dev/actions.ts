@@ -38,31 +38,48 @@ export async function simulateDelivery(): Promise<DevResult> {
 
   const supabase = await createClient();
 
-  // Clear any previous simulation so re-running is idempotent rather than
-  // stacking three substitutions onto the same tin of tomatoes.
   const itemIds = items.map((item) => item.id);
   await supabase.from('substitutions').delete().in('basket_item_id', itemIds);
   await supabase.from('delivery_receipts').delete().in('basket_item_id', itemIds);
 
-  // One of each case the reconciliation rules handle.
   const substituted = priced[0];
+  const pendingSub = priced.length > 3 ? priced[3] : priced[0];
   const missing = priced[1];
   const partial = priced.find((item) => item.quantity > 1) ?? priced[2];
 
-  const substitution = await supabase.from('substitutions').insert({
-    basket_item_id: substituted.id,
-    ordered_name: substituted.name,
-    ordered_price: substituted.unitPrice,
-    received_name: `${substituted.name} (different brand)`,
-    // Substitutes are usually dearer — that is the case worth testing, because
-    // accepting one costs more than was agreed.
-    received_price: Math.round(substituted.unitPrice * 1.2),
-    decision: 'pending',
-  });
-  if (substitution.error) return fail(`Substitution: ${substitution.error.message}`);
+  const substitutionsToInsert: Array<{
+    basket_item_id: string;
+    ordered_name: string;
+    ordered_price: number;
+    received_name: string;
+    received_price: number;
+    decision: 'pending' | 'accepted' | 'rejected';
+  }> = [
+    {
+      basket_item_id: substituted.id,
+      ordered_name: substituted.name,
+      ordered_price: substituted.unitPrice,
+      received_name: `${substituted.name} (Tesco Finest)`,
+      received_price: Math.round(substituted.unitPrice * 1.25),
+      decision: 'accepted',
+    },
+  ];
+
+  if (pendingSub && pendingSub.id !== substituted.id) {
+    substitutionsToInsert.push({
+      basket_item_id: pendingSub.id,
+      ordered_name: pendingSub.name,
+      ordered_price: pendingSub.unitPrice,
+      received_name: `${pendingSub.name} (Alternative Brand)`,
+      received_price: Math.max(10, Math.round(pendingSub.unitPrice * 0.9)),
+      decision: 'pending',
+    });
+  }
+
+  const subRes = await supabase.from('substitutions').insert(substitutionsToInsert);
+  if (subRes.error) return fail(`Substitutions: ${subRes.error.message}`);
 
   const receipts = await supabase.from('delivery_receipts').insert([
-    // Everything arrived except the two cases below.
     ...priced
       .filter((item) => item.id !== missing.id && item.id !== partial.id)
       .map((item) => ({
@@ -90,20 +107,16 @@ export async function simulateDelivery(): Promise<DevResult> {
   return {
     status: 'success',
     message:
-      `Delivered. ${substituted.name} was substituted for a dearer one, ${missing.name} ` +
-      `didn't turn up, and ${partial.name} came up short by one. Reconcile them on Split → Delivery.`,
+      `Delivered! Simulated ${substituted.name} (accepted replacement), ${pendingSub?.name ?? 'item'} (pending sub review), ` +
+      `${missing.name} (refunded), and ${partial.name} (short delivered by 1). Reconcile on Split → Delivery.`,
   };
 }
 
 /**
  * Moves housemates through the payment flow so the collector's side can be seen.
- *
- * Marking yourself as paid only ever exercises one row. The collector's view —
- * who has said they paid, who to chase, confirming and disputing — needs other
- * people to have acted, and demo housemates cannot sign in to act.
  */
 export async function simulatePayments(
-  stage: 'notified' | 'confirmed' | 'pending'
+  stage: 'notified' | 'confirmed' | 'pending' | 'mixed'
 ): Promise<DevResult> {
   const me = await getCurrentUser();
   if (!me.houseId) return fail('Join a house first.');
@@ -120,21 +133,29 @@ export async function simulatePayments(
     return fail('No split has been posted yet — post it first, then come back.');
   }
 
-  // Never touch the signed-in user's own row: the whole point is to see what
-  // the screen looks like when *somebody else* has or has not paid.
   const others = rows.filter((row) => row.from_user_id !== me.id);
   if (others.length === 0) {
     return fail('Only your own row exists, and moving that would prove nothing.');
   }
 
-  // Half of them, so the screen shows both states at once.
+  if (stage === 'mixed') {
+    // Distribute states across housemates for comprehensive testing
+    const states: ('notified' | 'confirmed' | 'pending' | 'disputed')[] = ['notified', 'confirmed', 'disputed', 'pending'];
+    let count = 0;
+    for (let i = 0; i < others.length; i++) {
+      const status = states[i % states.length];
+      const res = await supabase.from('splits').update({ status }).eq('id', others[i].id);
+      if (!res.error) count++;
+    }
+    revalidatePath('/', 'layout');
+    return {
+      status: 'success',
+      message: `Set mixed payment states across ${count} housemates (Paid, Settled, Disputed, Owes).`,
+    };
+  }
+
   const target = stage === 'pending' ? others : others.slice(0, Math.ceil(others.length / 2));
 
-  // `.select()` is load-bearing, not decoration. `splits_update` requires
-  // `from_user_id = auth.uid() OR to_user_id = auth.uid()`, so when the signed-in
-  // user is not the collector this matches ZERO rows — and without counting them
-  // this action reported "2 housemates say they have paid" having changed
-  // nothing at all.
   const updated = await supabase
     .from('splits')
     .update({ status: stage })
@@ -148,8 +169,7 @@ export async function simulatePayments(
   const changed = updated.data?.length ?? 0;
   if (changed === 0) {
     return fail(
-      'Nothing changed — row-level security only lets you touch a split you are on. ' +
-        'Swap the collector back to yourself and try again.'
+      'Nothing changed — row-level security only lets you touch a split you are on. Swap collector to yourself and try again.'
     );
   }
 
@@ -194,11 +214,6 @@ export async function clearDelivery(): Promise<DevResult> {
 
 /**
  * Rotates the collector to the next housemate.
- *
- * The split has two sides and you can only ever see one of them at a time: the
- * collector has nothing to pay and everything to chase, everyone else has the
- * opposite. Without a way to swap, half the screens in the settle-up flow are
- * unreachable from a single account.
  */
 export async function rotateCollector(): Promise<DevResult> {
   const me = await getCurrentUser();

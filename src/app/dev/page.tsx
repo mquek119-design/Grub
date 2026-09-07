@@ -24,8 +24,7 @@ const STAGE_LABELS: Record<string, string> = {
  * Its own page rather than a panel buried in House Settings.
  *
  * Settings is a screen four housemates share; this is a workbench for one
- * person, and half of what is on it deletes the house. Mixing them meant a
- * destructive button sat one scroll below the delivery-day picker.
+ * person, and half of what is on it deletes the house.
  */
 export default async function DevPage() {
   const currentUser = await getCurrentUser();
@@ -42,18 +41,19 @@ export default async function DevPage() {
   const viewingAs = realUser && currentUser.id !== realUser.id ? currentUser : null;
 
   return (
-    <PageShell>
+    <PageShell wide>
       <PageHeader
-        title="Testing & Development"
-        subtitle="A whole week, start to finish, without troubling Tesco."
+        title="Testing & Development Workbench"
+        subtitle="Full-lifecycle testing suite: simulate plans, orders, deliveries, and payment settlements."
       />
 
-      <Card className="flex items-center justify-between gap-md">
+      {/* Lifecycle Status Banner */}
+      <Card className="flex items-center justify-between gap-md border-l-4 border-l-primary bg-primary-fixed/15">
         <div className="min-w-0">
-          <p className="font-label-caps text-label-caps uppercase text-on-surface-variant">
-            This week
-          </p>
-          <p className="font-body-lg text-body-lg font-semibold">
+          <span className="font-label-caps text-label-caps uppercase text-primary font-bold tracking-wider">
+            Active Week Status
+          </span>
+          <p className="font-title-md text-title-md font-bold text-on-surface mt-0.5">
             {STAGE_LABELS[status] ?? status}
           </p>
         </div>
@@ -66,31 +66,36 @@ export default async function DevPage() {
                 : 'edit_calendar'
           }
           filled
-          className="text-primary text-[28px] shrink-0"
+          className="text-primary text-[32px] shrink-0"
         />
       </Card>
 
-      <ViewAsPanel
-        demoHousemates={housemates.filter((user) => user.isDemo)}
-        viewingAs={viewingAs}
-      />
-
-      <IngredientMergePanel report={duplicateIngredients} />
-
-      <WeekRunner status={status} />
-
-      <Card className="flex items-start gap-sm">
-        <Icon name="database" className="text-on-surface-variant mt-0.5 shrink-0" />
-        <div className="min-w-0">
-          <h2 className="font-title-md text-title-md">Migrations these need</h2>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            <span className="font-numeric-data">0012</span>–<span className="font-numeric-data">0019</span>{' '}
-            in the Supabase SQL editor. Each step degrades legibly without them — a missing table
-            empties a panel, a missing column returns a &ldquo;run migration NNNN&rdquo; hint — so
-            if a button reports something odd, that is the first thing to check.
-          </p>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start mt-sm">
+        {/* Main Column: Lifecycle Simulation Runner */}
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-lg min-w-0">
+          <WeekRunner status={status} />
         </div>
-      </Card>
+
+        {/* Side Column: Impersonation & Database Tools */}
+        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-lg lg:sticky lg:top-[90px]">
+          <ViewAsPanel
+            demoHousemates={housemates.filter((user) => user.isDemo)}
+            viewingAs={viewingAs}
+          />
+
+          <IngredientMergePanel report={duplicateIngredients} />
+
+          <Card className="flex items-start gap-sm">
+            <Icon name="database" className="text-on-surface-variant mt-0.5 shrink-0" />
+            <div className="min-w-0">
+              <h3 className="font-title-md text-title-md">Database Migrations</h3>
+              <p className="font-body-sm text-xs text-on-surface-variant mt-1">
+                Migrations <span className="font-numeric-data">0012</span>–<span className="font-numeric-data">0020</span> in Supabase SQL editor enable demo housemate impersonation and non-custodial RLS bypasses.
+              </p>
+            </div>
+          </Card>
+        </div>
+      </div>
     </PageShell>
   );
 }

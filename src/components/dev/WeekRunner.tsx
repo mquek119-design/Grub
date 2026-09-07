@@ -104,11 +104,11 @@ export function WeekRunner({ status }: { status: PlanStatus }) {
       key: 'pay',
       title: '7. Housemates pay',
       detail:
-        'Marks half of them as having paid, so the collector’s side — who to chase, confirming, disputing — is visible. Never touches your own row.',
-      action: 'Half of them say they paid',
+        'Simulates all payment statuses across housemates (Paid, Settled, Disputed, Owes) so every balance state is exercised. Never touches your own row.',
+      action: 'Simulate All Payment Scenarios',
       icon: 'payments',
       see: { href: '/split/balances', label: 'Balances' },
-      run: () => simulatePayments('notified'),
+      run: () => simulatePayments('mixed'),
     },
   ];
 
