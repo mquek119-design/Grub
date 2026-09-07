@@ -152,6 +152,7 @@ function RecipeCard({ recipe, isSelected, onSelect, style }: RecipeCardProps) {
         {/* Image */}
         <FoodImage
           alt={recipe.title}
+          src={recipe.imageUrl}
           seed={recipe.id}
           className="w-16 h-16 shrink-0 rounded-md"
         />

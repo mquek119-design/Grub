@@ -157,6 +157,7 @@ const MealRow = memo(function MealRow({
         >
           <FoodImage
             seed={meal.recipeId}
+            src={recipe?.imageUrl}
             alt={meal.recipeTitle}
             className="w-11 h-11 rounded-lg text-[20px]"
           />

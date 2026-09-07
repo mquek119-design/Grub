@@ -179,6 +179,7 @@ function QuickAddSheet({
         <div className="flex items-start gap-sm">
           <FoodImage
             seed={recipe.id}
+            src={recipe.imageUrl}
             alt={recipe.title}
             className="w-14 h-14 rounded-lg text-[24px] shrink-0"
           />

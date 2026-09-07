@@ -200,7 +200,7 @@ export function RecipeForm({ prefill }: { prefill?: RecipePrefill }) {
           <FoodImage
             seed={prefill?.recipeId ?? title ?? 'recipe'}
             src={removeImage ? null : photoPreview}
-            alt="Recipe photo preview"
+            alt={title ? `Photo preview for ${title}` : 'Recipe photo preview'}
             className="w-20 h-20 rounded-lg text-[24px] shrink-0"
           />
           <div className="flex flex-col gap-xs">
