@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Icon } from '@/components/media/Icon';
 import { Reveal } from '@/components/motion/Reveal';
+import { clsx } from '@/lib/clsx';
 
 export const metadata = {
   title: 'How Grub Works · Grub',
@@ -91,21 +92,22 @@ export default function InstructionsPage() {
           <h2 className="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant">
             The week, in order
           </h2>
-          {RHYTHM.map((step, i) => (
-            <Reveal
-              key={step.n}
-              delay={i * 70}
-              className="flex gap-md p-lg rounded-xl bg-surface-container-lowest border border-surface-container-highest shadow-ambient-card"
-            >
-              <span className="font-numeric-data text-secondary text-title-md shrink-0">
-                {step.n}
-              </span>
-              <div className="flex flex-col gap-xs min-w-0">
-                <h3 className="font-title-md text-title-md text-on-surface">{step.title}</h3>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">{step.body}</p>
+          <Reveal className="rounded-xl bg-primary text-on-primary p-lg flex flex-col">
+            {RHYTHM.map((step, i) => (
+              <div
+                key={step.n}
+                className={clsx('flex gap-md', i > 0 && 'pt-md mt-md border-t border-on-primary/15')}
+              >
+                <span className="font-numeric-data text-secondary text-title-md shrink-0">
+                  {step.n}
+                </span>
+                <div className="flex flex-col gap-xs min-w-0">
+                  <h3 className="font-title-md text-title-md">{step.title}</h3>
+                  <p className="font-body-sm text-body-sm text-on-primary/80">{step.body}</p>
+                </div>
               </div>
-            </Reveal>
-          ))}
+            ))}
+          </Reveal>
         </section>
 
         {/* Part two — the tabs */}
