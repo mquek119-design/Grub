@@ -39,12 +39,24 @@ export function FirstRunTip({
   const tip = TIPS[tab];
 
   useEffect(() => {
+    let isDismissed = false;
     try {
-      setVisible(window.localStorage.getItem(storageKey) !== 'dismissed');
+      isDismissed = window.localStorage.getItem(storageKey) === 'dismissed';
     } catch {
-      // Storage can be unavailable in private or restricted browser contexts.
-      // The guidance still works for this visit; it simply cannot persist.
+      // Storage can be unavailable in restricted contexts
+    }
+
+    if (!isDismissed) {
       setVisible(true);
+
+      // Auto-close after 7 seconds
+      const timer = setTimeout(() => {
+        dismiss();
+      }, 7000);
+
+      return () => clearTimeout(timer);
+    } else {
+      setVisible(false);
     }
   }, [storageKey]);
 
@@ -52,34 +64,66 @@ export function FirstRunTip({
     try {
       window.localStorage.setItem(storageKey, 'dismissed');
     } catch {
-      // Dismissing must still work for the current visit when storage is blocked.
+      // Dismissing works for current session
     }
     setVisible(false);
   }
 
-  if (!visible) return null;
+  function reopen() {
+    setVisible(true);
+    // Auto-dismiss again after 7s
+    setTimeout(() => {
+      dismiss();
+    }, 7000);
+  }
+
+  if (!visible) {
+    return (
+      <button
+        type="button"
+        onClick={reopen}
+        title="View page guide"
+        aria-label={`Open ${tab} guide`}
+        className={clsx(
+          'fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-30 w-10 h-10 rounded-full bg-secondary-fixed/90 text-secondary shadow-md hover:scale-105 transition-all flex items-center justify-center border border-secondary-container',
+          className
+        )}
+      >
+        <Icon name="lightbulb" filled className="text-[20px]" />
+      </button>
+    );
+  }
 
   return (
     <aside
       aria-label={`${tip.title} — first-run guidance`}
       className={clsx(
-        'flex items-start gap-sm rounded-xl border border-secondary-container/40 bg-secondary-fixed/40 p-md',
+        'fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50 max-w-sm w-[calc(100%-2rem)] rounded-2xl border border-secondary-container/60 bg-surface-container-lowest p-md shadow-elevated-card backdrop-blur-md transition-all',
         className
       )}
     >
-      <Icon name="lightbulb" filled className="mt-0.5 shrink-0 text-[20px] text-secondary" />
-      <div className="min-w-0 flex-1">
-        <p className="font-title-md text-title-md text-on-surface">{tip.title}</p>
-        <p className="mt-xs font-body-sm text-body-sm text-on-surface-variant">{tip.body}</p>
+      <div className="flex items-start gap-sm">
+        <div className="w-8 h-8 rounded-full bg-secondary-container/40 flex items-center justify-center text-secondary shrink-0 mt-0.5">
+          <Icon name="lightbulb" filled className="text-[18px]" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-xs mb-0.5">
+            <p className="font-title-sm text-title-sm font-semibold text-on-surface">{tip.title}</p>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-secondary bg-secondary-container/40 px-2 py-0.5 rounded-full">
+              Tip
+            </span>
+          </div>
+          <p className="font-body-sm text-[13px] leading-snug text-on-surface-variant">{tip.body}</p>
+        </div>
+        <button
+          type="button"
+          onClick={dismiss}
+          aria-label={`Dismiss ${tab} guide`}
+          className="-m-1 shrink-0 rounded-full p-1 text-on-surface-variant hover:bg-secondary-container/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <Icon name="close" className="text-[18px]" />
+        </button>
       </div>
-      <button
-        type="button"
-        onClick={dismiss}
-        aria-label={`Dismiss ${tab} guide`}
-        className="-m-1 shrink-0 rounded-full p-1 text-on-surface-variant hover:bg-secondary-container/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-      >
-        <Icon name="close" className="text-[18px]" />
-      </button>
     </aside>
   );
 }

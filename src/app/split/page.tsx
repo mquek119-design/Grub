@@ -83,34 +83,35 @@ export default async function SplitPage() {
 
   return (
     <>
-      <section className="flex flex-col items-center justify-center text-center py-lg">
+      <div className="bg-surface-container-lowest border border-surface-container-highest rounded-2xl p-lg md:p-xl shadow-ambient-card flex flex-col items-center justify-center text-center relative overflow-hidden my-sm">
+        <div className="flex items-center gap-xs px-sm py-1 rounded-full bg-primary-container/30 text-primary font-label-caps text-[11px] uppercase tracking-wider font-bold mb-xs">
+          <Icon name={!split.isPosted ? 'schedule' : plan?.status === 'delivered' ? 'verified' : 'local_shipping'} className="text-sm" />
+          {!split.isPosted ? 'Live Basket Estimate' : plan?.status === 'delivered' ? 'Delivery Verified' : 'Order Placed'}
+        </div>
         <p className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-xs">
           Week {plan?.weekNumber ?? ''} Settlement
         </p>
-        <h1 className="font-display-lg text-display-lg text-primary mb-sm">
-          {!split.isPosted || plan?.status !== 'delivered' ? 'Your estimated share' : isCollector ? 'Total Owed to You' : 'Total You Owe'}
+        <h1 className="font-title-md md:font-headline-md text-title-md text-on-surface font-semibold mb-xs">
+          {!split.isPosted || plan?.status !== 'delivered' ? 'Your Estimated Share' : isCollector ? 'Total Owed to You' : 'Total You Owe'}
         </h1>
-        <div className="font-numeric-data text-[56px] leading-[64px] font-bold text-on-background mb-lg tabular-nums">
+        <div className="font-numeric-data text-[52px] sm:text-[64px] leading-tight font-bold text-primary mb-sm tabular-nums">
           {formatPence(split.amount)}
         </div>
-        <p className="font-body-lg text-body-lg text-tertiary max-w-md mx-auto">
-          {plan?.status === 'delivered' ? 'Your split with ' : 'Delivery still needs checking by '}
-          <span className="font-bold text-on-background">{collector.name}</span> for this week&apos;s shop.
+        <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto flex items-center justify-center gap-xs">
+          <span>Collector:</span>
+          <span className="font-bold text-on-surface">{collector.name}</span>
         </p>
-      </section>
+      </div>
 
       {!split.isPosted && (
         <Notice tone="info" icon="pending">
-          This is what you <em>will</em> owe. It moves with the basket until the collector posts
-          the split. Payments open after delivery is checked.
+          This estimate updates automatically as basket items change. Payments unlock once delivery is checked.
         </Notice>
       )}
 
       {unpriced > 0 && (
         <Notice tone="check" icon="warning" role="alert">
-          This total leaves out <strong>{unpriced}</strong> basket item
-          {unpriced === 1 ? '' : 's'} with no recorded price, so it is lower than the real bill.
-          Add pack details on the Basket tab to settle accurately.
+          This total leaves out <strong>{unpriced}</strong> unpriced basket item{unpriced === 1 ? '' : 's'}. Add pack details on the Basket tab for accurate calculations.
         </Notice>
       )}
 
