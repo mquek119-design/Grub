@@ -96,3 +96,30 @@ _Audited September 2026. Preserved all previous Codex audit findings intact. The
 ### Implementation & Prioritization Note
 
 All additions above preserve zero custody of funds, dry money rules, and zero invented figures. They do not conflict with or override any existing Codex findings or planned tier work.
+
+---
+
+## Live Database & Route Sweep — Critical Bugs & Access Control Gaps
+
+_Audited 2026-09-07 via live Supabase MCP + HTTP route sweep. These are real blocking defects, not feature proposals._
+
+### Critical Bugs (RLS Delete-Policy Gaps)
+
+Three tables had RLS enabled but **no DELETE policy**, causing direct `.delete()` calls to silently affect zero rows — no error, just silent failure. Found by auditing every table's policies against the app's actual delete() call sites:
+
+| Bug | Impact | Status |
+|---|---|---|
+| **`ingredients` no DELETE policy** | `/dev → Duplicate ingredients` merge tool never worked; merges silently succeeded in repointing references but failed to delete loser rows, leaving duplicates and orphans. | **Fixed: migration `0026` applied** |
+| **`profiles` no DELETE policy** | `deleteAccount()` was fully broken for every user — profile delete silently affected 0 rows, so the action always returned "that account is not yours to remove." Account deletion was unreachable. **GDPR-relevant.** | **Fixed: migration `0027` applied** |
+| **`splits` no DELETE policy** | `postSplit()` cleanup of zeroed-out debts (when someone leaves every meal) silently no-opped, leaving phantom debt rows for people who owed nothing. | **Fixed: migration `0027` applied** |
+
+**Also fixed:** Account deletion's expense-share balance check failed open on query error (`shares.error ? [] : …`); now mirrors the splits check and fails closed.
+
+### Access Control Gap
+
+- **`/dev` is not admin-gated** — only checks `houseId`. Any housemate can reach it and hit "Clear everything" / "Reset demo data" to nuke the house's entire dataset. CLAUDE.md itself calls it a "workbench for one person" where "half of what is on it deletes the house" — but nothing enforces that. **Needs gating or hiding in prod.**
+
+### UX Gaps (Already in Codex audit, noted for completeness)
+
+- **Dietary clashes never surfaced** — recipes carry `dietary_tags`, accounts carry constraints; nothing warns of a clash at planning time (allergy-adjacent, higher stakes).
+- **Order-confirmation defect** — `syncBasketToTesco` marks week `ordered` before a real purchase exists. **High-risk, money+week state.**
