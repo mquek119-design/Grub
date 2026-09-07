@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { LogoMark } from '@/components/brand/Logo';
 
 export const metadata = { title: 'Privacy Policy · Grub', description: 'Grub Privacy Policy.' };
@@ -6,7 +7,9 @@ export default function PrivacyPage() {
   return (
     <main className="min-h-screen flex flex-col justify-start px-margin-mobile py-xl max-w-md mx-auto gap-lg">
       <div className="flex flex-col gap-sm">
-        <LogoMark className="h-16 w-auto lg:hidden" />
+        <Link href="/welcome" aria-label="Grub home" className="inline-block lg:hidden hover:opacity-90 transition-opacity">
+          <LogoMark className="h-16 w-auto" />
+        </Link>
         <h1 className="text-3xl font-georgia text-primary mt-4">Privacy Policy</h1>
       </div>
 

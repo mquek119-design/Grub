@@ -22,7 +22,9 @@ export default async function LoginPage({
       <div className="flex flex-col gap-sm">
         {/* Hidden on desktop, where the AuthShell brand panel carries the mark;
             the heading stays so the page keeps its h1. */}
-        <LogoMark className="h-16 w-auto lg:hidden" />
+        <Link href="/welcome" aria-label="Grub home" className="inline-block lg:hidden hover:opacity-90 transition-opacity">
+          <LogoMark className="h-16 w-auto" />
+        </Link>
         <h1
           className="font-headline-lg text-headline-lg text-primary"
           style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}

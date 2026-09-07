@@ -30,7 +30,9 @@ export default function OnboardingWelcomePage() {
         <div className="flex flex-col gap-sm pt-xl animate-fade-in-up">
           {/* The mark is hidden on desktop, where the layout's brand panel
               already carries it; the heading stays so the page keeps its h1. */}
-          <LogoMark className="h-16 w-auto lg:hidden" />
+          <Link href="/welcome" aria-label="Grub home" className="inline-block lg:hidden hover:opacity-90 transition-opacity">
+            <LogoMark className="h-16 w-auto" />
+          </Link>
           <h1 className="font-georgia font-bold text-headline-lg text-primary">Grub</h1>
           <p className="font-body-lg text-body-lg text-on-surface-variant">
             Plan meals together, buy one shop, split it fairly.

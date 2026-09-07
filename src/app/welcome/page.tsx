@@ -162,10 +162,10 @@ export default async function WelcomePage() {
       {/* ---- Hero ---------------------------------------------------------- */}
       <section className="relative w-full pt-lg md:pt-xl pb-[3rem] md:pb-[3.5rem]">
         <div className="px-margin-mobile md:px-margin-desktop mx-auto flex items-center justify-between gap-xl animate-fade-in">
-          <span className="inline-flex min-w-0 items-center gap-sm">
+          <Link href="/welcome" aria-label="Grub home" className="inline-flex min-w-0 items-center gap-sm hover:opacity-90 transition-opacity">
             <LogoMark className="h-9 w-auto" />
             <span className="font-georgia font-bold text-title-md text-primary">Grub</span>
-          </span>
+          </Link>
           {headerLink}
         </div>
 

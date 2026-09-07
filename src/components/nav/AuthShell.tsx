@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import Link from 'next/link';
 import { LogoMark } from '@/components/brand/Logo';
 
 /**
@@ -27,7 +28,9 @@ export function AuthShell({ children }: { children: ReactNode }) {
           }}
         />
 
-        <LogoMark tone="onDark" className="relative z-10 h-11 w-auto" />
+        <Link href="/welcome" aria-label="Grub home" className="relative z-10 inline-block hover:opacity-90 transition-opacity">
+          <LogoMark tone="onDark" className="h-11 w-auto" />
+        </Link>
 
         <p className="relative z-10 font-georgia text-headline-lg text-on-primary max-w-md leading-tight">
           The buying unit is the house, not you.
