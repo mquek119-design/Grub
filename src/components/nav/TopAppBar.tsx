@@ -11,9 +11,10 @@ import { Logo } from '@/components/brand/Logo';
 
 interface TopAppBarProps {
   currentUser: Pick<User, 'name' | 'accent' | 'avatarUrl'>;
+  basketNeedsAttention?: boolean;
 }
 
-export function TopAppBar({ currentUser }: TopAppBarProps) {
+export function TopAppBar({ currentUser, basketNeedsAttention = false }: TopAppBarProps) {
   const pathname = usePathname();
   const active = activeTabHref(pathname);
 
@@ -39,6 +40,11 @@ export function TopAppBar({ currentUser }: TopAppBarProps) {
             >
               <Icon name={tab.icon} className="text-[20px]" />
               <span className="font-title-md text-title-md">{tab.label}</span>
+              {tab.href === '/basket' && basketNeedsAttention && (
+                <span className="size-2 rounded-full bg-secondary" title="Missing pack prices">
+                  <span className="sr-only">Missing pack prices</span>
+                </span>
+              )}
             </Link>
           );
         })}

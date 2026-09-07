@@ -39,16 +39,16 @@ export default async function InvitePage() {
 
       <div className="flex flex-col gap-sm">
         <Link
-          href="/"
+          href="/plan"
           className="w-full h-12 rounded-lg bg-secondary-container text-on-secondary font-title-md text-title-md flex items-center justify-center hover:bg-secondary transition-colors"
         >
-          Go to the Feed
+          Start planning
         </Link>
         <Link
-          href="/plan"
+          href="/"
           className="w-full h-12 rounded-lg border border-primary text-primary font-title-md text-title-md flex items-center justify-center hover:bg-primary/10 transition-colors"
         >
-          Start Planning
+          Go to the Feed
         </Link>
       </div>
     </main>

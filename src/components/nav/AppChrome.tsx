@@ -33,6 +33,7 @@ const BARE_PREFIXES = ['/welcome', '/onboarding', '/login', '/auth', '/setup'];
 export function AppChrome({
   currentUser,
   viewingAsName,
+  basketNeedsAttention = false,
   children,
 }: {
   currentUser: User | null;
@@ -42,6 +43,7 @@ export function AppChrome({
    * small mistake.
    */
   viewingAsName?: string | null;
+  basketNeedsAttention?: boolean;
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -69,13 +71,13 @@ export function AppChrome({
         Skip to content
       </a>
       <RealtimeListener houseId={currentUser.houseId} />
-      <TopAppBar currentUser={currentUser} />
+      <TopAppBar currentUser={currentUser} basketNeedsAttention={basketNeedsAttention} />
       {viewingAsName && <ViewAsBanner name={viewingAsName} />}
       {/* Top padding clears the fixed app bar, plus the banner when it is up. */}
       <div className={clsx('pb-[96px] md:pb-xl', viewingAsName ? 'pt-[108px]' : 'pt-[72px]')}>
         {children}
       </div>
-      <BottomNav basketHasUpdates />
+      <BottomNav basketHasUpdates={basketNeedsAttention} />
     </ToastProvider>
   );
 }

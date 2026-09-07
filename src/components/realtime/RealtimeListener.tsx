@@ -51,6 +51,16 @@ export function RealtimeListener({ houseId }: RealtimeListenerProps) {
         { event: '*', schema: 'public', table: 'pantry_items' },
         triggerRefresh
       )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'meal_participants' },
+        triggerRefresh
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'houses', filter: `id=eq.${houseId}` },
+        triggerRefresh
+      )
       .subscribe();
 
     return () => {

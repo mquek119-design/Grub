@@ -71,8 +71,8 @@ export function CreateHouseForm() {
       </div>
 
       <p className="font-body-sm text-body-sm text-on-surface-variant">
-        Planning locks at the cutoff. The optimiser then builds one basket from everyone&apos;s
-        picks.
+        Planning locks at the cutoff. After that, the collector builds and reviews one basket
+        from everyone&apos;s picks.
       </p>
 
       {state.status === 'error' && (

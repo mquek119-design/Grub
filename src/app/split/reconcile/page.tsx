@@ -11,7 +11,7 @@ import {
   getWeeklyPlan,
 } from '@/lib/queries';
 
-export const metadata = { title: 'Reconciliation · Grub' };
+export const metadata = { title: 'Check delivery · Grub' };
 export const dynamic = 'force-dynamic';
 
 export default async function ReconcilePage() {
@@ -51,7 +51,7 @@ export default async function ReconcilePage() {
   return (
     <>
       <PageHeader
-        title="Order Reconciliation"
+        title="Check delivery"
         subtitle="Tick off what actually arrived. The split is rebuilt from this, not from the plan."
       />
       <Reconciliation

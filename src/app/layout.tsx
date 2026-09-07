@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { JetBrains_Mono, Plus_Jakarta_Sans } from 'next/font/google';
 import { AppChrome } from '@/components/nav/AppChrome';
 import { PushNotificationSetup } from '@/components/PushNotificationSetup';
-import { getCurrentUserOrNull, getRealUser } from '@/lib/queries';
+import { getBasketItems, getCurrentUserOrNull, getRealUser } from '@/lib/queries';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import './globals.css';
 
@@ -42,6 +42,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const realUser = isSupabaseConfigured ? await getRealUser() : null;
   const viewingAsName =
     currentUser && realUser && currentUser.id !== realUser.id ? currentUser.name : null;
+  const basketNeedsAttention = currentUser?.houseId
+    ? (await getBasketItems()).some((item) => item.needsPackData)
+    : false;
 
   return (
     <html
@@ -83,7 +86,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           element rather than in globals.css. */}
       <body className="bg-surface-0 text-on-background font-body-lg text-body-lg antialiased min-h-screen selection:bg-primary selection:text-on-primary">
         <PushNotificationSetup />
-        <AppChrome currentUser={currentUser} viewingAsName={viewingAsName}>
+        <AppChrome currentUser={currentUser} viewingAsName={viewingAsName} basketNeedsAttention={basketNeedsAttention}>
           {children}
         </AppChrome>
       </body>

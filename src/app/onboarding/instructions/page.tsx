@@ -17,8 +17,8 @@ const RHYTHM = [
   },
   {
     n: '02',
-    title: 'One basket builds',
-    body: 'At the cutoff the plan turns into a single Tesco basket — own-brand where it saves, and shared ingredients bought once, not four times.',
+    title: 'Build and review the basket',
+    body: 'After the cutoff, the collector builds and reviews the basket. Shared ingredients are combined, with own-brand swaps where they save.',
   },
   {
     n: '03',
@@ -60,7 +60,7 @@ const TABS = [
     body: 'What everyone owes, item by item, with the sums shown. Mark yourself paid, and reconcile the delivery once it arrives.',
   },
   {
-    icon: 'ti-plate',
+    icon: 'takeout_dining',
     name: 'Leftovers',
     body: 'Whatever is going spare in the kitchen. Free to whoever claims it — nobody owes anyone for a bowl of chilli.',
   },

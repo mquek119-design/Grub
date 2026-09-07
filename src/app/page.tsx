@@ -9,6 +9,9 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageShell } from '@/components/ui/PageShell';
 import { FirstRunTip } from '@/components/ui/FirstRunTip';
+import { NextActionCard } from '@/components/feed/NextActionCard';
+import { nextAction } from '@/lib/nextAction';
+import { isCutoffPassed } from '@/lib/weeks';
 import {
   getCurrentUser,
   getHousemates,
@@ -16,6 +19,9 @@ import {
   getPantryItems,
   getPaymentStatus,
   getWeeklyPlan,
+  getBasketItems,
+  getCollector,
+  getPostedSplits,
 } from '@/lib/queries';
 import { WEEKDAYS, type Weekday } from '@/lib/types';
 
@@ -36,12 +42,15 @@ export default async function FeedPage() {
   const currentUser = await getCurrentUser();
   if (!currentUser.houseId) redirect('/onboarding');
 
-  const [plan, housemates, payments, pantry, leftovers] = await Promise.all([
+  const [plan, housemates, payments, pantry, leftovers, basket, collector, splits] = await Promise.all([
     getWeeklyPlan(),
     getHousemates(),
     getPaymentStatus(),
     getPantryItems(),
     getLeftovers(),
+    getBasketItems(),
+    getCollector(),
+    getPostedSplits(),
   ]);
 
   if (!plan) redirect('/onboarding');
@@ -75,51 +84,45 @@ export default async function FeedPage() {
   // "use up your food" nag — only things somebody actually cooked and offered,
   // which is the case where a reminder rescues a real meal.
   const goingOff = leftovers.filter((item) => item.daysLeft <= 1);
+  const action = nextAction({
+    status: plan.status,
+    cutoffPassed: isCutoffPassed(plan.cutoffAt),
+    mealCount: plan.meals.length,
+    hasInput: currentUserHasInput,
+    hasBasket: basket.length > 0,
+    needsPackData: basket.some((item) => item.needsPackData),
+    userId: currentUser.id,
+    collector,
+    splits,
+  });
 
   return (
     <PageShell wide className="md:grid md:grid-cols-12 md:gap-lg md:items-start">
       <FirstRunTip tab="feed" className="md:col-span-12" />
       <div className="md:col-span-8 flex flex-col gap-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-          <CountdownCard cutoffAt={plan.cutoffAt} />
-
-          <Card className="flex flex-col justify-between relative overflow-hidden animate-fade-in">
-            {/* Subtle dot field, matching the mockup's primary action card.
-                Forest (#1B4332) — was the retired #006b3f green. */}
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 opacity-10 pointer-events-none"
-              style={{
-                backgroundImage: 'radial-gradient(circle at 1px 1px, #1B4332 1px, transparent 0)',
-                backgroundSize: '20px 20px',
-              }}
-            />
-            <div className="relative z-10">
-              <h2 className="font-title-md text-title-md text-on-surface mb-xs">
-                {currentUserHasInput ? "You're In" : 'Your Input Required'}
-              </h2>
-              <p className="font-body-sm text-body-sm text-on-surface-variant mb-md">
-                {currentUserHasInput
-                  ? "You're down for meals this week. Change anything before the cutoff."
-                  : "You haven't added your meals or personal items for this week's run yet."}
-              </p>
-            </div>
-            <Link
-              href="/plan"
-              className="relative z-10 w-full bg-secondary-container text-on-secondary font-title-md text-title-md py-3 rounded-lg shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2 mt-auto"
-            >
-              <Icon name="restaurant" />
-              {currentUserHasInput ? 'Review Your Week' : 'Submit Your Fancy?'}
-            </Link>
-          </Card>
+          <NextActionCard action={action} />
+          {plan.status === 'planning' || plan.status === 'locked' ? (
+            <CountdownCard cutoffAt={plan.cutoffAt} />
+          ) : (
+            <Card className="flex flex-col justify-center gap-sm">
+              <h2 className="font-title-md text-title-md">{plan.status === 'delivered' ? 'Delivery checked' : 'Delivery check pending'}</h2>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">Keep this week’s meals handy, or start choosing what you fancy next week.</p>
+              <Link href="/plan?week=next" className="text-primary font-semibold underline">Plan next week</Link>
+            </Card>
+          )}
         </div>
 
         {plan.meals.length === 0 ? (
           <EmptyState
             icon="ti-calendar"
             title="Nobody's picked anything"
-            body="You're all just going to wing it again aren't you."
-            action={{ href: '/plan', label: 'Start planning' }}
+            body={plan.status === 'planning' && !isCutoffPassed(plan.cutoffAt)
+              ? 'Pick something you fancy and give the house a meal to join.'
+              : 'Nothing was planned for this shop. Get a start on next week.'}
+            action={plan.status === 'planning' && !isCutoffPassed(plan.cutoffAt)
+              ? { href: '/plan', label: 'Start planning' }
+              : { href: '/plan?week=next', label: 'Plan next week' }}
           />
         ) : (
           <Card padded={false} className="overflow-hidden">
@@ -208,7 +211,7 @@ export default async function FeedPage() {
                 {goingOff.map((item) => item.description).join(', ')}{' '}
                 {goingOff.length === 1 ? 'is' : 'are'} on the board and{' '}
                 {goingOff.some((item) => item.daysLeft < 0) ? 'past it' : 'about to go'}.{' '}
-                <Link href="/pantry" className="text-secondary font-semibold underline">
+                <Link href="/leftovers" className="text-secondary font-semibold underline">
                   Claim it
                 </Link>
                 .

@@ -7,7 +7,7 @@ import { clsx } from '@/lib/clsx';
 import { TABS, activeTabHref } from './tabs';
 
 interface BottomNavProps {
-  /** Dot on the Basket tab when the week's basket has unreviewed items. */
+  /** Dot when saved basket items need pack prices. */
   basketHasUpdates?: boolean;
 }
 
@@ -36,7 +36,9 @@ export function BottomNav({ basketHasUpdates = false }: BottomNavProps) {
           >
             <Icon name={tab.icon} className="text-[20px]" />
             {tab.href === '/basket' && basketHasUpdates && !isActive && (
-              <span className="absolute top-2 right-4 w-2.5 h-2.5 bg-[#E07A5F] rounded-full border-2 border-primary" />
+              <span className="absolute top-2 right-4 w-2.5 h-2.5 bg-[#E07A5F] rounded-full border-2 border-primary" title="Missing pack prices">
+                <span className="sr-only">Missing pack prices</span>
+              </span>
             )}
             <span className="font-label-caps text-[10px] tracking-wide mt-1">
               {tab.label}

@@ -361,13 +361,21 @@ again. The original basket is preserved; settlement reads the saved receipts.
 ## Weekly Cycle
 
 1. **Sunday**: Housemates open "What do you fancy?" and submit recipes / constraints / opt-outs
-2. **Cutoff** (Sunday 17:00 by default): Planning locks; the optimiser builds the basket
+2. **Cutoff** (Sunday 17:00 by default): Planning closes; the collector presses Build basket
 3. **Basket review**: Collector reviews, swaps to own-brand, adjusts quantities
 4. **Order placed**: Collector places the Tesco order from their account
 5. **Delivery**: Reconciliation page shows substitutions and refunds
 6. **Settlement**: Per-item split posted; housemates pay the collector directly; collector confirms
 
 ## Key Design Decisions
+
+- **Feed guides the next action.** Before cutoff it asks for meal choices. After
+  cutoff it directs the collector through building, pricing, ordering and
+  delivery checking, while housemates see the relevant waiting state. Once
+  delivery is checked it uses posted payment statuses to guide settlement.
+  The Basket navigation dot means a saved item needs pack prices; there is no
+  invented unread-change count. After ordering, Feed shows delivery status
+  instead of an expired planning countdown.
 
 - **No custody of funds.** The app never holds money — it calculates and displays. Settlement happens by bank transfer / Revolut. Keeps us outside FCA regulation.
 - **"I've Paid" is social, not verified.** Display who's outstanding prominently; social pressure is the enforcement mechanism.

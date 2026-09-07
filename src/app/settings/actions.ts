@@ -162,5 +162,6 @@ export async function updateCollector(formData: FormData) {
   revalidatePath('/settings');
   revalidatePath('/basket');
   revalidatePath('/split');
+  revalidatePath('/');
   return { status: 'success' as const, message: 'Collector updated.' };
 }

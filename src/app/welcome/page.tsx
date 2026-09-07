@@ -59,7 +59,7 @@ const BENEFITS = [
 
 const STEPS = [
   { n: '01', title: 'Everyone picks', body: 'The house says what they fancy this week. Shared meals stack; nobody is signed up to a dinner they did not choose.' },
-  { n: '02', title: 'One basket builds', body: 'At the cutoff the optimiser turns the plan into a single Tesco basket, own-brand where it saves.' },
+  { n: '02', title: 'One basket builds', body: 'After the cutoff, the collector builds and reviews the basket, with own-brand swaps where they save.' },
   { n: '03', title: 'Split settles', body: 'The collector orders; everyone pays their real share back. The workings are printed under every line.' },
 ];
 

@@ -278,7 +278,7 @@ export async function buildBasket(): Promise<BasketActionState> {
   revalidatePath('/basket');
   revalidatePath('/split');
   revalidatePath('/plan');
-  revalidatePath('/');
+  revalidatePath('/', 'layout');
 
   // NOTE: rebuilding deliberately does NOT push to Tesco.
   //
@@ -365,7 +365,7 @@ export async function updateBasketItemQuantity(
   revalidatePath('/basket');
   revalidatePath('/split');
   revalidatePath('/plan');
-  revalidatePath('/');
+  revalidatePath('/', 'layout');
 
   return { status: 'built', message: 'Basket updated.' };
 }
@@ -440,7 +440,7 @@ export async function updateIngredientProductMapping(
 
   revalidatePath('/basket');
   revalidatePath('/split');
-  revalidatePath('/');
+  revalidatePath('/', 'layout');
 
   return { status: 'built', message: 'Brand swapped' };
 }
@@ -500,6 +500,7 @@ export async function addManualItem(
 
   revalidatePath('/basket');
   revalidatePath('/split');
+  revalidatePath('/', 'layout');
   return { status: 'built', message: `Added ${name}. It will survive a rebuild.` };
 }
 
@@ -519,5 +520,6 @@ export async function removeManualItem(itemId: string): Promise<BasketActionStat
 
   revalidatePath('/basket');
   revalidatePath('/split');
+  revalidatePath('/', 'layout');
   return { status: 'built', message: 'Removed.' };
 }

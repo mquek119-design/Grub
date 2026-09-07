@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
 import { clsx } from '@/lib/clsx';
 
@@ -36,14 +37,23 @@ interface CountdownCardProps {
 
 export function CountdownCard({ cutoffAt, windowHours = 24 }: CountdownCardProps) {
   const [remaining, setRemaining] = useState<number | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const target = new Date(cutoffAt).getTime();
-    const tick = () => setRemaining(target - Date.now());
+    let wasOpen = target > Date.now();
+    const tick = () => {
+      const next = target - Date.now();
+      setRemaining(next);
+      if (wasOpen && next <= 0) {
+        wasOpen = false;
+        router.refresh();
+      }
+    };
     tick();
     const id = window.setInterval(tick, 1000);
     return () => window.clearInterval(id);
-  }, [cutoffAt]);
+  }, [cutoffAt, router]);
 
   const isUrgent = remaining !== null && remaining < URGENT_THRESHOLD_MS;
   const locked = remaining !== null && remaining <= 0;
@@ -55,9 +65,9 @@ export function CountdownCard({ cutoffAt, windowHours = 24 }: CountdownCardProps
   return (
     <Card className="flex flex-col justify-between gap-sm">
       <div>
-        <h2 className="font-title-md text-title-md text-on-surface mb-xs">Order Cutoff</h2>
+        <h2 className="font-title-md text-title-md text-on-surface mb-xs">Planning cutoff</h2>
         <p className="font-body-sm text-body-sm text-on-surface-variant">
-          {locked ? 'Planning is locked for this week.' : "Locking in this week's delivery."}
+          {locked ? 'Planning is closed for this week.' : 'Choose your meals before planning closes.'}
         </p>
       </div>
 
