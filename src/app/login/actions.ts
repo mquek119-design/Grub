@@ -35,7 +35,11 @@ export async function sendMagicLink(
     return { status: 'error', message: 'Enter a valid email address.' };
   }
 
-  const origin = (await headers()).get('origin') ?? '';
+  const h = await headers();
+  const host = h.get('x-forwarded-host') || h.get('host') || 'localhost:3002';
+  const protocol = h.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
+  const origin = `${protocol}://${host}`;
+
   const supabase = await createClient();
 
   const { error } = await supabase.auth.signInWithOtp({
