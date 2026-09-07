@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Icon } from '@/components/media/Icon';
 import { LogoMark } from '@/components/brand/Logo';
+import { clsx } from '@/lib/clsx';
 
 export const metadata = { title: 'Welcome · Grub', description: 'Welcome to Grub.' };
 
@@ -36,19 +37,18 @@ export default function OnboardingWelcomePage() {
           </p>
         </div>
 
-        <ul className="flex flex-col gap-md">
+        <ul className="flex flex-col gap-md rounded-xl bg-primary text-on-primary p-lg animate-fade-in-up" style={{ animationDelay: '120ms' }}>
           {BENEFITS.map((benefit, i) => (
             <li
               key={benefit.title}
-              className="flex items-start gap-md animate-fade-in-up"
-              style={{ animationDelay: `${120 + i * 90}ms` }}
+              className={clsx('flex items-start gap-md', i > 0 && 'pt-md border-t border-on-primary/15')}
             >
-              <span className="w-10 h-10 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center shrink-0">
+              <span className="w-10 h-10 rounded-full bg-secondary text-on-secondary flex items-center justify-center shrink-0">
                 <Icon name={benefit.icon} />
               </span>
               <div>
-                <h2 className="font-title-md text-title-md">{benefit.title}</h2>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">{benefit.body}</p>
+                <h2 className="font-title-md text-title-md text-secondary">{benefit.title}</h2>
+                <p className="font-body-sm text-body-sm text-on-primary/80">{benefit.body}</p>
               </div>
             </li>
           ))}
