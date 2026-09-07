@@ -1,4 +1,6 @@
 import { redirect } from 'next/navigation';
+import { Icon } from '@/components/media/Icon';
+import { Marquee } from '@/components/motion/Marquee';
 import { ButtonLink } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -8,6 +10,8 @@ import { ImportRecipeCard } from '@/components/recipes/ImportRecipeCard';
 import { getCurrentUser, getRecipes, getWeeklyPlan } from '@/lib/queries';
 import { WEEKDAYS, WEEKDAY_LABELS, type Weekday } from '@/lib/types';
 import { parseWeekChoice } from '@/lib/weeks';
+
+const EMPTY_STRIP = ['Paste a link', 'Write it out', 'Takes a minute', 'Yours forever'];
 
 export const metadata = { title: 'Recipes · Grub', description: 'Browse the house recipe book and add meals to the plan.' };
 export const dynamic = 'force-dynamic';
@@ -74,12 +78,22 @@ export default async function RecipesPage({
       )}
 
       {recipes.length === 0 ? (
-        <EmptyState
-          icon="ti-soup"
-          title="Absolutely nothing here"
-          body="Paste a link or write one out. Everything else in Grub is built on top of this, so it's the one bit you can't skip."
-          action={{ href: '/recipes/new', label: 'Add your first recipe' }}
-        />
+        <div className="flex flex-col gap-md">
+          <Marquee className="-mx-margin-mobile md:-mx-margin-desktop border-y border-surface-container-highest bg-primary py-sm" duration={22}>
+            {EMPTY_STRIP.map((phrase) => (
+              <span key={phrase} className="inline-flex items-center gap-md px-md">
+                <span className="font-georgia text-title-md text-secondary">{phrase}</span>
+                <Icon name="soup_kitchen" className="text-[16px] text-primary-fixed-dim" />
+              </span>
+            ))}
+          </Marquee>
+          <EmptyState
+            icon="ti-soup"
+            title="Absolutely nothing here"
+            body="Paste a link or write one out. Everything else in Grub is built on top of this, so it's the one bit you can't skip."
+            action={{ href: '/recipes/new', label: 'Add your first recipe' }}
+          />
+        </div>
       ) : (
         <RecipeBrowser
           recipes={recipes}
