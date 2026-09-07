@@ -253,19 +253,20 @@ export function Reconciliation({
                         <p className="font-body-sm text-body-sm text-on-surface-variant line-through">
                           {sub.orderedName} · {formatPence(sub.orderedPrice)}
                         </p>
-                        <p className="font-body-lg text-body-lg font-semibold flex items-center gap-xs flex-wrap">
-                          <Icon name="swap_horiz" className="text-secondary" />
-                          {sub.receivedName} · {formatPence(sub.receivedPrice)}
+                        <div className="flex items-center gap-xs flex-wrap mt-0.5">
+                          <span className="font-body-lg text-body-lg font-semibold flex items-center gap-xs text-on-surface">
+                            <Icon name="swap_horiz" className="text-secondary" />
+                            {sub.receivedName} · {formatPence(sub.receivedPrice)}
+                          </span>
                           <span
                             className={clsx(
-                              'font-numeric-data text-[12px]',
-                              delta > 0 ? 'text-error' : 'text-primary'
+                              'px-2 py-0.5 rounded-full text-[11px] font-bold font-numeric-data tracking-wider uppercase',
+                              delta > 0 ? 'bg-error-container/60 text-error' : 'bg-primary-container/60 text-primary'
                             )}
                           >
-                            ({delta > 0 ? '+' : ''}
-                            {formatPence(delta)})
+                            {delta > 0 ? `+${formatPence(delta)} higher` : `${formatPence(delta)} saved`}
                           </span>
-                        </p>
+                        </div>
                       </div>
 
                       <div className="flex gap-sm">
