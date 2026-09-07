@@ -71,14 +71,14 @@ export default async function WelcomePage() {
   const headerLink = currentUser ? (
     <Link
       href="/account"
-      className="font-body-sm text-body-sm font-semibold text-primary hover:opacity-80 transition-opacity"
+      className="inline-flex h-11 shrink-0 items-center justify-center rounded-full border border-primary/40 bg-surface-0 px-lg font-body-sm text-body-sm font-semibold text-primary transition-[background-color,border-color,transform] hover:border-primary hover:bg-primary-fixed active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-0"
     >
       Account
     </Link>
   ) : (
     <Link
       href="/login"
-      className="font-body-sm text-body-sm font-semibold text-primary hover:opacity-80 transition-opacity"
+      className="inline-flex h-11 shrink-0 items-center justify-center rounded-full border border-primary/40 bg-surface-0 px-lg font-body-sm text-body-sm font-semibold text-primary transition-[background-color,border-color,transform] hover:border-primary hover:bg-primary-fixed active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-0"
     >
       Sign in
     </Link>
@@ -160,16 +160,16 @@ export default async function WelcomePage() {
   return (
     <main className="min-h-screen bg-surface-0 text-on-background overflow-x-hidden">
       {/* ---- Hero ---------------------------------------------------------- */}
-      <section className="relative w-full pt-xl md:pt-[6rem] pb-[4rem]">
-        <div className="px-margin-mobile md:px-margin-desktop mx-auto flex items-center justify-between animate-fade-in">
-          <span className="inline-flex items-center gap-sm">
+      <section className="relative w-full pt-lg md:pt-xl pb-[3rem] md:pb-[3.5rem]">
+        <div className="px-margin-mobile md:px-margin-desktop mx-auto flex items-center justify-between gap-xl animate-fade-in">
+          <span className="inline-flex min-w-0 items-center gap-sm">
             <LogoMark className="h-9 w-auto" />
             <span className="font-georgia font-bold text-title-md text-primary">Grub</span>
           </span>
           {headerLink}
         </div>
 
-        <div className="px-margin-mobile md:px-margin-desktop mx-auto pt-[3rem] md:pt-[5rem] max-w-3xl">
+        <div className="px-margin-mobile md:px-margin-desktop mx-auto pt-[2.5rem] md:pt-[3.5rem] max-w-3xl">
           <h1 className="font-georgia text-[2.75rem] leading-[1.05] md:text-[4.5rem] md:leading-[1.02] font-bold text-primary animate-fade-in-up">
             Stop buying four bags of pasta.
           </h1>

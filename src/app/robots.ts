@@ -1,7 +1,8 @@
 import { MetadataRoute } from 'next'
+import { getSiteUrl } from '@/lib/siteUrl'
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = 'https://grub-lime.vercel.app'
+  const baseUrl = getSiteUrl()
 
   return {
     rules: {

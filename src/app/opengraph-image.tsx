@@ -1,7 +1,5 @@
 import { ImageResponse } from 'next/og'
 
-export const runtime = 'edge'
-
 export const alt = 'Grub - Plan meals together, buy one shop, split it fairly.'
 export const size = {
   width: 1200,

@@ -3,6 +3,7 @@ import { JetBrains_Mono, Plus_Jakarta_Sans } from 'next/font/google';
 import { AppChrome } from '@/components/nav/AppChrome';
 import { PushNotificationSetup } from '@/components/PushNotificationSetup';
 import { getBasketItems, getCurrentUserOrNull, getRealUser } from '@/lib/queries';
+import { getSiteUrl } from '@/lib/siteUrl';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import './globals.css';
 
@@ -21,6 +22,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: 'Grub',
   description: 'Plan meals together, buy one shop, split it fairly.',
 };

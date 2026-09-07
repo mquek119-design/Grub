@@ -13,7 +13,12 @@ export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: { params: { id: string } }) {
   const recipe = await getRecipe(params.id);
-  return { title: recipe ? `${recipe.title} · Grub` : 'Recipe · Grub' };
+  return {
+    title: recipe ? `${recipe.title} · Grub` : 'Recipe · Grub',
+    description: recipe
+      ? `View ${recipe.title}, its ingredients, and cooking instructions.`
+      : 'View recipe ingredients and cooking instructions.',
+  };
 }
 
 export default async function RecipePage({ params }: { params: { id: string } }) {

@@ -8,7 +8,10 @@ import type { IngredientCategory, PantryItem } from '@/lib/types';
 import { PantryItemRow } from '@/components/pantry/PantryItemRow';
 import { AddPantryItem } from '@/components/pantry/AddPantryItem';
 
-export const metadata = { title: 'Pantry · Grub', description: 'Manage shared house staples and view leftovers.' };
+export const metadata = {
+  title: 'Pantry · Grub',
+  description: 'Manage the ingredients and shared staples already in the house.',
+};
 
 // Reads the signed-in user's house — nothing to prerender at build time.
 export const dynamic = 'force-dynamic';

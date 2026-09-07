@@ -1,7 +1,7 @@
 'use server';
 
-import { headers } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
+import { getSiteUrl } from '@/lib/siteUrl';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 
 export interface SignupState {
@@ -35,10 +35,7 @@ export async function sendSignupLink(
     return { status: 'error', message: 'Enter a valid email address.' };
   }
 
-  const h = await headers();
-  const host = h.get('x-forwarded-host') || h.get('host') || 'localhost:3002';
-  const protocol = h.get('x-forwarded-proto') || (host.includes('localhost') ? 'http' : 'https');
-  const origin = `${protocol}://${host}`;
+  const origin = getSiteUrl();
 
   const supabase = await createClient();
 

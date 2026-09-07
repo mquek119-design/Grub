@@ -21,7 +21,15 @@ const RealtimeListener = dynamic(
 );
 
 /** Routes that render bare — no tab bar, no app bar. */
-const BARE_PREFIXES = ['/welcome', '/onboarding', '/login', '/auth', '/setup'];
+const BARE_PREFIXES = [
+  '/welcome',
+  '/onboarding',
+  '/login',
+  '/auth',
+  '/setup',
+  '/privacy',
+  '/terms',
+];
 
 /**
  * Wraps every page in the app chrome, except the routes above.

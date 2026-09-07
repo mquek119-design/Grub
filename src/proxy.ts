@@ -4,15 +4,20 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL, isSupabaseConfigured } from '@/lib/sup
 
 /** Routes reachable while signed out. */
 const PUBLIC_PREFIXES = ['/welcome', '/login', '/auth', '/onboarding', '/privacy', '/terms'];
+const PUBLIC_METADATA_PATHS = new Set(['/robots.txt', '/sitemap.xml', '/opengraph-image']);
 
 function isPublic(pathname: string): boolean {
-  return PUBLIC_PREFIXES.some(
+  return PUBLIC_METADATA_PATHS.has(pathname) || PUBLIC_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
   );
 }
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // These generated files do not query Supabase and must remain available to
+  // crawlers even when authentication (or the local database) is unavailable.
+  if (PUBLIC_METADATA_PATHS.has(pathname)) return NextResponse.next();
 
   // With no database there is nothing any page can render, and every one of
   // them would throw on its first query. Send them all to /setup instead —
