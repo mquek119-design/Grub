@@ -37,6 +37,17 @@ export default function TermsPage() {
             Grub is provided as-is without any guarantees. Prices shown during planning are estimates pulled from Tesco's public data, and your final receipt might differ due to substitutions or live price changes. We make no warranty regarding the accuracy of grocery prices or the availability of delivery slots.
           </p>
         </section>
+
+        <section className="flex flex-col gap-sm">
+          <h2 className="text-xl font-georgia text-primary">4. Contact</h2>
+          <p>
+            Complaints or questions about these terms go to{' '}
+            <a href="mailto:support@grubhouse.uk" className="text-primary font-semibold underline">
+              support@grubhouse.uk
+            </a>
+            .
+          </p>
+        </section>
       </div>
     </main>
   );

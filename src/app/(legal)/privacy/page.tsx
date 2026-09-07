@@ -18,6 +18,11 @@ export default function PrivacyPage() {
 
       <div className="flex flex-col gap-md text-on-surface text-base leading-relaxed">
         <section className="flex flex-col gap-sm">
+          <h2 className="text-xl font-georgia text-primary">Optional analytics</h2>
+          <p>With your permission, we use Vercel Web Analytics to understand visits to the welcome, privacy and terms pages. We exclude signed-in pages, sign-in links and URLs containing query parameters. We do not send household names, recipes, balances or payment details as analytics events.</p>
+          <p>Analytics stays off until you accept. Use Privacy choices to change your decision at any time. Your choice is stored in this browser. Essential sign-in cookies work whichever option you choose.</p>
+        </section>
+        <section className="flex flex-col gap-sm">
           <h2 className="text-xl font-georgia text-primary">1. Authentication and Cookies</h2>
           <p>
             Grub uses Supabase for authentication. You sign in using a magic link sent to your email. We use cookies strictly to keep you signed in and to ensure the app works securely.
@@ -46,8 +51,20 @@ export default function PrivacyPage() {
 
         <section className="flex flex-col gap-sm">
           <h2 className="text-xl font-georgia text-primary">4. Deleting Your Data</h2>
+          <p>Your Supabase sign-in email is retained when you delete your profile through the app. Signing in again creates a blank profile.</p>
           <p>
             You can delete your account at any time from your account settings. This will permanently delete your profile and detach your data from the house. Note that if you owe money or are owed money for unsettled splits, the app will refuse deletion until those balances are settled.
+          </p>
+        </section>
+
+        <section className="flex flex-col gap-sm">
+          <h2 className="text-xl font-georgia text-primary">5. Contact</h2>
+          <p>
+            Questions about your data, or a request to have it removed, go to{' '}
+            <a href="mailto:support@grubhouse.uk" className="text-primary font-semibold underline">
+              support@grubhouse.uk
+            </a>
+            .
           </p>
         </section>
       </div>
