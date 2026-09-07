@@ -57,6 +57,32 @@ changed. Original spec below.
   explanation and never 500s; locally with it on, nothing changes.
 - **Effort:** ~1–2h. **Do not modify `lib/tesco/`** — guard at the call site.
 
+### 2A. Welcome-page header spacing and sign-in affordance — ✅ done (2026-09-07)
+
+Reduced the responsive hero spacing, gave the header an explicit gap, and
+turned Sign in/Account into a 44px outlined secondary action with complete
+hover, focus and active feedback. Verified at 375px and 1440px. Original spec
+below.
+
+- **Goal:** Make the signed-out welcome page feel balanced immediately: reduce
+  the oversized space above the hero, keep the Grub mark and account action
+  comfortably separated at narrow widths, and make Sign in read and behave as
+  an obvious button rather than a quiet text link.
+- **Approach:** Tighten the responsive top/hero padding in
+  `src/app/welcome/page.tsx`; give the header row explicit width and spacing
+  constraints; restyle the Sign in action with a clear hit area, visible
+  hover/focus/pressed states, and button-level visual weight while keeping Sign
+  up as the primary CTA. Check that long text, keyboard focus, and touch use do
+  not cause the logo and action to crowd each other.
+- **Files:** `src/app/welcome/page.tsx`; shared button styles only if an existing
+  component already provides the right treatment.
+- **Acceptance:** at 375px and 1440px the first content sits materially closer
+  to the top without feeling cramped; the logo and Sign in never collide or
+  appear grouped; Sign in has at least a 44px touch target and clear hover,
+  focus, and active feedback; the link reaches `/login`; Sign up remains the
+  strongest action; `npm run verify` clean.
+- **Effort:** ~30–60m.
+
 ---
 
 ## P2 — feedback & learnability (unblocked)
@@ -107,12 +133,14 @@ Original spec below.
 
 ## P3 — polish & data hygiene
 
-### 5. `canonical_name` unique index (data-gated) — migration written (2026-09-07)
+### 5. `canonical_name` unique index (data-gated) — preparation written (2026-09-07)
 
 `supabase/migrations/0024_canonical_name_unique.sql` exists and is
 deliberately **not applied** — see the file's own header. Run it manually
-once `/dev → Duplicate ingredients` reports zero clusters on the target
-database. Original spec below.
+once `/dev → Duplicate ingredients` reports zero clusters and no stale stored
+matching names on the target database. The audit and guarded repair UI now
+check both conditions, and the migration also makes `canonical_name` non-null.
+Original spec below.
 
 - **Goal:** Enforce one ingredient row per canonical name, so pooling can't be
   silently defeated by a duplicate.
@@ -126,6 +154,28 @@ database. Original spec below.
 - **Acceptance:** migration written and reviewed; applied only once the merge
   tool reports no clusters. Until then it stays unapplied by design.
 - **Effort:** ~1h to write; application is a separate, data-gated step.
+
+### 5A. Secure ingredient merge transaction
+
+- **Goal:** Make `/dev → Duplicate ingredients` able to fold rows reliably so
+  the unique index can eventually be applied.
+- **Why separate:** The current authenticated client has no ingredient DELETE
+  policy. A broad DELETE policy would expose the global catalogue, while the
+  existing multi-step action can partially repoint rows if a later statement
+  fails.
+- **Approach:** Add one narrowly authorised `SECURITY DEFINER` database
+  function that validates the caller and house-admin scope, handles recipe-key
+  collisions, repoints all four referencing tables, deletes the losing row and
+  updates the keeper's canonical name in one transaction. Set an empty
+  `search_path`, schema-qualify every relation, revoke public/anonymous
+  execution, and grant execution only to authenticated users. Replace the
+  client-side write sequence with the typed RPC.
+- **Acceptance:** an authorised admin can merge a duplicate atomically; an
+  ordinary or anonymous caller cannot; any failed step rolls the whole merge
+  back; focused SQL/RPC tests pass. Applying the unique index remains a later,
+  explicit production-data step.
+- **Risk:** high enough to review separately because it changes database
+  privileges and destructive data handling.
 
 ### 6. Richer new-house empty states — ✅ done
 
@@ -169,7 +219,13 @@ probably accurate", etc.), landed by earlier commits (`8cf5564`,
 
 ## Prep now, run when unblocked
 
-### 8. Authenticated-route accessibility test harness
+### 8. Authenticated-route accessibility test harness — harness written (2026-09-07)
+
+The Playwright/axe suite now covers Plan, Recipes, Basket and Split at mobile
+and desktop sizes, plus the shared skip-link focus path. It reads an ignored
+local storage-state file and skips with setup guidance when no authenticated
+session exists. The remaining step is to save a real session and run the ten
+checks. Original spec below.
 - **Goal:** The a11y work so far is static/build-verified; Plan/Recipes/Basket/
   Split have never been axe/keyboard-tested against a live signed-in session.
 - **Approach:** Write a Playwright spec that signs in (once a session exists),

@@ -55,6 +55,9 @@ Vercel reads that to pick the build runtime.
    - `NEXT_PUBLIC_SUPABASE_URL`
    - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (or `NEXT_PUBLIC_SUPABASE_ANON_KEY`
      on older Supabase projects — either is accepted)
+   - `NEXT_PUBLIC_SITE_URL` — the exact HTTPS production origin used by magic
+     links, the sitemap and social previews (for example,
+     `https://grub-lime.vercel.app`)
    - `NEXT_PUBLIC_VAPID_PUBLIC_KEY` — only if push is wired up later; unset is
      fine, the subscribe flow no-ops.
    - **Never** set a `service_role` / `sb_secret_…` key in a `NEXT_PUBLIC_`
@@ -98,3 +101,12 @@ conversions — see CLAUDE.md's "seams worth knowing" for why these matter).
 `npm run e2e` runs Playwright against a running dev server. There's also a
 Playwright MCP server registered in `.mcp.json` for driving a real browser
 from Claude Code — see CLAUDE.md's "Local Development & Testing" section.
+
+The authenticated accessibility suite covers Plan, Recipes, Basket and Split
+with axe, then checks that the shared skip link moves keyboard focus to the
+main content. Create its local session with `npm run e2e:auth`: finish the
+magic-link sign-in in the opened browser (paste the link into that browser if
+your mail client opens another one), then close it to save
+`.playwright/auth/user.json`. Run the suite with `npm run e2e:a11y`. The auth
+file is ignored because it contains a live session. Set
+`PLAYWRIGHT_AUTH_STATE` to use a different storage-state file.

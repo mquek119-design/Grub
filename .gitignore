@@ -22,6 +22,7 @@ dev-server.log
 /lighthouse-reports/
 /coverage/
 /playwright-report/
+/.playwright/
 /LIGHTHOUSE_PERFORMANCE_REPORT.html
 # One-off browser screenshots dumped at the repo root during testing.
 # Design reference PNGs live under mockups/ and are unaffected (subdir).

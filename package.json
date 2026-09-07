@@ -16,6 +16,8 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "e2e": "playwright test",
+    "e2e:a11y": "playwright test a11y-authenticated.spec.ts",
+    "e2e:auth": "playwright codegen --save-storage=.playwright/auth/user.json http://localhost:3002/login",
     "e2e:debug": "playwright test --debug",
     "e2e:report": "playwright show-report"
   },
@@ -31,6 +33,7 @@
     "server-only": "^0.0.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
     "@testing-library/jest-dom": "^7.0.1",
