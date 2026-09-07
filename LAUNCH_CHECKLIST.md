@@ -18,8 +18,8 @@ Legend: ✅ done · 🟡 partial / verify · ⬜ to do · 🏠 handled by host (
 | 7 | Social preview image | 🟡 | Branded `opengraph-image.tsx` exists. Verify its absolute production URL and rendered card on the deployed site. |
 | 8 | Add a favicon | ✅ | `src/app/icon.svg`. |
 | 9 | Sitemap + robots.txt | 🟡 | Both routes exist and exclude authenticated app pages. Verify signed-out `200` responses and production-domain URLs after deployment. |
-| 10 | Alt text on images | 🟡 | `FoodImage`/`Avatar` manage alt; decorative tiles use `alt=""` correctly. **Revisit** when recipe uploads (CODING_PLAN #7) land — real photos need real alt. |
-| 11 | Compress images | 🟡 | Largely N/A now — deterministic tiles, no heavy static assets, `next/image` for remotes. **Compress on upload** when recipe images (CODING_PLAN #7) land. |
+| 10 | Alt text on images | 🟡 | `FoodImage`/`Avatar` manage alt; decorative tiles use `alt=""` correctly. Recipe uploads (CODING_PLAN #7) landed 2026-09-07 — **audit** that uploaded photos get real alt text, not the recipe title reused blindly where it doesn't fit. |
+| 11 | Compress images | ⬜ | Recipe uploads (CODING_PLAN #7) landed with no client-side compression — a phone photo can upload uncompressed up to the 5MB cap. **Add compression on upload** (client-side, before it hits the server action) before this is a real problem. |
 | 12 | Check page load speed | 🟡 | Lighthouse ~100 on main routes locally; bundle work done. **Re-run against the deployed URL** — datacentre + real network differ from localhost. |
 | 13 | Fix colour contrast | ✅ | Accessibility pass done; AA verified. (The "marquee" contrast flag was a false positive — text already `text-secondary` on Forest.) |
 | 14 | Make it mobile friendly | ✅ | Mobile-first (375px) throughout; `md:`/`lg:` breakpoints; desktop pass done for onboarding + login. |
@@ -29,22 +29,24 @@ Legend: ✅ done · 🟡 partial / verify · ⬜ to do · 🏠 handled by host (
 | 18 | Spam protection | 🟡 | Invite-based + magic-link auth limits abuse; Supabase rate-limits auth. **Assess** whether signup needs an added limit — probably low priority for a closed-house app. |
 | 19 | Set up analytics | ⬜ | None. Vercel Analytics is privacy-friendly and ~one line. Ties to cookie consent (#5). |
 | 20 | One clear call to action | ✅ | `/welcome` has clear Sign up / Sign in CTAs after the redesign. |
+| 21 | Supabase region matches the target market | ⬜ | The Supabase project is in **Singapore**; Grub is built for **UK** students. Every request pays a Singapore round trip (`src/proxy.ts` hits Supabase's auth server on every navigation, plus several query round trips per page). `vercel.json` pins the Vercel function region to `sin1` to match it *today*, but that's a stopgap, not the fix. **Before public launch**: create a new Supabase project in a UK/EU region, migrate schema + data across, then move `vercel.json`'s `regions` to match in the same change. |
 
 ## What this actually reduces to (the ⬜ / audit work)
 
 **Build:**
 - Finish legal review and controller/contact details for Privacy + Terms (#1, #2).
 - Analytics + cookie consent (#19, #5) — as a pair, if wanted.
+- On-upload image compression (#11), now that recipe uploads exist.
+- Migrate Supabase (and `vercel.json`) from Singapore to a UK/EU region (#21) — the biggest lever on real-world speed for real users.
 
 **Audit (cheap, mostly at deploy time):**
-- Social preview, robots and sitemap URLs (#7, #9), broken-link sweep (#16), form-validation parity (#17), production Lighthouse (#12), confirm no secret in the client bundle (#3).
-
-**Deferred until recipe uploads exist (CODING_PLAN #7):**
-- Real-photo alt text (#10) and on-upload compression (#11).
+- Social preview, robots and sitemap URLs (#7, #9), broken-link sweep (#16), form-validation parity (#17), production Lighthouse (#12), confirm no secret in the client bundle (#3), uploaded-photo alt text (#10).
 
 ## Order
 
 Do the audits (#3, #6, #12, #16) as part of the deploy itself — they need the
 live URL. Finish legal review (#1, #2), then verify robots/sitemap (#9) and the
-OG image (#7) before announcing publicly. Analytics/consent (#19, #5) whenever
-you want numbers. The ✅ / 🏠 rows need nothing.
+OG image (#7) before announcing publicly. Migrate the Supabase region (#21)
+before announcing publicly too — it's the difference between the app feeling
+fast and feeling broken for the people it's actually built for. Analytics/
+consent (#19, #5) whenever you want numbers. The ✅ / 🏠 rows need nothing.

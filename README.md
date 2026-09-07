@@ -42,9 +42,20 @@ npm run e2e          # playwright
 ## Deploying
 
 **Target: Vercel** (frontend + SSR) with **Supabase** as the already-hosted
-backend. It's a standard Next.js App Router project, so Vercel is zero-config —
-no `vercel.json` needed. Node is pinned to `22.x` in `package.json` (`engines`);
-Vercel reads that to pick the build runtime.
+backend. It's a standard Next.js App Router project — Vercel auto-detects it.
+Node is pinned to `22.x` in `package.json` (`engines`); Vercel reads that to
+pick the build runtime.
+
+**`vercel.json` pins the serverless function region to `sin1` (Singapore)** —
+that must always match wherever the Supabase project actually lives, not
+wherever developers or users are. `src/proxy.ts` calls Supabase's auth server
+on every request, and most pages fire several more Supabase queries on top;
+if the Vercel function region and the Supabase region are different, every one
+of those round trips pays for the mismatch twice. The app is built for **UK**
+students (see the top of this file), so Singapore is a placeholder matching
+where the Supabase project happens to be today, not the target audience —
+**when Supabase moves to a UK/EU region, update the `regions` value here to
+match in the same change**, or the two will silently drift apart again.
 
 ### Checklist
 
