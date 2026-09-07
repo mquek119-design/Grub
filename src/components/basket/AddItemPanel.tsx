@@ -96,19 +96,35 @@ export function AddItemPanel() {
       </div>
 
       <div className="flex gap-sm">
-        <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter') {
-              event.preventDefault();
-              search();
-            }
-          }}
-          placeholder="e.g. washing up liquid"
-          aria-label="Search Tesco"
-          className="flex-1 min-w-0 h-11 px-3 rounded-lg bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-body-lg"
-        />
+        <div className="relative flex-1 min-w-0">
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter') {
+                event.preventDefault();
+                search();
+              }
+            }}
+            placeholder="e.g. washing up liquid"
+            aria-label="Search Tesco"
+            className="w-full h-11 pl-3 pr-9 rounded-lg bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-body-lg"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery('');
+                setResults([]);
+                setMessage(null);
+              }}
+              aria-label="Clear search"
+              className="absolute right-2 top-1/2 -translate-y-1/2 grid size-7 place-items-center rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+            >
+              <Icon name="close" className="text-[16px]" />
+            </button>
+          )}
+        </div>
         <button
           type="button"
           onClick={search}

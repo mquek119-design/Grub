@@ -11,10 +11,11 @@ export function Icon({ name, filled = false, className }: IconProps) {
   if (name.startsWith('ti-')) {
     return <i aria-hidden="true" className={clsx('ti', name, className)} />;
   }
+  const isSpinner = name === 'progress_activity';
   return (
     <span
       aria-hidden="true"
-      className={clsx('material-symbols-outlined', filled && 'fill', className)}
+      className={clsx('material-symbols-outlined', filled && 'fill', isSpinner && 'animate-spin', className)}
     >
       {name}
     </span>

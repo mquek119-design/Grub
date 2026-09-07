@@ -382,7 +382,7 @@ export function RecipeBrowser({
   return (
     <div className="flex flex-col gap-md">
       <div className="flex flex-col gap-sm">
-        <label className="relative block">
+        <div className="relative block">
           <span className="sr-only">Search recipes</span>
           <Icon
             name="search"
@@ -392,9 +392,19 @@ export function RecipeBrowser({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search a recipe, or something in the fridge…"
-            className="w-full h-12 pl-10 pr-3 rounded-lg bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-body-lg"
+            className="w-full h-12 pl-10 pr-10 rounded-lg bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-body-lg"
           />
-        </label>
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery('')}
+              aria-label="Clear search"
+              className="absolute right-3 top-1/2 -translate-y-1/2 grid size-7 place-items-center rounded-full text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+            >
+              <Icon name="close" className="text-[16px]" />
+            </button>
+          )}
+        </div>
 
         <div className="flex gap-xs overflow-x-auto hide-scrollbar pb-1">
           {CHIPS.map((chip) => {
