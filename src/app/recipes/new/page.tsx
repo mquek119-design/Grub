@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { PageShell } from '@/components/ui/PageShell';
 import { RecipeForm } from './RecipeForm';
 
-export const metadata = { title: 'Add a Recipe · Grub' };
+export const metadata = { title: 'Add a Recipe · Grub', description: 'Add a new recipe to the house book.' };
 
 export default function NewRecipePage({
   searchParams,

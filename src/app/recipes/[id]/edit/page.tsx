@@ -9,7 +9,7 @@ import { getRecipe } from '@/lib/queries';
 import { formatPenceBare } from '@/lib/money';
 
 export const dynamic = 'force-dynamic';
-export const metadata = { title: 'Edit Recipe · Grub' };
+export const metadata = { title: 'Edit Recipe · Grub', description: 'Edit recipe details and ingredients.' };
 
 export default async function EditRecipePage({ params }: { params: { id: string } }) {
   const recipe = await getRecipe(params.id);

@@ -22,7 +22,7 @@ import {
 } from '@/lib/queries';
 import { nextWeekStart, parseWeekChoice } from '@/lib/weeks';
 
-export const metadata = { title: 'Plan · Grub' };
+export const metadata = { title: 'Plan · Grub', description: 'Plan this week\'s meals and choose what to cook together.' };
 
 // The cutoff deadline shown here moves with the clock.
 export const dynamic = 'force-dynamic';

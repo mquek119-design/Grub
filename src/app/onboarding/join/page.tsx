@@ -4,7 +4,7 @@ import { Icon } from '@/components/media/Icon';
 import { getCurrentUserOrNull } from '@/lib/queries';
 import { JoinHouseForm } from './JoinHouseForm';
 
-export const metadata = { title: 'Join a House · Grub' };
+export const metadata = { title: 'Join a House · Grub', description: 'Join your housemates on Grub.' };
 
 export const dynamic = 'force-dynamic';
 

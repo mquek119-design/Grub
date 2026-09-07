@@ -9,7 +9,7 @@ import { getCurrentUser, getRecipes, getWeeklyPlan } from '@/lib/queries';
 import { WEEKDAYS, WEEKDAY_LABELS, type Weekday } from '@/lib/types';
 import { parseWeekChoice } from '@/lib/weeks';
 
-export const metadata = { title: 'Recipes · Grub' };
+export const metadata = { title: 'Recipes · Grub', description: 'Browse the house recipe book and add meals to the plan.' };
 export const dynamic = 'force-dynamic';
 
 /**

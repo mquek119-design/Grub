@@ -4,7 +4,7 @@ import { Icon } from '@/components/media/Icon';
 import { InviteLink } from '@/components/settings/InviteLink';
 import { getCurrentUserOrNull, getHouse } from '@/lib/queries';
 
-export const metadata = { title: 'Invite Housemates · Grub' };
+export const metadata = { title: 'Invite Housemates · Grub', description: 'Invite your housemates to join the house.' };
 
 // Reads the signed-in user's house — nothing to prerender at build time.
 export const dynamic = 'force-dynamic';

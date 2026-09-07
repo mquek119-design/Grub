@@ -22,7 +22,7 @@ import {
   getWeeklyPlan,
 } from '@/lib/queries';
 
-export const metadata = { title: 'Basket · Grub' };
+export const metadata = { title: 'Basket · Grub', description: 'Review the combined house basket before ordering.' };
 export const dynamic = 'force-dynamic';
 
 export default async function BasketPage() {

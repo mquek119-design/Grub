@@ -9,7 +9,7 @@ import { PageShell } from '@/components/ui/PageShell';
 import { getCurrentUser, getHousemates, getRealUser, getWeeklyPlan } from '@/lib/queries';
 import { findDuplicateIngredients } from '@/app/dev/ingredientActions';
 
-export const metadata = { title: 'Testing & Development · Grub' };
+export const metadata = { title: 'Testing & Development · Grub', description: 'Developer tools and simulated data.' };
 
 export const dynamic = 'force-dynamic';
 

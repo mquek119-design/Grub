@@ -17,7 +17,7 @@ import {
   getWeeklyPlan,
 } from '@/lib/queries';
 
-export const metadata = { title: 'Split · Grub' };
+export const metadata = { title: 'Split · Grub', description: 'See this week\'s split and settle up with your housemates.' };
 export const dynamic = 'force-dynamic';
 
 export default async function SplitPage() {

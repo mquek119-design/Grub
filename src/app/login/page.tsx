@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { LoginForm } from './LoginForm';
 import { LogoMark } from '@/components/brand/Logo';
 
-export const metadata = { title: 'Sign in · Grub' };
+export const metadata = { title: 'Sign in · Grub', description: 'Sign in to your Grub account.' };
 
 export default async function LoginPage({
   searchParams,

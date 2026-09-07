@@ -4,7 +4,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { PageShell } from '@/components/ui/PageShell';
 import { getCurrentUser, getHousemates, getLeftovers } from '@/lib/queries';
 
-export const metadata = { title: 'Leftovers · Grub' };
+export const metadata = { title: 'Leftovers · Grub', description: 'Claim or share spare portions and leftovers.' };
 export const dynamic = 'force-dynamic';
 
 export default async function LeftoversPage() {

@@ -21,7 +21,7 @@ import {
   PaymentDetailsPanel,
 } from '@/components/account/AccountPanels';
 
-export const metadata = { title: 'My Account · Grub' };
+export const metadata = { title: 'My Account · Grub', description: 'Manage your account and dietary preferences.' };
 
 // Reads the signed-in user's house — nothing to prerender at build time.
 export const dynamic = 'force-dynamic';

@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Icon } from '@/components/media/Icon';
 import { LogoMark } from '@/components/brand/Logo';
 
-export const metadata = { title: 'Welcome · Grub' };
+export const metadata = { title: 'Welcome · Grub', description: 'Welcome to Grub.' };
 
 const BENEFITS = [
   {

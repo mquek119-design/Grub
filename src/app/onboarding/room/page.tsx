@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Icon } from '@/components/media/Icon';
 import { RoomForm } from './RoomForm';
 
-export const metadata = { title: 'Your Room · Grub' };
+export const metadata = { title: 'Your Room · Grub', description: 'Set your room or nickname.' };
 
 export default function RoomPage() {
   return (

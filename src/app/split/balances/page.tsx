@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { formatPence } from '@/lib/money';
 import { getCurrentUser, getHousemates, getLedger, netBalances } from '@/lib/queries';
 
-export const metadata = { title: 'Balances · Grub' };
+export const metadata = { title: 'Balances · Grub', description: 'View running balances and the house ledger.' };
 
 // Reads the signed-in user's house — nothing to prerender at build time.
 export const dynamic = 'force-dynamic';

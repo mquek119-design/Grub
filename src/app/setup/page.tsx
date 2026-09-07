@@ -1,6 +1,6 @@
 import { SetupRequired } from '@/components/SetupRequired';
 
-export const metadata = { title: 'Connect a database · Grub' };
+export const metadata = { title: 'Connect a database · Grub', description: 'Setup database connection for your Grub instance.' };
 
 /**
  * Where proxy.ts sends every request while Supabase is unconfigured.

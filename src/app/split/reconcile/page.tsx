@@ -11,7 +11,7 @@ import {
   getWeeklyPlan,
 } from '@/lib/queries';
 
-export const metadata = { title: 'Check delivery · Grub' };
+export const metadata = { title: 'Check delivery · Grub', description: 'Check what arrived and log substitutions before finalizing the split.' };
 export const dynamic = 'force-dynamic';
 
 export default async function ReconcilePage() {

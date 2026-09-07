@@ -6,7 +6,7 @@ import { PageShell } from '@/components/ui/PageShell';
 import { formatPence } from '@/lib/money';
 import { getSavings } from '@/lib/queries';
 
-export const metadata = { title: 'Savings · Grub' };
+export const metadata = { title: 'Savings · Grub', description: 'See how much your house has saved.' };
 export const dynamic = 'force-dynamic';
 
 export default async function SavingsPage() {

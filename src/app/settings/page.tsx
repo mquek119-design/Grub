@@ -13,7 +13,7 @@ import { RoutinePanel } from '@/components/settings/RoutinePanel';
 import { StaplesPanel } from '@/components/settings/StaplesPanel';
 import { SharedStaplesToggle } from '@/components/settings/SharedStaplesToggle';
 
-export const metadata = { title: 'House Settings · Grub' };
+export const metadata = { title: 'House Settings · Grub', description: 'Manage housemates, shared staples, and the weekly rotation.' };
 
 // Reads the signed-in user's house — nothing to prerender at build time.
 export const dynamic = 'force-dynamic';
