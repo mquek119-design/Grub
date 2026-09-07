@@ -7,6 +7,7 @@ import { useFormStatus } from 'react-dom';
 import { useActionState } from 'react';
 import { FoodImage } from '@/components/media/FoodImage';
 import { Icon } from '@/components/media/Icon';
+import { Badge } from '@/components/ui/Badge';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
 import { RecipeFilterChips, matchesDietaryFilter, type DietaryTagKey } from '@/components/recipes/RecipeFilterChips';
@@ -99,6 +100,33 @@ const CHIPS: Chip[] = [
     },
   },
 ];
+
+/**
+ * At-a-glance facts for the card photo, Mob-style corner badges rather than
+ * text you have to read the whole card to find.
+ *
+ * Capped at two and ordered by what a shared house actually decides on first:
+ * whether they can eat it, then whether it fits a weeknight. Reuses the same
+ * `CHIPS` criteria the filter row already applies, so a card never claims
+ * something the filters would disagree with.
+ */
+function cardBadges(recipe: Recipe): { label: string; icon: string }[] {
+  const badges: { label: string; icon: string }[] = [];
+  const tags = recipe.tags.map((tag) => tag.toLowerCase());
+  const dietary = recipe.dietaryTags.map((tag) => tag.toLowerCase());
+
+  if (dietary.includes('vegan') || tags.includes('vegan')) {
+    badges.push({ label: 'Vegan', icon: 'eco' });
+  } else if (CHIPS.find((chip) => chip.key === 'veggie')?.matches(recipe)) {
+    badges.push({ label: 'Veggie', icon: 'eco' });
+  }
+
+  if (CHIPS.find((chip) => chip.key === 'quick')?.matches(recipe)) {
+    badges.push({ label: 'Quick', icon: 'bolt' });
+  }
+
+  return badges.slice(0, 2);
+}
 
 function AddButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
@@ -419,6 +447,7 @@ export function RecipeBrowser({
         <ul className="grid grid-cols-2 lg:grid-cols-4 gap-md">
           {results.map((recipe) => {
             const inPantry = recipe.ingredients.filter((ingredient) => ingredient.inPantry).length;
+            const badges = cardBadges(recipe);
             return (
               <li key={recipe.id}>
                 <button
@@ -439,6 +468,15 @@ export function RecipeBrowser({
                       className="w-full h-24 text-[32px] transition-transform duration-200 group-hover:scale-105"
                     />
                     <span className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/25 to-transparent" />
+                    {badges.length > 0 && (
+                      <span className="absolute top-1 left-1 flex flex-wrap gap-1">
+                        {badges.map((badge) => (
+                          <Badge key={badge.label} tone="photo" icon={badge.icon}>
+                            {badge.label}
+                          </Badge>
+                        ))}
+                      </span>
+                    )}
                   </span>
                   <span className="p-sm flex flex-col gap-xs flex-1">
                     <span className="font-body-lg text-body-lg font-semibold leading-tight line-clamp-2">

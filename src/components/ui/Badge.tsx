@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Icon } from '@/components/media/Icon';
 import { clsx } from '@/lib/clsx';
 
-type BadgeTone = 'neutral' | 'primary' | 'secondary' | 'error' | 'solid-primary';
+type BadgeTone = 'neutral' | 'primary' | 'secondary' | 'error' | 'solid-primary' | 'photo';
 
 const TONE_CLASSES: Record<BadgeTone, string> = {
   neutral: 'bg-surface-container text-on-surface-variant border-transparent',
@@ -10,6 +10,9 @@ const TONE_CLASSES: Record<BadgeTone, string> = {
   secondary: 'bg-[#FDECD0] text-[#7C4A1E] border-transparent',
   error: 'bg-[#FCDADA] text-[#7A1A1A] border-transparent',
   'solid-primary': 'bg-primary text-on-primary border-transparent',
+  // A light, opaque pill that stays legible sitting on top of a photo of
+  // unknown tone — food shots range from dark pans to pale rice.
+  photo: 'bg-surface-0/90 text-primary border-transparent shadow-sm backdrop-blur-sm',
 };
 
 interface BadgeProps {
