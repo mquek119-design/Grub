@@ -5,6 +5,7 @@ import { SubTabs } from '@/components/ui/SubTabs';
 import { FirstRunTip } from '@/components/ui/FirstRunTip';
 import { getWeeklyPlan } from '@/lib/queries';
 import type { PlanStatus } from '@/lib/types';
+import { SplitStepper } from '@/components/split/SplitStepper';
 
 /**
  * Ordered as the money actually moves, which is not how it used to be.
@@ -42,6 +43,7 @@ export default async function SplitLayout({ children }: { children: ReactNode })
   return (
     <PageShell wide>
       <SubTabs tabs={SPLIT_TABS} />
+      <SplitStepper status={status} />
 
       {/* One line saying where the week is, so the three tabs read as a
           sequence rather than three unrelated screens. */}

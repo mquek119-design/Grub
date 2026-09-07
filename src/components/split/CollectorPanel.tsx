@@ -83,16 +83,34 @@ export function CollectorPanel({
         )}
       </div>
 
-      <Button
-        disabled={basketIsEmpty || (planStatus !== 'ordered' && planStatus !== 'delivered')}
-        pending={isPending}
-        pendingLabel="Posting…"
-        icon="receipt_long"
-        onClick={() => run(postSplit, 'Split posted.')}
-        className="self-start"
-      >
-        {splits.length > 0 ? 'Re-post the split' : 'Post the split'}
-      </Button>
+      <div className="flex items-center gap-sm flex-wrap">
+        <Button
+          disabled={basketIsEmpty || (planStatus !== 'ordered' && planStatus !== 'delivered')}
+          pending={isPending}
+          pendingLabel="Posting…"
+          icon="receipt_long"
+          onClick={() => run(postSplit, 'Split posted.')}
+        >
+          {splits.length > 0 ? 'Re-post the split' : 'Post the split'}
+        </Button>
+
+        {splits.length > 0 && (
+          <Button
+            variant="outline"
+            icon="content_copy"
+            onClick={() => {
+              const lines = splits.map(
+                (s) => `• ${s.user.name}: ${formatPence(s.amount)} (${s.status === 'confirmed' ? 'Settled' : s.status === 'notified' ? 'Payment sent' : 'Owes'})`
+              );
+              const text = `Grub Shop Split Summary:\n${lines.join('\n')}\nTotal Owed: ${formatPence(owed)}`;
+              navigator.clipboard.writeText(text);
+              toast('Copied split summary for WhatsApp!');
+            }}
+          >
+            Copy WhatsApp Summary
+          </Button>
+        )}
+      </div>
 
       {planStatus !== 'ordered' && planStatus !== 'delivered' && (
         <p className="font-body-sm text-body-sm text-on-surface-variant">

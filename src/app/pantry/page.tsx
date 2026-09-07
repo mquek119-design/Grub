@@ -3,10 +3,11 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { PageShell } from '@/components/ui/PageShell';
-import { getCurrentUser, getPantryItems } from '@/lib/queries';
+import { getCurrentUser, getHouse, getHouseStaples, getPantryItems } from '@/lib/queries';
 import type { IngredientCategory, PantryItem } from '@/lib/types';
 import { PantryItemRow } from '@/components/pantry/PantryItemRow';
 import { AddPantryItem } from '@/components/pantry/AddPantryItem';
+import { StaplesPanel } from '@/components/settings/StaplesPanel';
 
 export const metadata = {
   title: 'Pantry · Grub',
@@ -33,7 +34,7 @@ function PantrySection({ title, items }: { title: string; items: PantryItem[] })
 
   return (
     <section className="flex flex-col gap-md">
-      <h2 className="font-title-md text-title-md">{title}</h2>
+      <h2 className="font-title-md text-title-md text-on-surface font-semibold">{title}</h2>
 
       {categories.length === 0 ? (
         <Card>
@@ -62,16 +63,18 @@ function PantrySection({ title, items }: { title: string; items: PantryItem[] })
 }
 
 export default async function PantryPage() {
-  const [items, currentUser] = await Promise.all([
+  const [items, currentUser, house, staples] = await Promise.all([
     getPantryItems(),
     getCurrentUser(),
+    getHouse(),
+    getHouseStaples(),
   ]);
 
   const shared = items.filter((item) => item.isShared);
   const personal = items.filter((item) => !item.isShared && item.ownerUserId === currentUser.id);
   const lowCount = shared.filter((item) => item.lowStock).length;
 
-  if (items.length === 0) {
+  if (items.length === 0 && staples.length === 0) {
     return (
       <PageShell wide>
         <PageHeader
@@ -107,8 +110,18 @@ export default async function PantryPage() {
             </Card>
           )}
 
-          <PantrySection title="Shared House Staples" items={shared} />
+          <PantrySection title="Shared Food & Ingredients" items={shared} />
           {personal.length > 0 && <PantrySection title="Your Personal Shelf" items={personal} />}
+
+          <section className="flex flex-col gap-sm mt-md">
+            <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs font-semibold">
+              <Icon name="repeat" className="text-primary text-lg" />
+              Recurring Standing Staples
+            </h2>
+            <Card className="flex flex-col gap-md">
+              <StaplesPanel staples={staples} splitEqually={house.sharedStaplesEnabled} />
+            </Card>
+          </section>
         </div>
 
         {/* Right Column: Add Item & Optimiser Info */}
