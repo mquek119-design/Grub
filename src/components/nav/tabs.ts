@@ -42,7 +42,10 @@ export const TABS: Tab[] = [
   {
     href: '/leftovers',
     label: 'Leftovers',
-    icon: 'takeout_dining',
+    // Tabler, to match the other four tabs (ti-*); a lone Material Symbol here
+    // rendered in a different weight and family. ti-soup is already used on the
+    // Plan empty state, so it's known to load.
+    icon: 'ti-soup',
     owns: ['/leftovers'],
   },
 ];

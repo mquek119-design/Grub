@@ -20,6 +20,15 @@ dev-server.log
 /test-results/
 /.accessibility-audit/
 /lighthouse-reports/
+/coverage/
+/playwright-report/
+/LIGHTHOUSE_PERFORMANCE_REPORT.html
+# One-off browser screenshots dumped at the repo root during testing.
+# Design reference PNGs live under mockups/ and are unaffected (subdir).
+/*.png
+
+# Supabase CLI scratch state — never source
+supabase/.temp/
 
 # Claude Code: settings.json is shared and reviewed, settings.local.json is not.
 # The local file accumulates whatever was clicked through at a prompt — one-off
