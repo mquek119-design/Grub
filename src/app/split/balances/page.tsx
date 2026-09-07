@@ -29,8 +29,8 @@ export default async function BalancesPage() {
     return (
       <EmptyState
         icon="account_balance"
-        title="No balances yet"
-        body="Every settled week is recorded here, so you can see who is owed what across the whole tenancy. Nothing has been settled yet."
+        title="Clean slate"
+        body="No one owes anyone anything. Enjoy it while it lasts."
       />
     );
   }

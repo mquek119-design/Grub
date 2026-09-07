@@ -78,10 +78,10 @@ export function FirstMealModal({ recipes, weekStartDate }: FirstMealModalProps) 
               <div className="flex shrink-0 items-start justify-between gap-sm">
                 <div className="flex flex-col gap-xs">
                   <h2 id="first-meal-title" className="font-title-lg text-title-lg text-on-surface">
-                    Add your first meal
+                    Nobody&apos;s picked anything
                   </h2>
                   <p className="font-body-sm text-body-sm text-on-surface-variant">
-                    Start with one of these. You can add more later.
+                    You&apos;re all just going to wing it again aren&apos;t you. Start with one of these.
                   </p>
                 </div>
                 <button
