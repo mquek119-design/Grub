@@ -10,6 +10,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { PageShell } from '@/components/ui/PageShell';
 import { FirstRunTip } from '@/components/ui/FirstRunTip';
 import { NextActionCard } from '@/components/feed/NextActionCard';
+import { RunningLowStapleCard } from '@/components/feed/RunningLowStapleCard';
 import { nextAction } from '@/lib/nextAction';
 import { isCutoffPassed } from '@/lib/weeks';
 import {
@@ -25,7 +26,6 @@ import {
 } from '@/lib/queries';
 import { WEEKDAYS, type Weekday } from '@/lib/types';
 
-// The countdown and payment status are live state — never serve a baked copy.
 export const dynamic = 'force-dynamic';
 
 const DAY_SHORT: Record<Weekday, string> = {
@@ -57,19 +57,14 @@ export default async function FeedPage() {
 
   const byId = new Map(housemates.map((user) => [user.id, user]));
 
-  // Weekends only appear once somebody plans one. An empty Saturday with an
-  // "add a meal" button is the app asking about a night nobody was going to
-  // plan — see the same rule in WeekStrip.
   const visibleDays = WEEKDAYS.filter(
     (day) => !['sat', 'sun'].includes(day) || plan.meals.some((meal) => meal.day === day)
   );
 
-  // Today, in the same weekday vocabulary the plan uses.
   const today = WEEKDAYS[(new Date().getDay() + 6) % 7];
   const cookingTonight = plan.meals.filter(
     (meal) => meal.day === today && meal.cookedByUserId === currentUser.id
   );
-  // Mouths, not housemates: someone's +1 still has to be fed.
   const mouths = (cookingTonight[0]?.participants ?? []).reduce(
     (sum, participant) => sum + 1 + (participant.guests ?? 0),
     0
@@ -80,9 +75,6 @@ export default async function FeedPage() {
   );
   const lowStock = pantry.filter((item) => item.isShared && item.lowStock);
 
-  // Anything on the leftovers board with a day or less on it. Not a general
-  // "use up your food" nag — only things somebody actually cooked and offered,
-  // which is the case where a reminder rescues a real meal.
   const goingOff = leftovers.filter((item) => item.daysLeft <= 1);
   const action = nextAction({
     status: plan.status,
@@ -112,6 +104,8 @@ export default async function FeedPage() {
             </Card>
           )}
         </div>
+
+        <RunningLowStapleCard />
 
         {plan.meals.length === 0 ? (
           <EmptyState
@@ -143,8 +137,6 @@ export default async function FeedPage() {
                   const diners = meals
                     .flatMap((meal) => meal.participants.map((p) => byId.get(p.userId)))
                     .filter((user): user is NonNullable<typeof user> => Boolean(user));
-                  // Days with a shared-shopping suggestion get a quiet marker,
-                  // not a red one. Nothing here is wrong — see overlaps.ts.
                   const hasHint = plan.overlaps.some((entry) => entry.day === day);
 
                   return (

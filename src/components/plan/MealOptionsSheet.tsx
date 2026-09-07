@@ -21,18 +21,6 @@ import { canSetCapacity, mouthsAt } from '@/lib/meals';
 import type { PlannedMeal, User } from '@/lib/types';
 import { MEAL_TYPE_LABELS, WEEKDAY_LABELS } from '@/lib/types';
 
-/**
- * Everything you can change about a meal, in one place you have to ask for.
- *
- * These four controls used to sit permanently under every meal you had joined —
- * a native `<select>` for the cook, a guest stepper and a capacity button, on
- * every row, on every day. Five meals meant fifteen controls competing with the
- * thing you actually came to read, and the whole week stopped being scannable.
- *
- * They are settings, not information. You change who is cooking roughly once
- * per meal and then never again, so they belong behind a tap.
- */
-
 const INITIAL: PlanActionState = { status: 'idle', message: '' };
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
@@ -43,14 +31,6 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-/**
- * A round +/− that submits.
- *
- * Every stepper in this sheet posts a whole form, so it is a network round trip
- * with a visible delay — the one place a control most needs to admit it is
- * working. `name`/`value` scope the spinner to the arrow actually pressed, so
- * pressing − does not set + spinning as well.
- */
 function StepperButton({
   name,
   value,
@@ -83,13 +63,6 @@ function StepperButton({
   );
 }
 
-/**
- * A pill that is both a choice and a submit — "Anyone can join" / "Cooking for
- * a set number", "I'm covering them" / "Split across the table".
- *
- * `selected` is a filled outline rather than a solid block, matching `Chip`:
- * solid reads as "press me", the filled outline reads as "this is on".
- */
 function ChoicePill({
   name,
   value,
@@ -128,13 +101,6 @@ function ChoicePill({
   );
 }
 
-/**
- * "Ask Maya", with the avatar it needs and the spinner every other control got.
- *
- * Its own component because `useFormStatus` reads the form it is rendered
- * inside — and one per housemate means one form per housemate, so each chip
- * genuinely reports only its own.
- */
 function AskCookChip({ user, asked }: { user: User; asked: boolean }) {
   const { pending } = useSubmitState();
 
@@ -161,13 +127,6 @@ function AskCookChip({ user, asked }: { user: User; asked: boolean }) {
   );
 }
 
-/**
- * Cooking, offered rather than assigned.
- *
- * Whoever adds a meal is its cook. Handing it over asks somebody — it does not
- * put their name on it, because a rota you were entered into without being
- * asked is not a rota anybody honours.
- */
 function CookChoice({
   meal,
   diners,
@@ -182,7 +141,6 @@ function CookChoice({
   const [claimState, claimAction] = useActionState(claimCook, INITIAL);
   const [standDownState, standDownAction] = useActionState(standDownAsCook, INITIAL);
 
-  // Memoize diners lookup Map to avoid recreation on every render
   const byId = useMemo(() => new Map(diners.map((user) => [user.id, user])), [diners]);
   const cook = meal.cookedByUserId ? byId.get(meal.cookedByUserId) : undefined;
   const offeree = meal.cookOfferTo ? byId.get(meal.cookOfferTo) : undefined;
@@ -198,7 +156,6 @@ function CookChoice({
     <div className="flex flex-col gap-xs">
       <SectionTitle>Who&apos;s cooking</SectionTitle>
 
-      {/* Somebody has asked *you*. This is the only place the cooking moves. */}
       {askedMe ? (
         <form action={respondAction} className="flex flex-col gap-xs">
           <input type="hidden" name="mealId" value={meal.id} />
@@ -233,7 +190,6 @@ function CookChoice({
         </p>
       )}
 
-      {/* Unclaimed: any diner may take it, since nobody is being volunteered. */}
       {!cook && !askedMe && (
         <form action={claimAction}>
           <input type="hidden" name="mealId" value={meal.id} />
@@ -285,14 +241,14 @@ function GuestChoice({ meal, mine }: { meal: PlannedMeal; mine: { guests?: numbe
       <input type="hidden" name="mealId" value={meal.id} />
       <input type="hidden" name="currentGuests" value={guests} />
       <input type="hidden" name="currentCovered" value={covered ? 'true' : 'false'} />
-      <SectionTitle>Anyone with you</SectionTitle>
+      <SectionTitle>Anyone with you (Extra / Gym Prep Portions)</SectionTitle>
 
       <div className="flex items-center gap-sm">
         <StepperButton
           name="guests"
           value={String(Math.max(0, guests - 1))}
           disabled={guests === 0}
-          label="One fewer guest"
+          label="One fewer guest/portion"
           icon="remove"
         />
         <span
@@ -301,13 +257,13 @@ function GuestChoice({ meal, mine }: { meal: PlannedMeal; mine: { guests?: numbe
             guests > 0 ? 'text-on-surface font-bold' : 'text-on-surface-variant'
           )}
         >
-          {guests === 0 ? 'Just me' : `+${guests}`}
+          {guests === 0 ? 'Just me (1x)' : `+${guests} extra (${guests + 1}x total)`}
         </span>
         <StepperButton
           name="guests"
           value={String(Math.min(6, guests + 1))}
           disabled={guests === 6}
-          label="One more guest"
+          label="One more guest/portion"
           icon="add"
         />
       </div>
@@ -390,7 +346,6 @@ function CapacityChoice({ meal, mouths }: { meal: PlannedMeal; mouths: number })
   );
 }
 
-/** One form per diner, so this reports only the row being removed. */
 function RemoveDinerButton({ name }: { name: string }) {
   const { pending } = useSubmitState();
 
@@ -410,6 +365,34 @@ function RemoveDinerButton({ name }: { name: string }) {
       {pending && <Icon name="progress_activity" className="text-[14px] animate-spin" />}
       Take off
     </button>
+  );
+}
+
+function DietaryWarningBanner({ recipeTags, diners }: { recipeTags?: string[]; diners: { user: User }[] }) {
+  const conflicts: { userName: string; conflict: string }[] = [];
+
+  diners.forEach(({ user }) => {
+    const prefs = (user.dietaryPreferences || []).map((p) => p.toLowerCase());
+    if (prefs.includes('vegetarian') || prefs.includes('vegan')) {
+      const titleLower = recipeTags?.join(' ').toLowerCase() ?? '';
+      const isMeat = ['chicken', 'beef', 'pork', 'lamb', 'meat', 'bacon'].some((t) => titleLower.includes(t));
+      if (isMeat) {
+        conflicts.push({ userName: user.name, conflict: 'Vegetarian / Vegan clash' });
+      }
+    }
+  });
+
+  if (conflicts.length === 0) return null;
+
+  return (
+    <div className="flex items-start gap-xs p-sm rounded-lg bg-error-container/40 border border-error/30 text-error text-[12px] font-semibold">
+      <Icon name="warning" className="text-sm mt-0.5 shrink-0" />
+      <div>
+        {conflicts.map((c, i) => (
+          <p key={i}>⚠️ Dietary Clash: {c.userName} ({c.conflict})</p>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -440,8 +423,8 @@ function DinerList({
                   {user.id !== currentUser.id && user.room && <span className="text-on-surface-variant text-[13px]"> (Room {user.room})</span>}
                 </span>
                 {guests > 0 && (
-                  <span className="block font-body-sm text-[12px] text-on-surface-variant">
-                    plus {guests} guest{guests === 1 ? '' : 's'}
+                  <span className="inline-flex items-center gap-xs px-2 py-0.5 rounded-full bg-secondary-container/40 text-secondary text-[11px] font-bold uppercase tracking-wider">
+                    Gym Prep / Extra (+{guests})
                   </span>
                 )}
               </span>
@@ -476,11 +459,13 @@ export function MealOptionsSheet({
   meal,
   diners,
   currentUser,
+  recipeTags,
   onClose,
 }: {
   meal: PlannedMeal;
   diners: { user: User; guests: number }[];
   currentUser: User;
+  recipeTags?: string[];
   onClose: () => void;
 }) {
   const mine = meal.participants.find((participant) => participant.userId === currentUser.id);
@@ -519,6 +504,8 @@ export function MealOptionsSheet({
             <Icon name="close" />
           </button>
         </div>
+
+        <DietaryWarningBanner recipeTags={recipeTags} diners={diners} />
 
         <CookChoice
           meal={meal}

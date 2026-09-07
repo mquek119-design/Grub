@@ -18,7 +18,9 @@ import {
   DeleteAccountPanel,
   DietaryPanel,
   LeaveHousePanel,
+  LogoutButton,
   PaymentDetailsPanel,
+  ProfileInfoPanel,
 } from '@/components/account/AccountPanels';
 
 export const metadata = { title: 'My Account · Grub', description: 'Manage your account and dietary preferences.' };
@@ -42,10 +44,6 @@ export default async function AccountPage() {
   const mealsPlanned =
     plan?.meals.filter((meal) => meal.participants.some((p) => p.userId === user.id)).length ?? 0;
 
-  // Impersonation swaps who the app renders for while `auth.uid()` stays you,
-  // so profile edits go through `demo_update_*` (migration 0020) and save
-  // properly against the demo housemate. Leaving and deleting deliberately do
-  // not: those end an account, and a seeded housemate is not yours to end.
   const realUser = await getRealUser();
   const viewingAs = realUser && realUser.id !== user.id ? user.name : null;
 
@@ -70,6 +68,7 @@ export default async function AccountPage() {
               <Icon name="person" className="text-primary text-lg" />
               Personal Settings
             </h2>
+            <ProfileInfoPanel user={user} />
             <PaymentDetailsPanel user={user} />
             <DietaryPanel user={user} />
             <Card padded={false} className="overflow-hidden hover:border-outline-variant/60 transition-colors">
@@ -121,6 +120,9 @@ export default async function AccountPage() {
               <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
                 {user.room ? `Room ${user.room}` : 'No room set'} · {house.name}
               </p>
+            </div>
+            <div className="w-full mt-xs">
+              <LogoutButton />
             </div>
           </Card>
 

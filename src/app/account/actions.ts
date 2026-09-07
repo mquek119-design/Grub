@@ -47,6 +47,44 @@ function normaliseAccountNumber(raw: string): string | null | 'invalid' {
   return digits;
 }
 
+/** Updates user display name and room number (supporting N/A or blank). */
+export async function updateProfileInfo(
+  _prev: AccountActionState,
+  formData: FormData
+): Promise<AccountActionState> {
+  const me = await getCurrentUser();
+
+  const name = String(formData.get('name') ?? '').trim();
+  const roomRaw = String(formData.get('room') ?? '').trim();
+  const room = roomRaw.toLowerCase() === 'n/a' || roomRaw === '' ? null : roomRaw;
+
+  if (!name) return fail('Name is required.');
+  if (name.length > 60) return fail('Keep your name under 60 characters.');
+
+  const supabase = await createClient();
+  const result = await supabase
+    .from('profiles')
+    .update({ name, room })
+    .eq('id', me.id)
+    .select('id');
+
+  if (result.error) return fail(result.error.message);
+
+  revalidatePath('/account');
+  revalidatePath('/settings');
+  revalidatePath('/plan');
+
+  return { status: 'success', message: 'Profile updated.' };
+}
+
+/** Logs the current user out and redirects to /welcome. */
+export async function signOutAction(): Promise<void> {
+  const supabase = await createClient();
+  await supabase.auth.signOut();
+  revalidatePath('/', 'layout');
+  redirect('/welcome');
+}
+
 /**
  * Saves how housemates pay you.
  *
@@ -90,11 +128,6 @@ export async function updatePaymentDetails(
   const supabase = await createClient();
   const actingAs = await readViewAsId();
 
-  // `profiles_update` is `id = auth.uid()`, so the ordinary update matches
-  // nothing at all while the app is rendering as a demo housemate — and setting
-  // their payment details is exactly what you need in order to walk through
-  // paying them. `demo_update_payment_details` (0020) makes the same house check
-  // in SQL and refuses any profile that is not a demo one.
   if (actingAs) {
     const { data, error } = await supabase.rpc('demo_update_payment_details', {
       p_target: actingAs,
@@ -158,7 +191,6 @@ export async function updateDietaryPreferences(
   const supabase = await createClient();
   const actingAs = await readViewAsId();
 
-  // Same reasoning as the payment details above — see `demo_update_dietary`.
   if (actingAs) {
     const { data, error } = await supabase.rpc('demo_update_dietary', {
       p_target: actingAs,
@@ -185,14 +217,6 @@ export async function updateDietaryPreferences(
 
 /**
  * Leaves the house.
- *
- * Refuses when you are the last member and the house still holds data, because
- * that would orphan every recipe, plan and split with no way back — the house
- * would exist with nobody able to see it. Refuses to strand the collector role
- * silently too: it moves to another member first.
- *
- * Historic splits are deliberately left alone. They record what happened, and
- * money owed does not stop being owed because someone moved out.
  */
 export async function leaveHouse(): Promise<AccountActionState> {
   const me = await getCurrentUser();
@@ -210,7 +234,6 @@ export async function leaveHouse(): Promise<AccountActionState> {
 
   const supabase = await createClient();
 
-  // Hand over the collector role rather than leaving it pointing at nobody.
   if (house.collectorUserId === me.id) {
     const successor = others.find((user) => user.isAdmin) ?? others[0];
     const handover = await supabase
@@ -233,32 +256,11 @@ export async function leaveHouse(): Promise<AccountActionState> {
 
 /**
  * Deletes your account.
- *
- * **Refuses while money is outstanding, and that is the whole point.**
- * `splits.from_user_id`, `splits.to_user_id` and `expense_shares.user_id` all
- * cascade on a profile delete, so removing the row would erase the debt in
- * either direction — silently, with the other housemates none the wiser. In an
- * app whose only job is keeping five people honest about money, a delete button
- * that can quietly write off what you owe is not a feature.
- *
- * What it can actually remove is the **profile** and everything hanging off it.
- * The Supabase login itself needs a `service_role` key to delete and this app
- * deliberately holds none — that key bypasses RLS entirely. So the honest
- * description, and what the UI says, is: your data goes, and signing in with
- * that email again would start you from nothing.
- *
- * The **last member** of a house used to hit a flat refusal, because deleting
- * their profile would leave the house standing with nobody able to see it and
- * `0002_rls.sql` grants no delete on `houses` to offer as a way out. It now
- * asks: `alsoDeleteHouse` false returns `confirm-house` naming what would go,
- * and true takes the house with it via `delete_house()` (migration 0020).
- * Two deliberate answers, because it is two deliberate deletions.
  */
 export async function deleteAccount(alsoDeleteHouse = false): Promise<AccountActionState> {
   const me = await getCurrentUser();
   const supabase = await createClient();
 
-  // --- Money first. Everything else is recoverable; this is not. ------------
   const splits = await supabase
     .from('splits')
     .select('amount, status, from_user_id, to_user_id')
@@ -276,9 +278,6 @@ export async function deleteAccount(alsoDeleteHouse = false): Promise<AccountAct
     .eq('user_id', me.id)
     .eq('settled', false);
 
-  // Fail closed, exactly as the splits check above does: a query error must
-  // never read as "nothing owed" and let a delete cascade away expense debt
-  // that nobody was told about.
   if (shares.error) return fail(`Could not check your balances: ${shares.error.message}`);
   const unsettledExpenses = shares.data ?? [];
 
@@ -297,12 +296,8 @@ export async function deleteAccount(alsoDeleteHouse = false): Promise<AccountAct
     );
   }
 
-  // --- Then the house, so nothing is left pointing at nobody ----------------
   if (me.houseId) {
     const [house, housemates] = await Promise.all([getHouse(), getHousemates()]);
-    // Demo housemates are seeded placeholders with no way to sign in, so they
-    // cannot inherit a house. Counting them as members would leave it standing
-    // with nobody able to open it — exactly the orphan this guards against.
     const others = housemates.filter((user) => user.id !== me.id && !user.isDemo);
 
     if (others.length === 0) {

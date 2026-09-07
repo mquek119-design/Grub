@@ -9,8 +9,10 @@ import { clsx } from '@/lib/clsx';
 import {
   deleteAccount,
   leaveHouse,
+  signOutAction,
   updateDietaryPreferences,
   updatePaymentDetails,
+  updateProfileInfo,
   type AccountActionState,
 } from '@/app/account/actions';
 import type { User } from '@/lib/types';
@@ -54,12 +56,77 @@ function Status({ state }: { state: AccountActionState }) {
   );
 }
 
-/**
- * How housemates pay you.
- *
- * Free text on purpose — the app never touches money, so it has no business
- * validating a sort code, and Revolut or Monzo links must work just as well.
- */
+/** Display name and room number (with N/A support). */
+export function ProfileInfoPanel({ user }: { user: User }) {
+  const [state, action] = useActionState(updateProfileInfo, INITIAL);
+
+  return (
+    <Card className="flex flex-col gap-sm">
+      <div className="min-w-0">
+        <h2 className="font-title-md text-title-md">Profile info</h2>
+        <p className="font-body-sm text-body-sm text-on-surface-variant">
+          Your display name and room number shown to housemates on meal rosters and splits.
+        </p>
+      </div>
+
+      <form action={action} className="flex flex-col gap-md">
+        <label className="flex flex-col gap-xs">
+          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
+            Display name
+          </span>
+          <input
+            name="name"
+            defaultValue={user.name}
+            placeholder="Your Name"
+            required
+            className={FIELD}
+          />
+        </label>
+
+        <label className="flex flex-col gap-xs">
+          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
+            Room number / name (optional)
+          </span>
+          <input
+            name="room"
+            defaultValue={user.room ?? ''}
+            placeholder="e.g. 4B or N/A"
+            className={FIELD}
+          />
+          <span className="font-body-sm text-[12px] text-on-surface-variant">
+            Type room number or &quot;N/A&quot; / leave blank if you have no room number.
+          </span>
+        </label>
+
+        <SaveButton label="Save name & room" />
+        <Status state={state} />
+      </form>
+    </Card>
+  );
+}
+
+/** Log Out Button */
+export function LogoutButton() {
+  const [pending, startTransition] = useTransition();
+
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      onClick={() => {
+        startTransition(async () => {
+          await signOutAction();
+        });
+      }}
+      className="w-full h-11 rounded-lg border border-outline-variant text-on-surface-variant font-semibold hover:bg-surface-container flex items-center justify-center gap-xs transition-colors"
+    >
+      <Icon name="logout" className="text-sm" />
+      {pending ? 'Logging out...' : 'Log Out'}
+    </button>
+  );
+}
+
+/** How housemates pay you. */
 export function PaymentDetailsPanel({ user }: { user: User }) {
   const [state, action] = useActionState(updatePaymentDetails, INITIAL);
   const payment = user.payment;
@@ -211,10 +278,7 @@ export function DietaryPanel({ user }: { user: User }) {
   );
 }
 
-/**
- * Leaving the house. Confirms first — it detaches you from every plan and
- * split, and rejoining needs the invite code again.
- */
+/** Leaving the house. */
 export function LeaveHousePanel() {
   const [confirming, setConfirming] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -223,7 +287,6 @@ export function LeaveHousePanel() {
   function leave() {
     startTransition(async () => {
       const result = await leaveHouse();
-      // On success the action redirects, so anything returned is a refusal.
       if (result?.status === 'error') {
         setMessage(result.message);
         setConfirming(false);
@@ -278,28 +341,7 @@ export function LeaveHousePanel() {
   );
 }
 
-/**
- * Deleting your account.
- *
- * Two confirmations deep, and the copy says exactly what goes and what does
- * not. It refuses outright while any money is unsettled — that check lives in
- * the action, because a guard the UI can be routed around is not a guard.
- */
-/**
- * Deleting an account, in up to two questions.
- *
- * `idle` → `account` is the ordinary path. `house` is only reached when the
- * server says you are the last member: the house cannot be left standing with
- * nobody able to open it, so it has to go too, and that is a second deletion
- * which gets its own second answer rather than being folded into the first.
- */
 type DeleteStage = 'idle' | 'account' | 'house';
-
-/**
- * The `danger` variant is the *outlined* error button — right for the control
- * that opens the question, too quiet for the one that answers it. Filling it
- * keeps the confirm distinct from the Cancel sitting next to it.
- */
 const SOLID_ERROR = 'bg-error text-on-error border-error hover:opacity-90';
 
 export function DeleteAccountPanel() {
@@ -312,7 +354,6 @@ export function DeleteAccountPanel() {
     setMessage(null);
     startTransition(async () => {
       const result = await deleteAccount(alsoDeleteHouse);
-      // Success redirects, so anything returned is a refusal or a question.
       if (result?.status === 'confirm-house') {
         setHouseWarning(result.message);
         setStage('house');

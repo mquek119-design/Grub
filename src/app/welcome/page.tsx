@@ -6,31 +6,15 @@ import { Marquee } from '@/components/motion/Marquee';
 import { getCurrentUserOrNull } from '@/lib/queries';
 
 export const metadata = {
-  title: 'Grub — one house, one shop, split fair',
+  title: 'Grub — one house, automated Tesco shop, split fair',
   description:
-    'Plan meals together, buy one Tesco shop that clears the minimum, and split it per item — you pay for what you ate.',
+    'Plan meals together, automate your Tesco online basket building, and split it per item — you pay for what you ate.',
 };
 
-// Dynamic page for auth state detection
 export const dynamic = 'force-dynamic';
 
-/**
- * The front door for all users.
- *
- * All users (signed-in and signed-out) land here. Content and CTAs adapt based
- * on auth state:
- * - Signed-out: "Sign up" and "Sign in with invite"
- * - Signed-in with house: "Go to your house" button
- * - Signed-in without house: "Finish setup" button
- *
- * The one surface in the app where big type and motion carry no risk, because
- * nothing here is a real house's data — every figure is a plain fact about how
- * Grub works (the £25 collection minimum), never an invented saving.
- *
- * Server component. The only client islands are <Reveal> and <Marquee>.
- */
-
 const STRIP = [
+  'Automates Tesco basket',
   'One shop, not four',
   'Split per item',
   'Clears the £25 minimum',
@@ -41,9 +25,9 @@ const STRIP = [
 
 const BENEFITS = [
   {
-    icon: 'groups',
-    title: 'One shop, one order',
-    body: 'Pool the whole house into a single basket that clears the £25 collection minimum a solo student never hits.',
+    icon: 'shopping_basket',
+    title: 'Automated Tesco trolley building',
+    body: 'Not just a manual tracking list. Grub automatically translates your house meal plan into exact ingredients and builds your Tesco online basket in 1 click.',
   },
   {
     icon: 'savings',
@@ -53,21 +37,20 @@ const BENEFITS = [
   {
     icon: 'receipt_long',
     title: 'Split per item, not evenly',
-    body: "You pay for what you ate — not a flat quarter of someone else's protein powder. Every line shows its own arithmetic.",
+    body: "You pay for what you ate — not a flat quarter of someone else's protein powder. Every line shows its own transparent arithmetic.",
   },
 ];
 
 const STEPS = [
   { n: '01', title: 'Everyone picks', body: 'The house says what they fancy this week. Shared meals stack; nobody is signed up to a dinner they did not choose.' },
-  { n: '02', title: 'One basket builds', body: 'After the cutoff, the collector builds and reviews the basket, with own-brand swaps where they save.' },
-  { n: '03', title: 'Split settles', body: 'The collector orders; everyone pays their real share back. The workings are printed under every line.' },
+  { n: '02', title: 'Tesco trolley builds automatically', body: 'Grub consolidates ingredients, finds own-brand swaps, and automatically syncs the trolley directly to Tesco.' },
+  { n: '03', title: 'Split settles on delivery', body: 'The shopper confirms order placement; everyone pays their real share back with transparent itemized receipts.' },
 ];
 
 export default async function WelcomePage() {
   const currentUser = await getCurrentUserOrNull();
   const hasHouse = currentUser?.houseId ? true : false;
 
-  // Determine header link based on auth state
   const headerLink = currentUser ? (
     <Link
       href="/account"
@@ -84,7 +67,6 @@ export default async function WelcomePage() {
     </Link>
   );
 
-  // Determine primary CTA based on auth state
   const primaryCta = currentUser ? (
     hasHouse ? (
       <Link
@@ -113,12 +95,6 @@ export default async function WelcomePage() {
     </Link>
   );
 
-  // For a signed-out visitor arriving with a housemate's invite, "Sign up" is
-  // still the right first step — this just skips them past /login, which
-  // assumes an account already exists. /onboarding/join itself redirects an
-  // unauthenticated visitor to signup with the invite code preserved, so
-  // pointing here directly (rather than via /login) keeps one destination for
-  // "no account yet" instead of two that both end up in the same place.
   const secondaryCta = !currentUser && (
     <Link
       href="/onboarding/join"
@@ -128,7 +104,6 @@ export default async function WelcomePage() {
     </Link>
   );
 
-  // Closing CTA
   const closingCta = currentUser ? (
     hasHouse ? (
       <Link
@@ -171,14 +146,13 @@ export default async function WelcomePage() {
 
         <div className="px-margin-mobile md:px-margin-desktop mx-auto pt-[2.5rem] md:pt-[3.5rem] max-w-3xl">
           <h1 className="font-georgia text-[2.75rem] leading-[1.05] md:text-[4.5rem] md:leading-[1.02] font-bold text-primary animate-fade-in-up">
-            Stop buying four bags of pasta.
+            Automated Tesco shops for your flat.
           </h1>
           <p
             className="mt-md md:mt-lg font-body-lg text-body-lg md:text-[1.35rem] md:leading-relaxed text-on-surface-variant max-w-xl animate-fade-in-up"
             style={{ animationDelay: '120ms' }}
           >
-            One house, one shop, split fair. Plan meals together, buy a single
-            order that actually clears the minimum, and pay for what you ate.
+            Not just another manual list app. Grub turns your house meal plan into an automated Tesco trolley, hits the minimum order limit effortlessly, and splits the bill item by item.
           </p>
 
           <div
@@ -190,7 +164,6 @@ export default async function WelcomePage() {
           </div>
         </div>
 
-        {/* A slow-drifting mark, decoration only, hidden on small screens. */}
         <span aria-hidden="true" className="hidden lg:block absolute right-8 top-[7rem] opacity-15 animate-float">
           <LogoMark className="h-40 w-auto" />
         </span>
@@ -214,11 +187,7 @@ export default async function WelcomePage() {
           </Reveal>
           <Reveal className="max-w-3xl">
             <p className="font-body-lg text-body-lg md:text-[1.1rem] md:leading-relaxed text-on-surface-variant">
-              Every student house has the same conversation: four bags of pasta, nobody&apos;s sure who&apos;s paying for
-              what, someone&apos;s cooking for one when they could be cooking for four. Grub is what we actually call
-              dinner — not a &quot;meal solution,&quot; just grub — built so your house plans together, shops once, and
-              splits it fair without the group chat argument. The mark is two shapes overlapping on purpose: your food is
-              never really just your food when you live with other people.
+              Every student house faces the same issue: manual shopping lists left unchecked, four separate deliveries paying delivery fees, or group chat arguments over who owes what. Grub is built to automate your Tesco basket directly from your weekly meal plan, pool orders to clear supermarket delivery thresholds, and calculate per-item dry-money splits automatically.
             </p>
           </Reveal>
         </div>
@@ -228,7 +197,7 @@ export default async function WelcomePage() {
       <section className="w-full px-margin-mobile md:px-margin-desktop py-[4rem]">
         <div className="mx-auto max-w-5xl">
           <Reveal as="h2" className="font-georgia text-headline-lg-mobile md:text-headline-lg text-primary max-w-2xl">
-            The buying unit is the household, not the student.
+            The buying unit is the household, not the individual.
           </Reveal>
           <div className="mt-xl grid gap-md md:grid-cols-3">
             {BENEFITS.map((benefit, i) => (
@@ -240,7 +209,7 @@ export default async function WelcomePage() {
                 <span className="w-11 h-11 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center">
                   <Icon name={benefit.icon} />
                 </span>
-                <h3 className="font-title-md text-title-md text-on-surface">{benefit.title}</h3>
+                <h3 className="font-title-md text-title-md text-on-surface font-bold">{benefit.title}</h3>
                 <p className="font-body-sm text-body-sm text-on-surface-variant">{benefit.body}</p>
               </Reveal>
             ))}
@@ -257,8 +226,8 @@ export default async function WelcomePage() {
           <div className="mt-xl grid gap-md md:grid-cols-3">
             {STEPS.map((step, i) => (
               <Reveal key={step.n} delay={i * 90} className="flex flex-col gap-xs">
-                <span className="font-numeric-data text-secondary text-title-md">{step.n}</span>
-                <h3 className="font-title-md text-title-md text-on-surface">{step.title}</h3>
+                <span className="font-numeric-data text-secondary text-title-md font-bold">{step.n}</span>
+                <h3 className="font-title-md text-title-md text-on-surface font-bold">{step.title}</h3>
                 <p className="font-body-sm text-body-sm text-on-surface-variant">{step.body}</p>
               </Reveal>
             ))}
@@ -271,13 +240,13 @@ export default async function WelcomePage() {
         <div className="mx-auto max-w-5xl">
           <Reveal className="rounded-xl bg-primary text-on-primary p-xl md:p-[3rem] flex flex-col items-start gap-md">
             <h2 className="font-georgia text-headline-lg-mobile md:text-headline-lg text-secondary max-w-2xl">
-              Get the house in before someone buys another four pints of milk.
+              Automate your flat&apos;s groceries and start pooling your shop today.
             </h2>
             {closingCta}
           </Reveal>
 
           <p className="mt-xl text-center font-body-sm text-body-sm text-on-surface-variant flex flex-col items-center gap-2">
-            <span><span className="font-georgia text-primary">Grub</span> · one house, one shop, split fair</span>
+            <span><span className="font-georgia text-primary font-bold">Grub</span> · one house, automated Tesco shop, split fair</span>
             <span className="flex gap-4">
               <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
               <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>

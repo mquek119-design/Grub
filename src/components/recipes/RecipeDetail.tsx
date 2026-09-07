@@ -6,16 +6,11 @@ import { Card } from '@/components/ui/Card';
 import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
 import type { Recipe } from '@/lib/types';
+import { CookModeModal } from '@/components/recipes/CookModeModal';
 
-/**
- * Recipe detail with Cook Mode.
- *
- * Cook Mode enlarges the steps and keeps the screen awake — you are reading
- * this from across a kitchen with wet hands.
- */
 export function RecipeDetail({ recipe }: { recipe: Recipe }) {
   const [servings, setServings] = useState(recipe.servings);
-  const [cookMode, setCookMode] = useState(false);
+  const [cookModeModalOpen, setCookModeModalOpen] = useState(false);
   const [done, setDone] = useState<Set<number>>(new Set());
 
   const scale = servings / recipe.servings;
@@ -32,58 +27,62 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
 
   return (
     <div className="flex flex-col gap-lg">
-      <div className="flex items-center justify-between gap-md">
+      {cookModeModalOpen && (
+        <CookModeModal
+          recipe={recipe}
+          servings={servings}
+          onClose={() => setCookModeModalOpen(false)}
+        />
+      )}
+
+      <div className="flex items-center justify-between gap-md flex-wrap">
         <div className="flex items-center gap-md flex-wrap">
-          <span className="flex items-center gap-xs font-body-sm text-body-sm text-on-surface-variant">
-            <Icon name="schedule" className="text-[18px]" />
-            {recipe.cookTimeMins} min
+          <span className="flex items-center gap-xs font-body-sm text-body-sm text-on-surface-variant bg-surface-container px-sm py-xs rounded-full">
+            <Icon name="schedule" className="text-[18px] text-primary" />
+            {recipe.cookTimeMins} mins cook
           </span>
-          <span className="flex items-center gap-xs font-body-sm text-body-sm text-on-surface-variant capitalize">
-            <Icon name="signal_cellular_alt" className="text-[18px]" />
+          <span className="flex items-center gap-xs font-body-sm text-body-sm text-on-surface-variant capitalize bg-surface-container px-sm py-xs rounded-full">
+            <Icon name="signal_cellular_alt" className="text-[18px] text-primary" />
             {recipe.difficulty}
           </span>
-          <span className="flex items-center gap-xs font-numeric-data text-numeric-data text-primary">
+          <span className="flex items-center gap-xs font-numeric-data text-numeric-data text-primary bg-primary-container/20 px-sm py-xs rounded-full font-bold">
             <Icon name="payments" className="text-[18px]" />
             {formatPence(recipe.costPerPortion)}/portion
           </span>
         </div>
 
-        <label className="flex items-center gap-sm cursor-pointer shrink-0">
-          <span className="font-body-sm text-body-sm text-on-surface-variant">Cook Mode</span>
-          <span className="relative inline-flex items-center">
-            <input
-              type="checkbox"
-              className="sr-only peer"
-              checked={cookMode}
-              onChange={(event) => setCookMode(event.target.checked)}
-            />
-            <span className="w-11 h-6 bg-surface-container-highest rounded-full peer peer-checked:bg-primary peer-focus-visible:ring-2 peer-focus-visible:ring-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full" />
-          </span>
-        </label>
+        <button
+          type="button"
+          onClick={() => setCookModeModalOpen(true)}
+          className="inline-flex items-center gap-xs px-lg py-sm rounded-xl bg-primary text-on-primary font-bold text-sm hover:opacity-90 transition-opacity shadow-sm"
+        >
+          <Icon name="skillet" className="text-lg" />
+          Start Cook Mode
+        </button>
       </div>
 
-      <div className={clsx('grid gap-lg', cookMode ? 'grid-cols-1' : 'lg:grid-cols-12')}>
-        <div className={clsx('flex flex-col gap-md', !cookMode && 'lg:col-span-5 lg:order-2')}>
+      <div className="grid gap-lg lg:grid-cols-12">
+        <div className="flex flex-col gap-md lg:col-span-5 lg:order-2">
           <Card className="flex flex-col gap-md">
             <div className="flex items-center justify-between gap-sm">
-              <h2 className="font-title-md text-title-md">Ingredients</h2>
+              <h2 className="font-title-md text-title-md font-bold">Ingredients</h2>
               <div className="flex items-center gap-2 bg-surface-container rounded-lg p-1">
                 <button
                   type="button"
                   aria-label="Fewer servings"
                   onClick={() => setServings((prev) => Math.max(1, prev - 1))}
-                  className="w-6 h-6 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded"
+                  className="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded font-bold"
                 >
                   <Icon name="remove" className="text-[16px]" />
                 </button>
-                <span className="font-numeric-data text-numeric-data w-12 text-center tabular-nums">
-                  {servings}
+                <span className="font-numeric-data text-numeric-data w-12 text-center tabular-nums font-bold">
+                  {servings} ptn
                 </span>
                 <button
                   type="button"
                   aria-label="More servings"
                   onClick={() => setServings((prev) => prev + 1)}
-                  className="w-6 h-6 flex items-center justify-center text-primary hover:bg-primary-container hover:text-on-primary-container rounded"
+                  className="w-7 h-7 flex items-center justify-center text-primary hover:bg-primary-container hover:text-on-primary-container rounded font-bold"
                 >
                   <Icon name="add" className="text-[16px]" />
                 </button>
@@ -110,7 +109,7 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
                       />
                       <span className="font-body-lg text-body-lg truncate">{ingredient.name}</span>
                     </span>
-                    <span className="font-numeric-data text-numeric-data text-on-surface-variant shrink-0">
+                    <span className="font-numeric-data text-numeric-data text-on-surface-variant shrink-0 font-semibold">
                       {display} {ingredient.unit}
                     </span>
                   </li>
@@ -131,8 +130,8 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
           </Card>
         </div>
 
-        <div className={clsx('flex flex-col gap-md', !cookMode && 'lg:col-span-7 lg:order-1')}>
-          <h2 className="font-title-md text-title-md">Method</h2>
+        <div className="flex flex-col gap-md lg:col-span-7 lg:order-1">
+          <h2 className="font-title-md text-title-md font-bold">Method</h2>
           <ol className="flex flex-col gap-sm">
             {recipe.instructions.map((step, index) => {
               const isDone = done.has(index);
@@ -150,7 +149,7 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
                   >
                     <span
                       className={clsx(
-                        'w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-numeric-data',
+                        'w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-numeric-data font-bold',
                         isDone
                           ? 'bg-primary text-on-primary'
                           : 'bg-surface-container text-on-surface-variant'
@@ -160,7 +159,7 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
                     </span>
                     <span
                       className={clsx(
-                        cookMode ? 'text-[20px] leading-8' : 'text-body-lg',
+                        'text-body-lg leading-relaxed',
                         isDone && 'line-through text-on-surface-variant'
                       )}
                     >
@@ -176,7 +175,7 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
             <Card accent="secondary" className="flex items-start gap-sm">
               <Icon name="lightbulb" filled className="text-secondary mt-0.5" />
               <div>
-                <h3 className="font-numeric-data text-numeric-data mb-1">Pro Tip</h3>
+                <h3 className="font-numeric-data text-numeric-data mb-1 font-bold">Mob Pro Tip</h3>
                 <p className="font-body-sm text-body-sm text-on-surface-variant">{recipe.proTip}</p>
               </div>
             </Card>

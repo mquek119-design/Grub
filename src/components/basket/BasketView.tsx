@@ -12,7 +12,10 @@ import { basketLineTotal, basketSavings, basketTotal } from '@/lib/calc';
 import type { BasketItem, IngredientCategory, User } from '@/lib/types';
 import { updateBasketItemQuantity } from '@/app/basket/actions';
 import { checkTescoSession, syncBasketToTesco, startTescoCheckout } from '@/app/basket/tescoActions';
+import { HostedHandoffBanner } from '@/components/basket/HostedHandoffBanner';
 import { BrandSwapModal } from '@/components/basket/BrandSwapModal';
+
+// Inside BasketView:
 import { TESCO_ORDERING_UNAVAILABLE_MESSAGE } from '@/lib/tescoOrdering';
 
 /**
@@ -187,6 +190,13 @@ export function BasketView({
 
   return (
     <div className="pb-[140px] flex flex-col gap-md">
+      <HostedHandoffBanner
+        planId={planId}
+        isCollector={isCollector}
+        collectorName={collectorName}
+        itemCount={liveItems.length}
+      />
+
     {selectedSwapItem && (
       <BrandSwapModal
         isOpen={isSwapModalOpen}

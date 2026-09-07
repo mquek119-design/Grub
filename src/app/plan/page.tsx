@@ -6,6 +6,7 @@ import { WeekPlan } from '@/components/plan/WeekPlan';
 import { WeekSwitcher } from '@/components/plan/WeekSwitcher';
 import { ReopenPlanningBanner } from '@/components/plan/ReopenPlanningBanner';
 import { FirstMealModal } from '@/components/plan/FirstMealModal';
+import { CopyRosterButton } from '@/components/plan/CopyRosterButton';
 import { Icon } from '@/components/media/Icon';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Notice } from '@/components/ui/Notice';
@@ -24,7 +25,6 @@ import { nextWeekStart, parseWeekChoice } from '@/lib/weeks';
 
 export const metadata = { title: 'Plan · Grub', description: 'Plan this week\'s meals and choose what to cook together.' };
 
-// The cutoff deadline shown here moves with the clock.
 export const dynamic = 'force-dynamic';
 
 export default async function PlanPage({
@@ -68,7 +68,10 @@ export default async function PlanPage({
   if (showKitchen) {
     return (
       <PageShell wide>
-        <PageHeader title="Your Week" subtitle="Shop's in. This is what you're working with." />
+        <div className="flex items-center justify-between gap-md flex-wrap">
+          <PageHeader title="Your Week" subtitle="Shop's in. This is what you're working with." />
+          <CopyRosterButton plan={thisWeek} />
+        </div>
         <FirstRunTip tab="plan" />
         {switcher}
         <ReopenPlanningBanner status={thisWeek.status} />
@@ -79,14 +82,17 @@ export default async function PlanPage({
 
   return (
     <PageShell wide>
-      <PageHeader
-        title="Your Week"
-        subtitle={
-          week === 'next'
-            ? "Nothing here is bought yet. Get ahead while this week cooks itself."
-            : `Say what you fancy before ${cutoff}. After that it's whatever everyone else wanted.`
-        }
-      />
+      <div className="flex items-center justify-between gap-md flex-wrap">
+        <PageHeader
+          title="Your Week"
+          subtitle={
+            week === 'next'
+              ? "Nothing here is bought yet. Get ahead while this week cooks itself."
+              : `Say what you fancy before ${cutoff}. After that it's whatever everyone else wanted.`
+          }
+        />
+        <CopyRosterButton plan={plan} />
+      </div>
 
       <FirstRunTip tab="plan" />
 

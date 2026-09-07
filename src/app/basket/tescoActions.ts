@@ -128,11 +128,6 @@ export async function syncBasketToTesco(planId: string): Promise<TescoActionStat
         if (!actualItem.product_uid) continue;
         const localMatch = items.find((i) => i.tesco_product_id === actualItem.product_uid);
         if (localMatch) {
-          // Tesco's trolley is the authority on price. Our figure is derived
-          // from pack size and a listed price, which for anything sold by
-          // weight is a guide only — loose items are charged on actual weight,
-          // so the estimate can sit above or below the real charge. Once the
-          // item is in the trolley, take Tesco's number.
           const actualPricePence = Math.round(actualItem.unit_price * 100);
           if (actualPricePence !== localMatch.unit_price) repricedCount += 1;
           await supabase
@@ -142,22 +137,20 @@ export async function syncBasketToTesco(planId: string): Promise<TescoActionStat
         }
       }
     } catch (_basketErr) {
-      // Not fatal — the items are in the trolley either way. But the split now
-      // rests on our own estimate rather than Tesco's figure, so say so instead
-      // of only logging where nobody will look.
       priceNote =
         ' Prices could not be reconciled against the Tesco trolley, so the split still uses estimates.';
     }
 
-    // Mark plan as ordered
+    // Mark plan as locked (trolley ready, awaiting shopper order placement)
     await supabase
       .from('weekly_plans')
-      .update({ status: 'ordered' })
+      .update({ status: 'locked' })
       .eq('id', planId)
       .eq('house_id', me.houseId);
 
     revalidatePath('/basket');
     revalidatePath('/split');
+    revalidatePath('/plan');
     revalidatePath('/');
 
     return {
@@ -167,7 +160,7 @@ export async function syncBasketToTesco(planId: string): Promise<TescoActionStat
       message:
         `Pushed ${syncedCount} item${syncedCount === 1 ? '' : 's'} to your Tesco basket.` +
         (repricedCount > 0
-          ? ` ${repricedCount} price${repricedCount === 1 ? '' : 's'} updated to Tesco's actual charge — the split now matches your trolley.`
+          ? ` ${repricedCount} price${repricedCount === 1 ? '' : 's'} updated to Tesco's actual charge.`
           : '') +
         priceNote,
     };
@@ -176,15 +169,32 @@ export async function syncBasketToTesco(planId: string): Promise<TescoActionStat
   }
 }
 
+/** Confirms that the order has been placed and paid for on Tesco, locking the week and activating splits. */
+export async function confirmOrderPlaced(planId: string): Promise<TescoActionState> {
+  const me = await getCurrentUser();
+  if (!me.houseId) return fail('Join a house first.');
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('weekly_plans')
+    .update({ status: 'ordered' })
+    .eq('id', planId)
+    .eq('house_id', me.houseId);
+
+  if (error) return fail(error.message);
+
+  revalidatePath('/basket');
+  revalidatePath('/plan');
+  revalidatePath('/split');
+  revalidatePath('/');
+
+  return {
+    status: 'success',
+    message: 'Order confirmed! The week is locked and financial splits are active.',
+  };
+}
+
 /** Runs a checkout dry-run to retrieve actual slot pricing and total checkout cost. */
-/**
- * Fetches a checkout preview from Tesco.
- *
- * Deliberately takes no plan id: this previews whatever is in the collector's
- * Tesco trolley server-side, which `syncBasketToTesco` has already populated.
- * It previously accepted a `planId` it never read, which implied the preview
- * was scoped to a plan when it is not.
- */
 export async function startTescoCheckout(): Promise<TescoActionState> {
   if (!isTescoOrderingEnabled()) return fail(TESCO_ORDERING_UNAVAILABLE_MESSAGE);
 
@@ -215,7 +225,6 @@ export async function startTescoCheckout(): Promise<TescoActionState> {
     }
 
     const provider = new TescoProvider(session);
-    // Run dry-run checkout with fulfillment options from database
     const orderResult = await provider.checkout(true, {
       fulfillmentMethod: house.fulfillment_method,
       postcode: house.delivery_postcode || undefined,
