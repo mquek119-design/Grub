@@ -584,6 +584,11 @@ price, a split, a balance or a payment is written plainly and precisely. A joke
 beside a figure somebody has to pay makes the figure look like a joke too, and
 the whole product rests on those figures being believed.
 
+**`VOICE.md` is the fuller guide** — per-screen examples, a DO/DON'T list, and
+where a louder register is allowed (empty states, onboarding, milestones only;
+everywhere else, including every money screen, stays dry). It expands on this
+section; it never overrides it.
+
 ## A Rule Worth Keeping
 
 When a figure cannot be derived, show an empty state saying so — never a placeholder that looks like data. The whole product rests on housemates trusting the split; one invented number seen through costs more than a blank panel ever will.
