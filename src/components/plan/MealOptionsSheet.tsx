@@ -368,14 +368,25 @@ function RemoveDinerButton({ name }: { name: string }) {
   );
 }
 
-function DietaryWarningBanner({ recipeTags, diners }: { recipeTags?: string[]; diners: { user: User }[] }) {
+function DietaryWarningBanner({
+  recipeTitle,
+  recipeTags,
+  diners,
+}: {
+  recipeTitle: string;
+  recipeTags?: string[];
+  diners: { user: User }[];
+}) {
   const conflicts: { userName: string; conflict: string }[] = [];
+
+  const combinedText = `${recipeTitle} ${recipeTags?.join(' ') ?? ''}`.toLowerCase();
+  const isMeat = ['chicken', 'beef', 'pork', 'lamb', 'meat', 'bacon', 'sushi', 'fish', 'salmon', 'tuna', 'prawn'].some(
+    (t) => combinedText.includes(t)
+  );
 
   diners.forEach(({ user }) => {
     const prefs = (user.dietaryPreferences || []).map((p) => p.toLowerCase());
     if (prefs.includes('vegetarian') || prefs.includes('vegan')) {
-      const titleLower = recipeTags?.join(' ').toLowerCase() ?? '';
-      const isMeat = ['chicken', 'beef', 'pork', 'lamb', 'meat', 'bacon'].some((t) => titleLower.includes(t));
       if (isMeat) {
         conflicts.push({ userName: user.name, conflict: 'Vegetarian / Vegan clash' });
       }
@@ -505,7 +516,11 @@ export function MealOptionsSheet({
           </button>
         </div>
 
-        <DietaryWarningBanner recipeTags={recipeTags} diners={diners} />
+        <DietaryWarningBanner
+          recipeTitle={meal.recipeTitle}
+          recipeTags={recipeTags}
+          diners={diners}
+        />
 
         <CookChoice
           meal={meal}
