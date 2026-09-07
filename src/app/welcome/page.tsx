@@ -113,13 +113,18 @@ export default async function WelcomePage() {
     </Link>
   );
 
-  // Secondary CTA (only for signed-out users)
+  // For a signed-out visitor arriving with a housemate's invite, "Sign up" is
+  // still the right first step — this just skips them past /login, which
+  // assumes an account already exists. /onboarding/join itself redirects an
+  // unauthenticated visitor to signup with the invite code preserved, so
+  // pointing here directly (rather than via /login) keeps one destination for
+  // "no account yet" instead of two that both end up in the same place.
   const secondaryCta = !currentUser && (
     <Link
       href="/onboarding/join"
-      className="inline-flex items-center justify-center h-12 px-xl rounded-full border border-outline-variant text-on-surface-variant font-title-md text-title-md hover:bg-surface-container transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-0"
+      className="inline-flex items-center justify-center h-12 px-lg font-body-sm text-body-sm font-semibold text-on-surface-variant hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-0 rounded-full"
     >
-      Sign in with invite
+      Got an invite code? Join a house
     </Link>
   );
 
