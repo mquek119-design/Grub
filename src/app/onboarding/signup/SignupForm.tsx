@@ -96,6 +96,7 @@ export function SignupForm({ next = '/onboarding/instructions' }: { next?: strin
           onChange={(e) => setEmail(e.target.value)}
           required
           aria-required="true"
+          aria-describedby={state.status === 'error' ? 'signup-error' : undefined}
           autoComplete="email"
           placeholder="you@university.ac.uk"
           className="h-12 px-3 rounded-lg bg-surface-container-lowest border border-surface-container-highest focus:ring-2 focus:ring-primary focus:border-primary text-body-lg"
@@ -103,7 +104,7 @@ export function SignupForm({ next = '/onboarding/instructions' }: { next?: strin
       </label>
 
       {state.status === 'error' && (
-        <p role="alert" className="font-body-sm text-body-sm text-error">
+        <p id="signup-error" role="alert" className="font-body-sm text-body-sm text-error">
           {state.message}
         </p>
       )}

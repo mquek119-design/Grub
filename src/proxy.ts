@@ -15,6 +15,8 @@ function isPublic(pathname: string): boolean {
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  if (pathname.startsWith('/_vercel/insights/')) return NextResponse.next();
+
   // These generated files do not query Supabase and must remain available to
   // crawlers even when authentication (or the local database) is unavailable.
   if (PUBLIC_METADATA_PATHS.has(pathname)) return NextResponse.next();

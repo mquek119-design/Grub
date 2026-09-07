@@ -19,11 +19,13 @@
     "e2e:a11y": "playwright test a11y-authenticated.spec.ts",
     "e2e:auth": "playwright codegen --save-storage=.playwright/auth/user.json http://localhost:3002/login",
     "e2e:debug": "playwright test --debug",
-    "e2e:report": "playwright show-report"
+    "e2e:report": "playwright show-report",
+    "audit:launch": "node scripts/launch-audit.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.45.4",
+    "@vercel/analytics": "^2.0.1",
     "axios": "^1.19.0",
     "headroom-ai": "^0.22.4",
     "next": "^16.3.1",

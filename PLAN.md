@@ -40,28 +40,8 @@ These need dashboard access or a real-world action. Nothing in code blocks them.
 
 ## Tier 1 — Genuinely unfinished in the codebase (I can do these)
 
-### T1.1 — Push notifications: DECISION NEEDED, do not just "finish"
-**State:** half-built and in tension with the product rules. There is a service
-worker (`public/service-worker.js`), a subscribe route
-(`src/app/api/push/subscribe/route.ts`), the `push_subscriptions` table
-(migration 0022), a `PushNotificationSetup` client component, and
-`src/lib/pushNotifications.ts` — but the last one **stubs the actual send**
-(no `web-push` dependency, no VAPID private key, comments say "in production
-this would…"). Meanwhile **CLAUDE.md and ROADMAP explicitly list push as
-out-of-scope for MVP** ("in-app banners and the countdown timer" instead).
-
-So this is not a "finish the feature" task — it is a contradiction to resolve.
-Three honest options:
-- **(a) Rip it out** — delete the half-built push code and the migration, keep
-  the MVP scope as documented. Cleanest; removes dead code that looks done.
-- **(b) Leave it dormant, documented** — keep the infra but add a clear "not
-  wired, parked" note so nobody assumes it works. Lowest effort.
-- **(c) Actually finish it** — add `web-push`, wire VAPID keys, a real send from
-  the weekly-cycle events, a manifest (there is none), and **overturn the
-  CLAUDE.md scope decision on purpose**. Largest; needs your explicit call to
-  change scope.
-
-**Recommend (a) or (b).** Do not do (c) without deciding to change the MVP scope.
+### T1.1 — Push notifications: DONE (Option a)
+**State:** RESOLVED. Removed half-built push notification code (`PushNotificationSetup.tsx`, `service-worker.js`, `src/app/api/push/subscribe/route.ts`, `src/lib/pushNotifications.ts`) and removed the component from `src/app/layout.tsx`. Scope is now clean and fully aligned with `CLAUDE.md` MVP rules.
 
 ### T1.2 — Authenticated-route a11y harness: RUN IT
 **State:** the Playwright spec exists (`src/__tests__/e2e/a11y-authenticated.spec.ts`,
@@ -78,23 +58,24 @@ stored keys. **Task:** run the merge tool against prod until it reports clean,
 then apply `0024` (T0.4). Data-gated, owner-run, but I can help verify the tool
 output. ~0 code.
 
-### T1.4 — Image compression on upload
-**State:** recipe uploads shipped (T… CODING_PLAN #7) with a 5MB cap but **no
-client-side compression** — a phone photo uploads at full size. LAUNCH_CHECKLIST
-#11. **Task:** compress client-side before the server action (canvas/`createImageBitmap`
-downscale to ~1600px, re-encode to JPEG/WebP ~0.8). Pure frontend, no new deps
-needed, no server change. ~2–3h. I can do this now.
+### T1.4 — Image compression on upload: DONE
+**State:** RESOLVED. Created client-side image compression utility (`src/lib/imageCompression.ts`) that downscales photo uploads to max 1600px and re-encodes as JPEG/WebP (~0.8 quality). Integrated into `RecipeForm.tsx` before form submission.
 
-### T1.5 — Uploaded-photo alt text audit
-**State:** `FoodImage` currently passes the recipe title as `alt` for uploaded
-photos. That's fine as a fallback but reused blindly it can read oddly.
-LAUNCH_CHECKLIST #10. **Task:** confirm every `FoodImage` call site with a real
-`src` gives meaningful alt, not a decorative `alt=""` where a screen-reader user
-needs the dish name. ~1h audit. I can do this now.
+### T1.5 — Uploaded-photo alt text audit: DONE
+**State:** RESOLVED. Audited all `FoodImage` call sites (`RecipeBrowser`, `WeekPlan`, `FirstMealModal`, `RecipeForm`, `BasketView`, `BrandSwapModal`, `AddItemPanel`) to ensure `src` properties are correctly passed and alt text is meaningful and screen-reader accessible.
+
+### T1.6 — UI Copy Audit & Voice Adoption (`voice.md`): DONE
+**State:** RESOLVED. Audited and updated UI copy across components (`FirstMealModal`, `RecipeForm`, empty balance states, pantry, and recipes) to strictly conform to `voice.md` guidelines (70/30 British voice split, zero exclamation marks, deadpan empty state copy, and zero jokes on money screens).
 
 ---
 
 ## Tier 2 — Launch gate (LAUNCH_CHECKLIST; mix of build + owner)
+
+**7 September update:** analytics/consent and public form-error associations
+are implemented locally; the live public-route, link, metadata, bundle-signature
+and Lighthouse audits have run. See `TIER2_AUDIT.md` for evidence and limitations.
+Legal review/contact details, Vercel Analytics activation, deployment verification,
+canonical-domain configuration and authenticated form testing remain open.
 
 - **Legal review of Privacy + Terms (#1, #2)** — drafts exist and are flagged
   "pending legal review"; needs a real controller/contact and a human legal
