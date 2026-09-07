@@ -8,8 +8,18 @@ import { formatPence } from '@/lib/money';
 import type { Recipe } from '@/lib/types';
 import { CookModeModal } from '@/components/recipes/CookModeModal';
 
-export function RecipeDetail({ recipe }: { recipe: Recipe }) {
-  const [servings, setServings] = useState(recipe.servings);
+export function RecipeDetail({
+  recipe,
+  cookContext = false,
+  fixedServings,
+}: {
+  recipe: Recipe;
+  /** True when the recipe is part of a locked/ordered week — hides editing controls. */
+  cookContext?: boolean;
+  /** When in cook context, the portion count from the plan (number of participants). */
+  fixedServings?: number;
+}) {
+  const [servings, setServings] = useState(fixedServings ?? recipe.servings);
   const [cookModeModalOpen, setCookModeModalOpen] = useState(false);
   const [done, setDone] = useState<Set<number>>(new Set());
 
@@ -66,27 +76,35 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
           <Card className="flex flex-col gap-md">
             <div className="flex items-center justify-between gap-sm">
               <h2 className="font-title-md text-title-md font-bold">Ingredients</h2>
-              <div className="flex items-center gap-2 bg-surface-container rounded-lg p-1">
-                <button
-                  type="button"
-                  aria-label="Fewer servings"
-                  onClick={() => setServings((prev) => Math.max(1, prev - 1))}
-                  className="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded font-bold"
-                >
-                  <Icon name="remove" className="text-[16px]" />
-                </button>
-                <span className="font-numeric-data text-numeric-data w-12 text-center tabular-nums font-bold">
-                  {servings} ptn
+              {cookContext ? (
+                /* In cook context, servings are locked to the plan's participant count */
+                <span className="flex items-center gap-xs font-numeric-data text-numeric-data bg-primary-container/20 px-sm py-xs rounded-full font-bold text-primary">
+                  <Icon name="groups" className="text-[16px]" />
+                  {servings} portions
                 </span>
-                <button
-                  type="button"
-                  aria-label="More servings"
-                  onClick={() => setServings((prev) => prev + 1)}
-                  className="w-7 h-7 flex items-center justify-center text-primary hover:bg-primary-container hover:text-on-primary-container rounded font-bold"
-                >
-                  <Icon name="add" className="text-[16px]" />
-                </button>
-              </div>
+              ) : (
+                <div className="flex items-center gap-2 bg-surface-container rounded-lg p-1">
+                  <button
+                    type="button"
+                    aria-label="Fewer servings"
+                    onClick={() => setServings((prev) => Math.max(1, prev - 1))}
+                    className="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded font-bold"
+                  >
+                    <Icon name="remove" className="text-[16px]" />
+                  </button>
+                  <span className="font-numeric-data text-numeric-data w-12 text-center tabular-nums font-bold">
+                    {servings} ptn
+                  </span>
+                  <button
+                    type="button"
+                    aria-label="More servings"
+                    onClick={() => setServings((prev) => prev + 1)}
+                    className="w-7 h-7 flex items-center justify-center text-primary hover:bg-primary-container hover:text-on-primary-container rounded font-bold"
+                  >
+                    <Icon name="add" className="text-[16px]" />
+                  </button>
+                </div>
+              )}
             </div>
 
             <ul className="flex flex-col divide-y divide-surface-container-highest">
@@ -117,16 +135,23 @@ export function RecipeDetail({ recipe }: { recipe: Recipe }) {
               })}
             </ul>
 
-            <button
-              type="button"
-              disabled={missing.length === 0}
-              className="w-full h-12 rounded-lg bg-secondary-container text-on-secondary font-title-md text-title-md flex items-center justify-center gap-sm hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Icon name="add_shopping_cart" />
-              {missing.length === 0
-                ? 'Everything in the pantry'
-                : `Add ${missing.length} Missing to Basket`}
-            </button>
+            {cookContext ? (
+              <p className="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-xs">
+                <Icon name="check_circle" filled className="text-primary text-[16px]" />
+                Ingredients already in this week&apos;s basket.
+              </p>
+            ) : (
+              <button
+                type="button"
+                disabled={missing.length === 0}
+                className="w-full h-12 rounded-lg bg-secondary-container text-on-secondary font-title-md text-title-md flex items-center justify-center gap-sm hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Icon name="add_shopping_cart" />
+                {missing.length === 0
+                  ? 'Everything in the pantry'
+                  : `Add ${missing.length} Missing to Basket`}
+              </button>
+            )}
           </Card>
         </div>
 

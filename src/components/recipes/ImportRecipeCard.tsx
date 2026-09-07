@@ -58,11 +58,17 @@ export function ImportRecipeCard() {
     <Card id="import" accent="secondary" className="flex flex-col gap-sm scroll-mt-[88px]">
       <div className="flex items-start gap-sm">
         <Icon name="link" className="text-secondary mt-0.5 shrink-0" />
-        <div className="min-w-0">
-          <h2 className="font-body-lg text-body-lg font-semibold">Import from a link</h2>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-sm flex-wrap">
+            <h2 className="font-body-lg text-body-lg font-semibold">Import from a link</h2>
+            <span className="inline-flex items-center gap-xs px-2 py-0.5 rounded-full bg-secondary-container border border-secondary/30 text-secondary text-[10px] font-bold uppercase tracking-wider">
+              <Icon name="construction" className="text-[12px]" />
+              Under Construction
+            </span>
+          </div>
           <p className="font-body-sm text-body-sm text-on-surface-variant">
             Paste a recipe URL and we&apos;ll read the ingredients and method, then hand them to the
-            form for you to check.
+            form for you to check. This feature is still being refined.
           </p>
         </div>
       </div>

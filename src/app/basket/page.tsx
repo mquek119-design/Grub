@@ -118,7 +118,7 @@ export default async function BasketPage() {
         </div>
 
         {/* Right Column: Controls, Optimiser, Thresholds & Slot Picker */}
-        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-lg lg:sticky lg:top-[90px]">
+        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-lg pb-[160px] lg:pb-lg lg:sticky lg:top-[90px]">
           <BuildBasketPanel
             hasBasket={items.length > 0}
             mealCount={mealCount}

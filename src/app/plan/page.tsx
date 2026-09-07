@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation';
 import { KitchenPanel } from '@/components/plan/KitchenPanel';
-import { NavCard } from '@/components/plan/NavCard';
 import { OverlapHints } from '@/components/plan/OverlapHints';
 import { WeekPlan } from '@/components/plan/WeekPlan';
 import { WeekSwitcher } from '@/components/plan/WeekSwitcher';
@@ -138,21 +137,6 @@ export default async function PlanPage({
           <OverlapHints overlaps={plan.overlaps} />
         </>
       )}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-        <NavCard
-          href={week === 'next' ? '/recipes?week=next' : '/recipes'}
-          icon="menu_book"
-          title="Recipe hub"
-          detail="Everything the house can cook"
-        />
-        <NavCard
-          href="/recipes#import"
-          icon="link"
-          title="Import a recipe"
-          detail="Nick one off the internet"
-          tone="secondary"
-        />
-      </div>
     </PageShell>
   );
 }
