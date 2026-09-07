@@ -60,7 +60,7 @@ const TABS = [
     body: 'What everyone owes, item by item, with the sums shown. Mark yourself paid, and reconcile the delivery once it arrives.',
   },
   {
-    icon: 'takeout_dining',
+    icon: 'ti-soup',
     name: 'Leftovers',
     body: 'Whatever is going spare in the kitchen. Free to whoever claims it — nobody owes anyone for a bowl of chilli.',
   },
