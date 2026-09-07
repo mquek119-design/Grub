@@ -144,7 +144,7 @@ _Audited September 2026. Expanded specifications based on user requirements and 
 ### 4. Dynamic Portion Multipliers ($N\times$) & Cook Capacity Sync
 - **Arbitrary Portion Multipliers ($1\times, 2\times, 3\times, \dots$):** Housemates can specify how many portions they want for a meal.
 - **Sync to Cook Capacity Limit:** Each extra portion counts against the cook's set `maxCapacity` (e.g., if cook capacity is 6 portions and User A requests $3\times$ portions for gym meal prep, 3 capacity slots are consumed).
-- **Cook Roster Badges:** Clearly label extra portions on the cook's meal roster with badges like **"Gym Meal Prep (3x)"** or **"Double Portion"** so the cook knows exactly why 3 portions are required and for whom.
+- **Cook Roster Badges:** Clearly label extra portions on the cook's meal roster with badges like **"Gym Meal Prep (3x)"** or **"Extra Portions"** so the cook knows exactly why 3 portions are required and for whom.
 
 ### 5. Recipe Page Audit vs. Mob.co.uk
 - **Design Inspiration from Mob.co.uk:**
@@ -160,5 +160,14 @@ _Audited September 2026. Expanded specifications based on user requirements and 
   - *"Not just another manual order tracker — Grub automates your Tesco basket building, coordinates house meal planning, and automatically reconciles dry-money splits when the shop arrives."*
   - Emphasize zero custody of funds, dry money rules, and automated trolley building.
 
-### 8. Pre-Checkout Tesco Substitutions Tracking
-- Before final order placement, when Tesco notifies the shopper that an item is out of stock or substituted in the online trolley, provide an inline modal in Grub for the shopper to record the substitution price/item before confirming order placement, ensuring dry-money split calculations reflect actual purchased items from minute one.
+### 8. Pre-Checkout Tesco Substitutions Tracking & Complete Order Lifecycle
+- **How Grub Knows (2 Ways):**
+  1. **Automated Mode (Local Playwright Controller):** After Grub pushes the basket to Tesco (`tesco basket`), Grub executes a secondary scan of the active Tesco trolley endpoint (`/api/trolley` or trolley DOM scan). If Tesco returns out-of-stock items or suggested pre-checkout substitutions (e.g. 500g Catering Rice substituted for 1kg Basmati), Grub parses the substitution price/quantity and alerts the shopper before payment.
+  2. **Manual / Hosted Mode (Vercel):** On hosted deployments, when the shopper opens Tesco and sees Tesco's pre-checkout substitutions banner, Grub provides a 1-tap **"Re-check / Scan Tesco Basket"** action or log modal so the shopper can confirm pre-checkout substitutions before paying.
+- **The Complete 6-Step Order Lifecycle:**
+  1. **Build Basket (in Grub):** House plans meals for the week $\rightarrow$ Grub consolidates ingredients into the house shopping list.
+  2. **Sync to Tesco Basket:** Grub pushes ingredients into the Tesco trolley (`tesco basket`).
+  3. **Pre-Checkout Scan (`grub check basket`):** Grub scans the active Tesco trolley *before checkout*. If Tesco flagged any item as unavailable or replaced with a pre-checkout substitute, Grub reads the substitute price/quantity and updates the shopper (`tesco substitutions`).
+  4. **Book Slot & Pay:** Shopper selects delivery time slot, enters payment details on Tesco, and completes checkout.
+  5. **Confirm Order Placed:** Shopper clicks **"Confirm Order Placed & Paid"** in Grub $\rightarrow$ week status transitions to `ordered`.
+  6. **Delivery & Post-Delivery Amendments:** When the Tesco van delivers, if Tesco made *post-checkout* substitutions at delivery time (e.g., driver hands over a different milk brand or refunds a missing item), the shopper uses Grub's **Check Delivery & Reconcile** screen to record final adjustments before settling money splits.
