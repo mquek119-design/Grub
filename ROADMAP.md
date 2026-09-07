@@ -4,7 +4,9 @@ _Last updated: 2026-09-06. Read `CLAUDE.md` first — it is the authoritative
 source for architecture and product rules. This file is the forward-looking
 "what's done, what's half-built, what's next" view. For the per-feature
 implementation detail (approach, files, acceptance, effort), see
-`CODING_PLAN.md`. Where this disagrees with older planning docs (`WEEK1_*`,
+`CODING_PLAN.md`. `LAUNCH_CHECKLIST.md` is the pre-public-launch gate (legal
+pages, robots/sitemap, social preview image, analytics, deploy-time audits).
+Where this disagrees with older planning docs (`WEEK1_*`,
 `AUDIT_FINDINGS_AND_ROADMAP.md`, the `OPTION*.md` files), this one is newer._
 
 ## Where the project is
