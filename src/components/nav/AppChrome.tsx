@@ -27,7 +27,7 @@ const BARE_PREFIXES = ['/welcome', '/onboarding', '/login', '/auth', '/setup'];
  * Wraps every page in the app chrome, except the routes above.
  *
  * Onboarding and login run before a house (or a session) exists, so there is
- * nothing for the tabs to point at — showing them would offer four dead ends.
+ * nothing for the tabs to point at — showing them would offer five dead ends.
  * This is a client component because the decision depends on the pathname.
  */
 export function AppChrome({

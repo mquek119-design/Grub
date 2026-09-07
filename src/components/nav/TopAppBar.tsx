@@ -23,7 +23,7 @@ export function TopAppBar({ currentUser }: TopAppBarProps) {
         <Logo tone="onDark" markClassName="h-8 w-auto" wordmarkClassName="text-[22px]" />
       </Link>
 
-      {/* Desktop mirrors the same four tabs — no bottom bar above md. */}
+      {/* Desktop mirrors the same five tabs — no bottom bar above md. */}
       <nav aria-label="Primary" className="hidden md:flex items-center gap-lg h-full">
         {TABS.map((tab) => {
           const isActive = active === tab.href;

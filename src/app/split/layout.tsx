@@ -30,9 +30,9 @@ const STAGE_NOTE: Record<PlanStatus, string> = {
   locked:
     'Planning is closed and the basket is settled. Nothing is owed until the order goes in.',
   ordered:
-    'Ordered. When it arrives, tick off what turned up under Delivery — the split is rebuilt from that, not from the plan.',
+    'Ordered. The split is an estimate until the collector checks Delivery. Payments are not open yet.',
   delivered:
-    'Delivered. Reconcile Delivery first if you have not, then settle up with the collector.',
+    'Delivery checked. Review the posted split, then settle up with the collector.',
 };
 
 export default async function SplitLayout({ children }: { children: ReactNode }) {

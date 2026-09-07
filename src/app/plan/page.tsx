@@ -132,22 +132,6 @@ export default async function PlanPage({
         </Notice>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-        <NavCard
-          href={week === 'next' ? '/recipes?week=next' : '/recipes'}
-          icon="menu_book"
-          title="Recipe hub"
-          detail="Everything the house can cook"
-        />
-        <NavCard
-          href="/recipes#import"
-          icon="link"
-          title="Import a recipe"
-          detail="Nick one off the internet"
-          tone="secondary"
-        />
-      </div>
-
       {recipes.length === 0 ? (
         <>
           <EmptyState
@@ -167,6 +151,21 @@ export default async function PlanPage({
           <OverlapHints overlaps={plan.overlaps} />
         </>
       )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
+        <NavCard
+          href={week === 'next' ? '/recipes?week=next' : '/recipes'}
+          icon="menu_book"
+          title="Recipe hub"
+          detail="Everything the house can cook"
+        />
+        <NavCard
+          href="/recipes#import"
+          icon="link"
+          title="Import a recipe"
+          detail="Nick one off the internet"
+          tone="secondary"
+        />
+      </div>
     </PageShell>
   );
 }

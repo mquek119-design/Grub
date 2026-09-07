@@ -10,7 +10,7 @@ import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
 import { confirmPaymentReceived, disputePayment } from '@/app/split/actions';
 import { postSplit } from '@/app/split/postActions';
-import type { SplitStatus, User } from '@/lib/types';
+import type { PlanStatus, SplitStatus, User } from '@/lib/types';
 
 /**
  * The collector's side of the week.
@@ -34,9 +34,11 @@ const STATUS_COPY: Record<SplitStatus, { label: string; tone: 'primary' | 'secon
 export function CollectorPanel({
   splits,
   basketIsEmpty,
+  planStatus,
 }: {
   splits: { user: User; amount: number; status: SplitStatus; splitId: string }[];
   basketIsEmpty: boolean;
+  planStatus: PlanStatus;
 }) {
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
@@ -68,7 +70,7 @@ export function CollectorPanel({
           <h2 className="font-title-md text-title-md">You&apos;re the collector</h2>
           <p className="font-body-sm text-body-sm text-on-surface-variant">
             You pay Tesco; the house pays you back. Post the week to turn everyone&apos;s share
-            into something they can settle.
+            into a posted split. Payments open after you check the delivery.
           </p>
         </div>
         {splits.length > 0 && (
@@ -82,7 +84,7 @@ export function CollectorPanel({
       </div>
 
       <Button
-        disabled={basketIsEmpty}
+        disabled={basketIsEmpty || (planStatus !== 'ordered' && planStatus !== 'delivered')}
         pending={isPending}
         pendingLabel="Posting…"
         icon="receipt_long"
@@ -91,6 +93,12 @@ export function CollectorPanel({
       >
         {splits.length > 0 ? 'Re-post the split' : 'Post the split'}
       </Button>
+
+      {planStatus !== 'ordered' && planStatus !== 'delivered' && (
+        <p className="font-body-sm text-body-sm text-on-surface-variant">
+          Place the order before posting the split.
+        </p>
+      )}
 
       {basketIsEmpty && (
         <p className="font-body-sm text-body-sm text-on-surface-variant">
@@ -129,7 +137,7 @@ export function CollectorPanel({
                     <div className="flex gap-xs">
                       <Button
                         size="sm"
-                        disabled={isPending}
+                        disabled={isPending || planStatus !== 'delivered'}
                         onClick={() => run(() => confirmPaymentReceived(entry.splitId))}
                       >
                         Got it

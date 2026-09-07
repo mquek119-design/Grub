@@ -195,18 +195,19 @@ script to make them — a 100-line Python file that performs three substitutions
 costs more than the three substitutions. Scripts earn their place only on
 repetitive mechanical passes across many files.
 
-## Navigation — Four Tabs
+## Navigation — Five Tabs
 
-Decided deliberately; the mockups were inconsistent (some showed six tabs, some four). Everything remains reachable:
+The primary navigation keeps Leftovers visible alongside the weekly shopping flow:
 
 | Tab | What lives here |
 |---|---|
 | **Feed** | Home, countdown, payment status, nudge |
-| **Plan** | One scrollable page: the week as day cards, the recipe browser inline below it, constraints at the bottom |
+| **Plan** | Week day cards first, then links to the separate recipe hub and import flow |
 | **Basket** | Basket review, own-brand toggle, proceed to checkout |
 | **Split** | This week's split, delivery reconciliation, balances/ledger |
+| **Leftovers** | Real spare portions on the fridge board, with add and take actions |
 
-`src/components/nav/tabs.ts` maps route prefixes to tabs via an `owns` array, so `/recipes/r-tacos` keeps **Plan** highlighted. Add new routes to an existing tab's `owns` list rather than adding a fifth tab.
+`src/components/nav/tabs.ts` maps route prefixes to tabs via an `owns` array, so `/recipes/r-tacos` keeps **Plan** highlighted. Keep these five tabs; secondary routes belong to an existing tab.
 
 Onboarding renders without chrome — `AppChrome` checks the pathname and drops the bars under `/onboarding`.
 
@@ -350,6 +351,13 @@ before the order goes in nobody owes anything, they merely will.
 Re-posting after reconciliation **keeps a status when the amount is unchanged
 and resets it to pending when it moves**. Somebody who paid £20 has not paid £22.
 
+Only the collector can post, after the plan is `ordered` or `delivered`.
+Payment notification and confirmation require the split's own plan to be
+`delivered`; before that, its amount is an estimate. Completing Delivery posts
+the corrected quantities and substitution prices before opening payments.
+Editing the delivery again returns the plan to `ordered` until it is checked
+again. The original basket is preserved; settlement reads the saved receipts.
+
 ## Weekly Cycle
 
 1. **Sunday**: Housemates open "What do you fancy?" and submit recipes / constraints / opt-outs
@@ -455,10 +463,10 @@ They were briefly the same page. The result was a tab called Plan that was about
 Three jobs with three different lifespans — a week changes daily, a recipe book
 monthly, dietary constraints roughly once — do not belong in one scroll.
 
-- **`/plan`** — reads top to bottom: shared-savings banner, two nav cards
-  (Recipe hub, Import a recipe), then the week as a **vertical list of day
-  cards**, Mon–Fri, weekends only once someone plans one. Overlap suggestions
-  sit at the bottom.
+- **`/plan`** — reads top to bottom: shared-savings banner, the week as day
+  cards (two columns on wide screens), overlap suggestions, then two nav cards
+  (Recipe hub, Import a recipe). Mon–Fri are always shown; weekends appear once
+  someone plans one.
 
   Each day card is a header (day, date, TODAY chip, and a `SHARED: …` badge when
   the whole table is on one meal) over a divided list of meal rows. A meal row
@@ -473,7 +481,7 @@ monthly, dietary constraints roughly once — do not belong in one scroll.
   give. Do not put it back.
 - **`/recipes`** — search, filter chips (Quick / Budget / Pantry match /
   Veggie), a grid of cards with pictures, cook time and cost per portion, and
-  the quick-add bottom sheet. Reached from Plan rather than owning a fifth tab:
+  the quick-add bottom sheet. Reached from Plan rather than owning another tab:
   it is a library you visit, not a stage of the week you check.
 - **`/account`** — dietary constraints. A personal setting, set once.
 

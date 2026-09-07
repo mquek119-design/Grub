@@ -81,7 +81,7 @@ export async function simulateDelivery(): Promise<DevResult> {
 
   const marked = await supabase
     .from('weekly_plans')
-    .update({ status: 'delivered' })
+    .update({ status: 'ordered' })
     .eq('id', plan.id);
   if (marked.error) return fail(marked.error.message);
 

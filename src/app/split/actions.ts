@@ -1,9 +1,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { getCurrentUser } from '@/lib/queries';
+import { getBasketItems, getCollector, getCurrentUser, getSubstitutions, getWeeklyPlan } from '@/lib/queries';
 import { createClient } from '@/lib/supabase/server';
 import { readViewAsId, viewAsRefusal } from '@/lib/viewAs';
+import { postSplit } from './postActions';
 import type { SplitStatus, SubstitutionDecision } from '@/lib/types';
 
 export interface SplitActionState {
@@ -30,6 +31,19 @@ async function writeSplitStatus(
   scope: { column: 'from_user_id' | 'to_user_id'; userId: string }
 ): Promise<{ changed: number } | { error: string }> {
   const supabase = await createClient();
+  if (status === 'notified' || status === 'confirmed') {
+    // Check the split's own week, including older balances and demo users.
+    const split = await supabase.from('splits').select('plan_id')
+      .eq('id', splitId).eq(scope.column, scope.userId).maybeSingle();
+    if (split.error) return { error: split.error.message };
+    if (!split.data) return { error: 'That split is no longer available to you.' };
+    const plan = await supabase.from('weekly_plans').select('status')
+      .eq('id', split.data.plan_id).maybeSingle();
+    if (plan.error) return { error: plan.error.message };
+    if (plan.data?.status !== 'delivered') {
+      return { error: 'The collector needs to check the delivery before payments can be marked or confirmed.' };
+    }
+  }
   const actingAs = await readViewAsId();
 
   if (actingAs) {
@@ -147,13 +161,37 @@ export async function disputePayment(splitId: string): Promise<SplitActionState>
   return { status: 'success', message: 'Payment disputed.' };
 }
 
-/** Updates decision for a substitution item ('pending' | 'accepted' | 'rejected'). */
+/** Corrections reopen the delivery check before any amount can change. */
+async function prepareDeliveryEdit(basketItemId: string): Promise<string | null> {
+  const [me, collector, plan, items] = await Promise.all([
+    getCurrentUser(), getCollector(), getWeeklyPlan(), getBasketItems(),
+  ]);
+  if (collector?.id !== me.id) return 'Only the collector can change the delivery check.';
+  if (!plan?.id || !['ordered', 'delivered'].includes(plan.status) || !items.some((item) => item.id === basketItemId)) {
+    return 'That item is not in the current order.';
+  }
+  if (plan.status === 'delivered') {
+    const supabase = await createClient();
+    const { error } = await supabase.from('weekly_plans').update({ status: 'ordered' })
+      .eq('id', plan.id).eq('house_id', me.houseId);
+    if (error) return error.message;
+    revalidatePath('/split', 'layout');
+    revalidatePath('/');
+  }
+  return null;
+}
+
 export async function updateSubstitutionDecision(
   substitutionId: string,
   decision: SubstitutionDecision
 ): Promise<SplitActionState> {
   const me = await getCurrentUser();
   if (!me.houseId) return fail('Join a house first.');
+  if (!['pending', 'accepted', 'rejected'].includes(decision)) return fail('Choose a valid substitution decision.');
+  const substitution = (await getSubstitutions()).find((sub) => sub.id === substitutionId);
+  if (!substitution) return fail('That substitution is not in the current order.');
+  const refusal = await prepareDeliveryEdit(substitution.basketItemId);
+  if (refusal) return fail(refusal);
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -177,6 +215,9 @@ export async function updateItemReceived(
 ): Promise<SplitActionState> {
   const me = await getCurrentUser();
   if (!me.houseId) return fail('Join a house first.');
+  if (!Number.isInteger(receivedQuantity) || receivedQuantity < 0) return fail('Enter a whole number of received packs.');
+  const refusal = await prepareDeliveryEdit(basketItemId);
+  if (refusal) return fail(refusal);
 
   const supabase = await createClient();
   const { error } = await supabase.from('delivery_receipts').upsert({
@@ -199,19 +240,38 @@ export async function finaliseReconciliation(planId: string): Promise<SplitActio
   const me = await getCurrentUser();
   if (!me.houseId) return fail('Join a house first.');
 
+  const [collector, plan, substitutions, items] = await Promise.all([
+    getCollector(), getWeeklyPlan(), getSubstitutions(), getBasketItems(),
+  ]);
+  if (collector?.id !== me.id) return fail('Only the collector can check the delivery.');
+  if (plan?.id !== planId || (plan.status !== 'ordered' && plan.status !== 'delivered')) {
+    return fail('Place the order before checking the delivery.');
+  }
+  if (substitutions.some((sub) => sub.decision === 'pending')) {
+    return fail('Review every substitution before completing the delivery check.');
+  }
+  if (items.some((item) => item.needsPackData)) {
+    return fail('Add the missing pack prices on Basket before completing the delivery check.');
+  }
+
+  const posted = await postSplit();
+  if (posted.status === 'error') return fail(posted.message);
+
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('weekly_plans')
     .update({ status: 'delivered' })
     .eq('id', planId)
-    .eq('house_id', me.houseId);
+    .eq('house_id', me.houseId)
+    .select('id');
 
   if (error) return fail(error.message);
+  if (!data?.length) return fail('The delivery could not be updated. Refresh and try again.');
 
   revalidatePath('/split/reconcile');
   revalidatePath('/split');
   revalidatePath('/split/balances');
   revalidatePath('/');
 
-  return { status: 'success', message: 'Split finalised and marked as delivered.' };
+  return { status: 'success', message: 'Delivery check saved.' };
 }

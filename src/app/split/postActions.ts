@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { perPersonTotals } from '@/lib/calc';
 import { splitPence } from '@/lib/money';
 import {
-  getBasketItems,
+  getSettlementItems,
   getCollector,
   getCurrentUser,
   getHousemates,
@@ -43,13 +43,17 @@ export async function postSplit(): Promise<PostSplitState> {
 
   const [plan, items, housemates, collector] = await Promise.all([
     getWeeklyPlan(),
-    getBasketItems(),
+    getSettlementItems(),
     getHousemates(),
     getCollector(),
   ]);
 
   if (!plan?.id) return fail('No plan for this week yet.');
   if (!collector) return fail('The house has no collector set — pick one in House Settings.');
+  if (collector.id !== me.id) return fail('Only the collector can post the split.');
+  if (plan.status !== 'ordered' && plan.status !== 'delivered') {
+    return fail('Place the order before posting the split.');
+  }
   if (items.length === 0) return fail('Build the basket first: there is nothing to split.');
 
   const allUserIds = housemates.map((user) => user.id);
@@ -106,7 +110,10 @@ export async function postSplit(): Promise<PostSplitState> {
     const stillOwes = allUserIds.some(
       (id, index) => id === userId && (totals[id] ?? 0) + slotShares[index] > 0
     );
-    if (!stillOwes) await supabase.from('splits').delete().eq('id', row.id);
+    if (!stillOwes) {
+      const removed = await supabase.from('splits').delete().eq('id', row.id);
+      if (removed.error) return fail(removed.error.message);
+    }
   }
 
   revalidatePath('/split');

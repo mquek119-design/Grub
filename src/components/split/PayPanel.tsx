@@ -26,6 +26,7 @@ export function PayPanel({
   splitId,
   isNotified = false,
   isPosted = true,
+  deliveryChecked,
 }: {
   collectorName: string;
   collectorRoom?: string | null;
@@ -34,9 +35,11 @@ export function PayPanel({
   isNotified?: boolean;
   /** False while the figure is still a live estimate rather than a debt. */
   isPosted?: boolean;
+  deliveryChecked: boolean;
 }) {
   const [notified, setNotified] = useState(isNotified);
   const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const rows: { label: string; value: string; mono: boolean }[] = [];
@@ -49,12 +52,15 @@ export function PayPanel({
   if (payment.note) rows.push({ label: 'Note', value: payment.note, mono: false });
 
   async function handleMarkPaid() {
+    if (!isPosted || !deliveryChecked || !splitId) return;
+    setError(null);
     setNotified(true);
     if (splitId) {
       startTransition(async () => {
         const result = await notifyPaymentSent(splitId);
         if (result.status === 'error') {
           setNotified(false);
+          setError(result.message);
           return;
         }
         toast(result.message);
@@ -63,12 +69,14 @@ export function PayPanel({
   }
 
   async function handleUndoPaid() {
+    setError(null);
     setNotified(false);
     if (splitId) {
       startTransition(async () => {
         const result = await undoPaymentNotification(splitId);
         if (result.status === 'error') {
           setNotified(true);
+          setError(result.message);
           return;
         }
         toast(result.message);
@@ -84,7 +92,7 @@ export function PayPanel({
           className="absolute -top-10 -right-10 w-32 h-32 bg-primary-fixed/20 rounded-full blur-2xl pointer-events-none"
         />
         <h3 className="font-title-md text-title-md text-on-background relative z-10">
-          Pay {collectorName}
+          {deliveryChecked && isPosted ? 'Pay' : 'Payment to'} {collectorName}
           {collectorRoom && <span className="text-on-surface-variant"> (Room {collectorRoom})</span>}
         </h3>
 
@@ -108,6 +116,15 @@ export function PayPanel({
           <p className="font-body-sm text-body-sm text-on-surface-variant text-center">
             Nothing to pay yet — the collector posts this week&apos;s split once the order is in.
           </p>
+        ) : !deliveryChecked ? (
+          <div className="flex flex-col gap-sm text-center">
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              Wait for {collectorName} to check the delivery. Substitutions and missing items can change your share.
+            </p>
+            <button type="button" disabled className="h-12 rounded-lg bg-secondary-container text-on-secondary opacity-50">
+              I&apos;ve Paid
+            </button>
+          </div>
         ) : notified ? (
           <div className="flex flex-col gap-2 text-center">
             <p className="font-body-sm text-body-sm text-primary font-bold">
@@ -136,6 +153,7 @@ export function PayPanel({
             I&apos;ve Paid
           </button>
         )}
+        {error && <p role="alert" className="text-body-sm text-error">{error}</p>}
       </div>
 
       <p className="text-center font-body-sm text-body-sm text-tertiary">

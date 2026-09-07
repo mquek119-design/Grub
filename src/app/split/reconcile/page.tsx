@@ -55,6 +55,8 @@ export default async function ReconcilePage() {
         subtitle="Tick off what actually arrived. The split is rebuilt from this, not from the plan."
       />
       <Reconciliation
+        planId={plan?.id}
+        deliveryChecked={plan?.status === 'delivered'}
         items={items}
         substitutions={substitutions}
         plannedTotal={basketTotal(basket)}

@@ -1,6 +1,7 @@
 import 'server-only';
 
 import { cache } from 'react';
+import { reconciledItems } from './reconciledItems';
 
 /**
  * The single seam between the UI and the database.
@@ -584,7 +585,7 @@ function shareWorking(
 export const getCurrentSplit = cache(async (): Promise<Split | null> => {
   const [plan, items, housemates, me, collector] = await Promise.all([
     getWeeklyPlan(),
-    getBasketItems(),
+    getSettlementItems(),
     getHousemates(),
     getCurrentUser(),
     getCollector(),
@@ -995,6 +996,14 @@ export const getReconciliationItems = cache(async (): Promise<ReconciliationItem
       received: receipt?.received ?? true,
     };
   });
+});
+
+/** Delivery corrections affect settlement, leaving the original basket intact. */
+export const getSettlementItems = cache(async (): Promise<BasketItem[]> => {
+  const [items, receipts, substitutions] = await Promise.all([
+    getBasketItems(), getReconciliationItems(), getSubstitutions(),
+  ]);
+  return reconciledItems(items, receipts, substitutions);
 });
 
 // ---------------------------------------------------------------------------

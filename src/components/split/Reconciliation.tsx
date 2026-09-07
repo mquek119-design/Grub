@@ -24,6 +24,7 @@ interface ReconciliationProps {
   plannedTotal: Pence;
   isCollector: boolean;
   planId?: string;
+  deliveryChecked: boolean;
 }
 
 export function Reconciliation({
@@ -32,6 +33,7 @@ export function Reconciliation({
   plannedTotal,
   isCollector,
   planId,
+  deliveryChecked,
 }: ReconciliationProps) {
   const [received, setReceived] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(items.map((item) => [item.basketItemId, item.received]))
@@ -42,39 +44,52 @@ export function Reconciliation({
   const [decisions, setDecisions] = useState<Record<string, SubstitutionDecision>>(() =>
     Object.fromEntries(substitutions.map((sub) => [sub.id, sub.decision]))
   );
-  const [adjustment, setAdjustment] = useState(0);
-  const [finalised, setFinalised] = useState(false);
+  const [finalised, setFinalised] = useState(deliveryChecked);
+  const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   function toggleItemReceived(basketItemId: string) {
+    setFinalised(false);
     const nextState = !received[basketItemId];
     const qty = quantities[basketItemId] ?? 0;
     setReceived((prev) => ({ ...prev, [basketItemId]: nextState }));
     startTransition(async () => {
-      await updateItemReceived(basketItemId, nextState, qty);
+      const result = await updateItemReceived(basketItemId, nextState, qty);
+      setError(result.status === 'error' ? result.message : null);
+      if (result.status === 'error') setReceived((prev) => ({ ...prev, [basketItemId]: !nextState }));
     });
   }
 
   function setItemQuantity(basketItemId: string, nextQty: number) {
+    setFinalised(false);
     const isRec = received[basketItemId];
+    const previousQty = quantities[basketItemId];
     setQuantities((prev) => ({ ...prev, [basketItemId]: nextQty }));
     startTransition(async () => {
-      await updateItemReceived(basketItemId, isRec, nextQty);
+      const result = await updateItemReceived(basketItemId, isRec, nextQty);
+      setError(result.status === 'error' ? result.message : null);
+      if (result.status === 'error') setQuantities((prev) => ({ ...prev, [basketItemId]: previousQty }));
     });
   }
 
   function handleDecision(subId: string, decision: SubstitutionDecision) {
+    setFinalised(false);
+    const previousDecision = decisions[subId];
     setDecisions((prev) => ({ ...prev, [subId]: decision }));
     startTransition(async () => {
-      await updateSubstitutionDecision(subId, decision);
+      const result = await updateSubstitutionDecision(subId, decision);
+      setError(result.status === 'error' ? result.message : null);
+      if (result.status === 'error') setDecisions((prev) => ({ ...prev, [subId]: previousDecision }));
     });
   }
 
   function handleFinalise() {
-    setFinalised(true);
     if (planId) {
       startTransition(async () => {
-        await finaliseReconciliation(planId);
+        setError(null);
+        const result = await finaliseReconciliation(planId);
+        if (result.status === 'error') setError(result.message);
+        else setFinalised(true);
       });
     }
   }
@@ -83,36 +98,30 @@ export function Reconciliation({
     let actual = 0;
     let refund = 0;
 
+    let delta = 0;
     for (const item of items) {
       const isReceived = received[item.basketItemId];
-      const quantity = isReceived ? (quantities[item.basketItemId] ?? 0) : 0;
-      actual += item.price * quantity;
+      const sub = substitutions.find((entry) => entry.basketItemId === item.basketItemId);
+      const decision = sub ? decisions[sub.id] : undefined;
+      const quantity = isReceived && decision !== 'rejected' ? (quantities[item.basketItemId] ?? 0) : 0;
+      const price = sub && decision === 'accepted' ? sub.receivedPrice : item.price;
+      actual += price * quantity;
       refund += item.price * (item.expectedQuantity - quantity);
-    }
-
-    let delta = 0;
-    for (const sub of substitutions) {
-      const decision = decisions[sub.id];
-      if (decision === 'accepted') {
-        actual += sub.receivedPrice;
-        delta += sub.receivedPrice - sub.orderedPrice;
-      } else if (decision === 'rejected') {
-        refund += sub.orderedPrice;
-      }
+      delta += (price - item.price) * quantity;
     }
 
     return {
-      actualTotal: actual + adjustment,
+      actualTotal: actual,
       refunded: refund,
       substitutionDelta: delta,
       pending: substitutions.filter((sub) => decisions[sub.id] === 'pending').length,
     };
-  }, [items, substitutions, received, quantities, decisions, adjustment]);
+  }, [items, substitutions, received, quantities, decisions]);
 
   const difference = actualTotal - plannedTotal;
 
   return (
-    <div className="flex flex-col gap-lg">
+    <fieldset disabled={!isCollector || isPending} className="flex min-w-0 flex-col gap-lg">
       <Card className="flex flex-col gap-sm">
         <div className="flex items-start justify-between gap-md">
           <div>
@@ -321,35 +330,16 @@ export function Reconciliation({
       </section>
 
       <section className="flex flex-col gap-sm">
-        <h2 className="font-title-md text-title-md">Manual Adjustment</h2>
-        <Card className="flex items-center justify-between gap-md">
-          <div className="min-w-0">
-            <p className="font-body-lg text-body-lg font-semibold">Delivery fee / bags</p>
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Split equally across the house
-            </p>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="font-numeric-data text-on-surface-variant">£</span>
-            <input
-              type="number"
-              min={0}
-              step="0.01"
-              aria-label="Manual adjustment in pounds"
-              value={(adjustment / 100).toFixed(2)}
-              onChange={(event) => {
-                const parsed = Number.parseFloat(event.target.value);
-                setAdjustment(Number.isFinite(parsed) ? Math.round(parsed * 100) : 0);
-              }}
-              className="w-24 h-10 px-2 rounded-lg bg-surface-container-low border-none focus:ring-2 focus:ring-primary font-numeric-data text-right"
-            />
-          </div>
-        </Card>
+        <p className="font-body-sm text-body-sm text-on-surface-variant">
+          These are item totals. The booked delivery or collection charge is added separately to the split.
+        </p>
       </section>
+
+      {error && <p role="alert" className="text-body-sm text-error">{error}</p>}
 
       <button
         type="button"
-        disabled={!isCollector || pending > 0 || finalised || isPending}
+        disabled={!isCollector || !planId || pending > 0 || finalised || isPending}
         onClick={handleFinalise}
         className="w-full h-12 bg-primary text-on-primary font-title-md text-title-md rounded-lg flex items-center justify-center gap-sm hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
       >
@@ -362,7 +352,6 @@ export function Reconciliation({
               ? 'Finalise Corrected Split'
               : 'Collector finalises the split'}
       </button>
-    </div>
+    </fieldset>
   );
 }
-
