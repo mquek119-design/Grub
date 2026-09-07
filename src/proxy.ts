@@ -3,7 +3,7 @@ import { createServerClient, type CookieMethodsServer } from '@supabase/ssr';
 import { SUPABASE_ANON_KEY, SUPABASE_URL, isSupabaseConfigured } from '@/lib/supabase/config';
 
 /** Routes reachable while signed out. */
-const PUBLIC_PREFIXES = ['/welcome', '/login', '/auth', '/onboarding'];
+const PUBLIC_PREFIXES = ['/welcome', '/login', '/auth', '/onboarding', '/privacy', '/terms'];
 
 function isPublic(pathname: string): boolean {
   return PUBLIC_PREFIXES.some(

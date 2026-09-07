@@ -271,8 +271,12 @@ export default async function WelcomePage() {
             {closingCta}
           </Reveal>
 
-          <p className="mt-xl text-center font-body-sm text-body-sm text-on-surface-variant">
-            <span className="font-georgia text-primary">Grub</span> · one house, one shop, split fair
+          <p className="mt-xl text-center font-body-sm text-body-sm text-on-surface-variant flex flex-col items-center gap-2">
+            <span><span className="font-georgia text-primary">Grub</span> · one house, one shop, split fair</span>
+            <span className="flex gap-4">
+              <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
+              <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
+            </span>
           </p>
         </div>
       </section>
