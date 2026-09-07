@@ -87,15 +87,11 @@ _Audited September 2026. Preserved all previous Codex audit findings intact. The
 | Priority | Feature / Gap | Rationale & User Impact | Suggested Scope | Complexity / Risk |
 |---|---|---|---|---|
 | P2 | **Housemate Dietary Conflict Warnings in Meal Planning** | Users record dietary requirements (`users.dietary`) in `/account`, but `WeekPlan.tsx` and `MealOptionsSheet.tsx` do not highlight conflicts when adding/assigning meals to housemates with incompatible dietary requirements (e.g. assigning a non-veggie recipe to a vegetarian housemate). | Display subtle dietary warning badges in meal options sheet and roster view when a meal's tags conflict with an assigned housemate's profile settings. | Low |
-| P2 | **Custom Portion Multipliers per Participant (Double Portions)** | `PlannedMeal` currently assumes 1 portion per opt-in participant + guest additions. Housemates cooking for lunch prep or larger appetites cannot reserve 2 portions for themselves. | Allow participants in `MealOptionsSheet.tsx` to set a portion multiplier (e.g., 1x or 2x) with auto-computed cost/ingredient allocation. | Medium: affects recipe quantity calculations |
+| P2 | **Custom Portion Multipliers per Participant (Nx)** | `PlannedMeal` currently assumes 1 portion per opt-in participant + guest additions. Housemates cooking for lunch prep or larger appetites cannot reserve Nx portions for themselves. | Allow participants in `MealOptionsSheet.tsx` to set a portion multiplier (1x, 2x, 3x...) with auto-computed cost/ingredient allocation, syncing to cook's max capacity limit and displaying "Meal Prep / Extra Portions" badges for the cook. | Medium: affects recipe quantity calculations and capacity limits |
 | P2 | **Quick "Running Low" Staple Toggles on Feed** | Staples (`houseStaples`) can be added to the basket from `/basket`, but housemates spotting a depleted staple in the kitchen must navigate to the Basket page to flag it. | Add a "Flag Staple as Low" quick action tile on `/feed` or in the staple overview card. | Low |
 | P3 | **Print / Copy Text Format for Weekly Plan & Shopping List** | Student households often want a physical printout for the fridge door or a plain text summary to paste into house WhatsApp/Discord chats. | Add a "Copy Text Roster" and clean print stylesheet (`@media print`) trigger on `/plan` and `/basket`. | Low |
 | P3 | **Exportable Settlement Breakdown Receipts** | After reconciling a shop on `/split`, housemates have no way to export a plain text or PDF breakdown receipt showing individual item allocations and final totals for tenancy/end-of-term records. | Add a "Share Settlement Breakdown" action in balance history that generates a copyable text summary or printable receipt. | Low |
 | P3 | **Search & Filter in Balance & Transaction History** | The balance history on `/split` displays all past settlements and manual payments in a single chronologically sorted list without filtering by date or housemate. | Add a simple search input and housemate filter dropdown above the transaction history list. | Low |
-
-### Implementation & Prioritization Note
-
-All additions above preserve zero custody of funds, dry money rules, and zero invented figures. They do not conflict with or override any existing Codex findings or planned tier work.
 
 ---
 
@@ -119,7 +115,50 @@ Three tables had RLS enabled but **no DELETE policy**, causing direct `.delete()
 
 - **`/dev` is not admin-gated** — only checks `houseId`. Any housemate can reach it and hit "Clear everything" / "Reset demo data" to nuke the house's entire dataset. CLAUDE.md itself calls it a "workbench for one person" where "half of what is on it deletes the house" — but nothing enforces that. **Needs gating or hiding in prod.**
 
-### UX Gaps (Already in Codex audit, noted for completeness)
+---
 
-- **Dietary clashes never surfaced** — recipes carry `dietary_tags`, accounts carry constraints; nothing warns of a clash at planning time (allergy-adjacent, higher stakes).
-- **Order-confirmation defect** — `syncBasketToTesco` marks week `ordered` before a real purchase exists. **High-risk, money+week state.**
+## Deep-Dive Feature Specifications & Mob.co.uk Audit Findings
+
+_Audited September 2026. Expanded specifications based on user requirements and Mob.co.uk design audit._
+
+### 1. P0 — Actual Order Confirmation & State Machine (Detailed Breakdown)
+- **Current Defect:** `syncBasketToTesco` in `src/app/basket/tescoActions.ts` sets `thisWeek.status = 'ordered'` as soon as items are sent to the Tesco trolley. Adding items to an online cart is not a financial purchase; if the shopper cancels checkout or cart sync fails mid-way, the app gets trapped in `'ordered'` mode, locking planning and triggering post-order split reconciliation prematurely when £0 was actually charged.
+- **Detailed Solution:** Introduce a explicit state flow:
+  1. `planning` (building week meal roster & basket)
+  2. `trolley_syncing` / `trolley_ready` (items synced to Tesco, but checkout not finished)
+  3. `ordered` (confirmed paid by the shopper).
+- **Rule:** The week status only transitions to `ordered` when the designated shopper explicitly clicks **"Confirm Order Placed & Paid"** in Grub, ensuring financial split calculations only execute on actual purchases.
+
+### 2. P1 — Hosted Handoff to Manual Ordering (Detailed Breakdown)
+- **Current Gap:** Local dev environments use Playwright to automate Tesco checkout. Hosted deployments (Vercel) cannot run local browser automation to log into private user Tesco accounts. Currently `BasketView.tsx` shows a simple text prompt "open locally to automate".
+- **Detailed Solution:** Provide a dedicated **Hosted Shopping Handoff View**:
+  - Displays an itemized, aisle-categorized shopping checklist.
+  - Displays target quantities, estimated total cost, and direct 1-click store links.
+  - Includes a **Pre-Checkout Tesco Substitution Tracker**: if Tesco highlights out-of-stock items or substitutions before final payment, the shopper can log/accept the sub in Grub before placing the order so the initial split calculation is 100% accurate.
+  - Prominent **"Mark Order Placed"** button that updates house status on Vercel.
+
+### 3. Account Edit Name & Room Number (With N/A Support)
+- Expand `/account` profile form to allow editing display name and room number.
+- Explicitly support **"N/A"** or leaving room number empty/blank for housemates living in unnumbered rooms or shared flats without room numbers.
+
+### 4. Dynamic Portion Multipliers ($N\times$) & Cook Capacity Sync
+- **Arbitrary Portion Multipliers ($1\times, 2\times, 3\times, \dots$):** Housemates can specify how many portions they want for a meal.
+- **Sync to Cook Capacity Limit:** Each extra portion counts against the cook's set `maxCapacity` (e.g., if cook capacity is 6 portions and User A requests $3\times$ portions for gym meal prep, 3 capacity slots are consumed).
+- **Cook Roster Badges:** Clearly label extra portions on the cook's meal roster with badges like **"Gym Meal Prep (3x)"** or **"Double Portion"** so the cook knows exactly why 3 portions are required and for whom.
+
+### 5. Recipe Page Audit vs. Mob.co.uk
+- **Design Inspiration from Mob.co.uk:**
+  - **Hero Media & Badges:** Full-bleed clean recipe hero images with pill badges for Cook Time, Prep Time, Cost per Portion, Difficulty, and Dietary Tags.
+  - **Interactive Cook Mode:** A dedicated full-screen "Cook Mode" with step-by-step swipeable/clickable instructions, screen wake-lock (keeps phone screen on while cooking), and interactive ingredient checkboxes that strike through as ingredients are added.
+  - **Dynamic Ingredient Scaling:** Servings adjustment stepper ($2 \rightarrow 4 \rightarrow 6$) that dynamically re-calculates ingredient quantities in real-time.
+
+### 6. Authentication & Log Out Action
+- Add an explicit, easily accessible **"Log Out"** action button in `/account` and top-nav user profile menu that clears the Supabase Auth session cookie and safely redirects the user to `/welcome`.
+
+### 7. Welcome Page Value Proposition Revamp
+- Revamp `/welcome` hero copy to clearly articulate Grub's unique value proposition:
+  - *"Not just another manual order tracker — Grub automates your Tesco basket building, coordinates house meal planning, and automatically reconciles dry-money splits when the shop arrives."*
+  - Emphasize zero custody of funds, dry money rules, and automated trolley building.
+
+### 8. Pre-Checkout Tesco Substitutions Tracking
+- Before final order placement, when Tesco notifies the shopper that an item is out of stock or substituted in the online trolley, provide an inline modal in Grub for the shopper to record the substitution price/item before confirming order placement, ensuring dry-money split calculations reflect actual purchased items from minute one.
