@@ -107,7 +107,13 @@ Original spec below.
 
 ## P3 — polish & data hygiene
 
-### 5. `canonical_name` unique index (data-gated)
+### 5. `canonical_name` unique index (data-gated) — migration written (2026-09-07)
+
+`supabase/migrations/0024_canonical_name_unique.sql` exists and is
+deliberately **not applied** — see the file's own header. Run it manually
+once `/dev → Duplicate ingredients` reports zero clusters on the target
+database. Original spec below.
+
 - **Goal:** Enforce one ingredient row per canonical name, so pooling can't be
   silently defeated by a duplicate.
 - **Approach:** Write the migration adding a unique index on
@@ -121,7 +127,15 @@ Original spec below.
   tool reports no clusters. Until then it stays unapplied by design.
 - **Effort:** ~1h to write; application is a separate, data-gated step.
 
-### 6. Richer new-house empty states
+### 6. Richer new-house empty states — ✅ done
+
+Checked every `<EmptyState>` call site (Feed, Plan, Recipes, Basket, Pantry,
+Split, Balances, Reconcile, Savings) on 2026-09-07: each already carries
+specific, warm copy and a single clear next action ("Absolutely nothing here
+— paste a link or write one out", "Your cupboard is giving nothing —
+probably accurate", etc.), landed by earlier commits (`8cf5564`,
+`9017e04`). Nothing generic or sparse remained. Original spec below.
+
 - **Goal:** The first ten minutes of an empty house are the weakest stretch.
   The empty states are honest but sparse.
 - **Approach:** Enhance the existing `FirstMealModal` / Feed+Plan empty states —
