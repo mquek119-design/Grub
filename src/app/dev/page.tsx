@@ -75,7 +75,7 @@ export default async function DevPage() {
         viewingAs={viewingAs}
       />
 
-      <IngredientMergePanel clusters={duplicateIngredients} />
+      <IngredientMergePanel report={duplicateIngredients} />
 
       <WeekRunner status={status} />
 

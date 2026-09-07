@@ -3,7 +3,11 @@
 import { revalidatePath } from 'next/cache';
 import { getCurrentUser } from '@/lib/queries';
 import { createClient } from '@/lib/supabase/server';
-import { canonicalName } from '@/lib/ingredients';
+import {
+  analyseIngredientCanonicalNames,
+  canonicalName,
+  type CanonicalNameMismatch,
+} from '@/lib/ingredients';
 import type { DevResult } from './actions';
 
 const fail = (message: string): DevResult => ({ status: 'error', message });
@@ -12,6 +16,13 @@ export interface DuplicateCluster {
   canonical: string;
   rows: { id: string; name: string; uses: number }[];
 }
+
+export interface IngredientCanonicalReport {
+  clusters: DuplicateCluster[];
+  mismatches: CanonicalNameMismatch[];
+}
+
+const emptyReport = (): IngredientCanonicalReport => ({ clusters: [], mismatches: [] });
 
 /**
  * Ingredients that mean the same thing but are separate rows.
@@ -24,26 +35,21 @@ export interface DuplicateCluster {
  * merging into the row nobody uses would be technically correct and practically
  * annoying.
  */
-export async function findDuplicateIngredients(): Promise<DuplicateCluster[]> {
+export async function findDuplicateIngredients(): Promise<IngredientCanonicalReport> {
   const me = await getCurrentUser();
-  if (!me.houseId) return [];
+  if (!me.houseId) return emptyReport();
 
   const supabase = await createClient();
-  const rows = await supabase.from('ingredients').select('id, name');
-  if (rows.error || !rows.data) return [];
+  const rows = await supabase.from('ingredients').select('id, name, canonical_name');
+  if (rows.error || !rows.data) return emptyReport();
 
-  const byCanonical = new Map<string, { id: string; name: string }[]>();
-  for (const row of rows.data) {
-    const key = canonicalName(row.name);
-    byCanonical.set(key, [...(byCanonical.get(key) ?? []), row]);
-  }
-
-  const clusters = [...byCanonical.entries()].filter(([, group]) => group.length > 1);
-  if (clusters.length === 0) return [];
+  const audit = analyseIngredientCanonicalNames(rows.data);
+  const clusters = audit.duplicateGroups;
+  if (clusters.length === 0) return { clusters: [], mismatches: audit.mismatches };
 
   // One query per table rather than per row: a house with a messy catalogue
   // would otherwise fire hundreds of round trips to draw one panel.
-  const ids = clusters.flatMap(([, group]) => group.map((row) => row.id));
+  const ids = clusters.flatMap((cluster) => cluster.rows.map((row) => row.id));
   const [recipeUses, pantryUses, stapleUses] = await Promise.all([
     supabase.from('recipe_ingredients').select('ingredient_id').in('ingredient_id', ids),
     supabase.from('pantry_items').select('ingredient_id').in('ingredient_id', ids),
@@ -58,14 +64,50 @@ export async function findDuplicateIngredients(): Promise<DuplicateCluster[]> {
     }
   }
 
-  return clusters
-    .map(([canonical, group]) => ({
-      canonical,
-      rows: group
+  const duplicateClusters = clusters
+    .map((cluster) => ({
+      canonical: cluster.canonical,
+      rows: cluster.rows
         .map((row) => ({ ...row, uses: counts.get(row.id) ?? 0 }))
         .sort((a, b) => b.uses - a.uses),
     }))
     .sort((a, b) => a.canonical.localeCompare(b.canonical));
+
+  return { clusters: duplicateClusters, mismatches: audit.mismatches };
+}
+
+/** Bring stored keys up to date once duplicate meanings have been folded. */
+export async function repairIngredientCanonicalNames(): Promise<DevResult> {
+  const me = await getCurrentUser();
+  if (!me.houseId) return fail('Join a house first.');
+
+  const supabase = await createClient();
+  const rows = await supabase.from('ingredients').select('id, name, canonical_name');
+  if (rows.error) return fail(rows.error.message);
+
+  const audit = analyseIngredientCanonicalNames(rows.data ?? []);
+  if (audit.duplicateGroups.length > 0) {
+    return fail('Fold the duplicate ingredient groups first, then repair the remaining names.');
+  }
+  if (audit.mismatches.length === 0) {
+    return { status: 'success', message: 'Every stored ingredient name is already current.' };
+  }
+
+  for (const row of audit.mismatches) {
+    const updated = await supabase
+      .from('ingredients')
+      .update({ canonical_name: row.expectedCanonical })
+      .eq('id', row.id);
+    if (updated.error) {
+      return fail(`Could not repair "${row.name}": ${updated.error.message}`);
+    }
+  }
+
+  revalidatePath('/dev');
+  return {
+    status: 'success',
+    message: `${audit.mismatches.length} stored canonical name${audit.mismatches.length === 1 ? '' : 's'} repaired.`,
+  };
 }
 
 /**
@@ -82,7 +124,10 @@ export async function mergeIngredients(keepId: string, dropId: string): Promise<
 
   const supabase = await createClient();
 
-  const names = await supabase.from('ingredients').select('id, name').in('id', [keepId, dropId]);
+  const names = await supabase
+    .from('ingredients')
+    .select('id, name, canonical_name')
+    .in('id', [keepId, dropId]);
   if (names.error) return fail(names.error.message);
   if ((names.data ?? []).length !== 2) return fail('One of those ingredients no longer exists.');
 
@@ -123,8 +168,23 @@ export async function mergeIngredients(keepId: string, dropId: string): Promise<
     if (repointed.error) return fail(`${table}: ${repointed.error.message}`);
   }
 
-  const deleted = await supabase.from('ingredients').delete().eq('id', dropId);
+  const deleted = await supabase.from('ingredients').delete().eq('id', dropId).select('id');
   if (deleted.error) return fail(`Could not remove "${dropName}": ${deleted.error.message}`);
+  if ((deleted.data ?? []).length !== 1) {
+    return fail(
+      `Could not remove "${dropName}". The database merge function has not been installed yet.`
+    );
+  }
+
+  // The row that survives becomes the authority for future matching. This is
+  // needed even when its old key came from 0018's lowercase-only backfill.
+  const updatedKeeper = await supabase
+    .from('ingredients')
+    .update({ canonical_name: canonicalName(keepName) })
+    .eq('id', keepId);
+  if (updatedKeeper.error) {
+    return fail(`"${dropName}" was folded in, but "${keepName}" still needs its stored name repaired: ${updatedKeeper.error.message}`);
+  }
 
   revalidatePath('/', 'layout');
 

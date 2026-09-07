@@ -105,6 +105,59 @@ export function canonicalName(raw: string): string {
   return words.join(' ');
 }
 
+export interface IngredientCanonicalRow {
+  id: string;
+  name: string;
+  canonical_name: string | null;
+}
+
+export interface CanonicalNameMismatch extends IngredientCanonicalRow {
+  expectedCanonical: string;
+}
+
+export interface CanonicalDuplicateGroup {
+  canonical: string;
+  rows: IngredientCanonicalRow[];
+}
+
+/**
+ * Compare the catalogue as stored with the current canonicalisation rules.
+ *
+ * Migration 0018 could only backfill lowercase display names. This catches
+ * those stale values even when there is no duplicate row to make them visible.
+ * Keeping this calculation pure also makes the migration gate testable without
+ * connecting to a real database.
+ */
+export function analyseIngredientCanonicalNames(rows: readonly IngredientCanonicalRow[]): {
+  duplicateGroups: CanonicalDuplicateGroup[];
+  mismatches: CanonicalNameMismatch[];
+} {
+  const byExpectedCanonical = new Map<string, IngredientCanonicalRow[]>();
+  const mismatches: CanonicalNameMismatch[] = [];
+
+  for (const row of rows) {
+    const expectedCanonical = canonicalName(row.name);
+    byExpectedCanonical.set(expectedCanonical, [
+      ...(byExpectedCanonical.get(expectedCanonical) ?? []),
+      row,
+    ]);
+
+    if (row.canonical_name !== expectedCanonical) {
+      mismatches.push({ ...row, expectedCanonical });
+    }
+  }
+
+  const duplicateGroups = [...byExpectedCanonical.entries()]
+    .filter(([, group]) => group.length > 1)
+    .map(([canonical, group]) => ({ canonical, rows: group }))
+    .sort((a, b) => a.canonical.localeCompare(b.canonical));
+
+  return {
+    duplicateGroups,
+    mismatches: mismatches.sort((a, b) => a.expectedCanonical.localeCompare(b.expectedCanonical)),
+  };
+}
+
 /**
  * Find an ingredient by what it *means*, or create it.
  *
@@ -151,10 +204,25 @@ export async function findOrCreateIngredient(
     .single();
 
   if (created.error) {
-    // Lost a race, or the legacy `lower(name)` unique index caught a duplicate
-    // this canonical lookup missed. Re-read the winner either way.
-    const retry = await supabase.from('ingredients').select('id').ilike('name', name).limit(1);
+    // A unique canonical index can reject two concurrent inserts after both
+    // callers observed no row. Re-read by the same identity key used above.
+    const retry = await supabase
+      .from('ingredients')
+      .select('id')
+      .eq('canonical_name', canonical)
+      .order('created_at', { ascending: true })
+      .limit(1);
     if (retry.data?.[0]) return { id: retry.data[0].id };
+
+    // Before the catalogue has been repaired, the original lower(name) index
+    // can still win a race against a row whose stored canonical_name is stale.
+    // Keep that compatibility path after the authoritative canonical retry.
+    const legacyRetry = await supabase
+      .from('ingredients')
+      .select('id')
+      .ilike('name', name)
+      .limit(1);
+    if (legacyRetry.data?.[0]) return { id: legacyRetry.data[0].id };
     return { error: `Could not save ingredient "${name}": ${created.error.message}` };
   }
 

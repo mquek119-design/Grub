@@ -5,7 +5,8 @@
 -- than a missing constraint. That is still true here.
 --
 -- DO NOT RUN THIS until `/dev` → Duplicate ingredients reports zero clusters
--- on the target database. Running it against a database with any remaining
+-- AND says every stored matching name is current on the target database.
+-- Running it against a database with missing/stale keys or any remaining
 -- duplicate `canonical_name` values will fail the whole migration (see
 -- CLAUDE.md — "Why the migration can appear to do nothing": one failing
 -- statement in the SQL editor discards the entire transaction).
@@ -13,6 +14,9 @@
 -- Once the merge tool is clean, run this file's statement manually in the
 -- SQL editor (or via the CLI) — it is not wired into any automatic migration
 -- run, on purpose.
+
+alter table ingredients
+  alter column canonical_name set not null;
 
 create unique index if not exists ingredients_canonical_name_key
   on ingredients (canonical_name);

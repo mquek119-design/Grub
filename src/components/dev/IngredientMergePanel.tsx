@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Notice } from '@/components/ui/Notice';
 import { clsx } from '@/lib/clsx';
-import { mergeIngredients } from '@/app/dev/ingredientActions';
-import type { DuplicateCluster } from '@/app/dev/ingredientActions';
+import { mergeIngredients, repairIngredientCanonicalNames } from '@/app/dev/ingredientActions';
+import type { IngredientCanonicalReport } from '@/app/dev/ingredientActions';
 
 /**
  * Ingredients that mean the same thing but are separate rows.
@@ -20,14 +20,23 @@ import type { DuplicateCluster } from '@/app/dev/ingredientActions';
  * into the row nobody references is technically correct and practically
  * infuriating.
  */
-export function IngredientMergePanel({ clusters }: { clusters: DuplicateCluster[] }) {
+export function IngredientMergePanel({ report }: { report: IngredientCanonicalReport }) {
   const [isPending, startTransition] = useTransition();
   const [result, setResult] = useState<{ ok: boolean; message: string } | null>(null);
+  const { clusters, mismatches } = report;
 
   function merge(keepId: string, dropId: string) {
     setResult(null);
     startTransition(async () => {
       const response = await mergeIngredients(keepId, dropId);
+      setResult({ ok: response.status === 'success', message: response.message });
+    });
+  }
+
+  function repairCanonicalNames() {
+    setResult(null);
+    startTransition(async () => {
+      const response = await repairIngredientCanonicalNames();
       setResult({ ok: response.status === 'success', message: response.message });
     });
   }
@@ -45,7 +54,7 @@ export function IngredientMergePanel({ clusters }: { clusters: DuplicateCluster[
 
       {clusters.length === 0 ? (
         <Notice tone="good">
-          Nothing to merge. Every ingredient in the catalogue is distinct.
+          Nothing to merge. Every ingredient in the catalogue has a distinct meaning.
         </Notice>
       ) : (
         <ul className="flex flex-col gap-md">
@@ -109,6 +118,39 @@ export function IngredientMergePanel({ clusters }: { clusters: DuplicateCluster[
           })}
         </ul>
       )}
+
+      {mismatches.length > 0 ? (
+        <div className="flex flex-col gap-sm p-md rounded-lg bg-surface-container-low">
+          <div className="flex flex-wrap items-start justify-between gap-sm">
+            <div className="min-w-0">
+              <h3 className="font-body-lg text-body-lg font-semibold">Stored names need updating</h3>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                {mismatches.length} ingredient{mismatches.length === 1 ? ' has' : 's have'} an old
+                matching key. {clusters.length > 0 ? 'Fold the duplicate groups first.' : 'Repair them before applying the unique index.'}
+              </p>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={isPending || clusters.length > 0}
+              pending={isPending}
+              pendingLabel="Repairing…"
+              onClick={repairCanonicalNames}
+            >
+              Repair stored names
+            </Button>
+          </div>
+          <ul className="font-numeric-data text-[12px] text-on-surface-variant">
+            {mismatches.map((row) => (
+              <li key={row.id}>
+                {row.name}: {row.canonical_name ?? 'missing'} → {row.expectedCanonical}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : clusters.length === 0 ? (
+        <Notice tone="good">Stored matching names are current. The catalogue is ready for the unique index.</Notice>
+      ) : null}
 
       {result && (
         <p
