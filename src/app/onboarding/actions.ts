@@ -62,6 +62,20 @@ export async function createHouse(
         .single();
 
       if (profile?.house_id) {
+        const rawMethod = formData.get('fulfillmentMethod');
+        const fulfillmentMethod = rawMethod === 'collect' ? 'collect' : 'delivery';
+        const rawSupermarket = String(formData.get('supermarket') ?? '');
+        const storeName = rawSupermarket.includes('leamington') ? 'Leamington Spa' : 'Cannon Park';
+
+        await supabase
+          .from('houses')
+          .update({
+            fulfillment_method: fulfillmentMethod,
+            preferred_fulfillment_method: fulfillmentMethod,
+            click_collect_store: storeName,
+          })
+          .eq('id', profile.house_id);
+
         const { seedStarterRecipes } = await import('@/lib/seedStarterRecipes');
         await seedStarterRecipes(profile.house_id, user.data.user.id);
       }

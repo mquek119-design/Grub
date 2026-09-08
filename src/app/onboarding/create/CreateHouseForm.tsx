@@ -379,93 +379,108 @@ export function CreateHouseForm() {
           </div>
         )}
 
-        {step === 3 && (
-          <div className="flex flex-col gap-lg animate-fade-in-up">
-            <div className="flex flex-col gap-sm text-center">
-              <span className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mx-auto">
-                <Icon name="local_shipping" className="text-[32px]" />
-              </span>
-              <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
-                Delivery or Collect?
-              </h2>
-              <p className="font-body-sm text-body-sm text-on-surface-variant max-w-xs mx-auto">
-                Choose how you get your weekly shop. Grub can book the slot for you.
-              </p>
-            </div>
+        {step === 3 && (() => {
+          const selectedStore = SUPERMARKETS.find((m) => m.id === supermarket) ?? SUPERMARKETS[0];
+          const shortLocation = selectedStore.location.split(',')[0].trim();
 
-            {/* Fulfillment Mode */}
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setFulfillmentMethod('delivery')}
-                className={clsx(
-                  'p-4 rounded-2xl border flex flex-col items-center gap-3 transition-all cursor-pointer btn-tactile',
-                  fulfillmentMethod === 'delivery'
-                    ? 'bg-primary/8 border-primary ring-2 ring-primary/30 shadow-sm'
-                    : 'bg-surface-container-lowest hover:bg-surface-container border-outline-variant/50'
-                )}
-              >
-                <span className={clsx(
-                  'w-12 h-12 rounded-xl flex items-center justify-center transition-colors',
-                  fulfillmentMethod === 'delivery' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant'
-                )}>
-                  <Icon name="local_shipping" className="text-[24px]" />
+          return (
+            <div className="flex flex-col gap-lg animate-fade-in-up">
+              <div className="flex flex-col gap-sm text-center">
+                <span className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mx-auto">
+                  <Icon name="local_shipping" className="text-[32px]" />
                 </span>
-                <div className="text-center">
-                  <p className="font-title-sm text-xs font-bold text-on-surface">Home Delivery</p>
-                  <p className="font-body-xs text-[10px] text-on-surface-variant mt-0.5">Van to your door</p>
-                  <p className="font-body-xs text-[9px] text-on-surface-variant/70 mt-1">From £4.49</p>
+                <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
+                  Delivery or Collect?
+                </h2>
+                <p className="font-body-sm text-body-sm text-on-surface-variant max-w-xs mx-auto">
+                  Choose how you get your weekly shop. Grub can book the slot for you.
+                </p>
+
+                {/* Linked store pill */}
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container border border-outline-variant/60 mx-auto text-xs text-on-surface mt-1">
+                  <StoreIcon storeId={selectedStore.id} className="w-4 h-4 shrink-0" />
+                  <span>
+                    Linked store: <strong>{selectedStore.name} ({selectedStore.location})</strong>
+                  </span>
                 </div>
-              </button>
+              </div>
 
-              <button
-                type="button"
-                onClick={() => setFulfillmentMethod('collect')}
-                className={clsx(
-                  'p-4 rounded-2xl border flex flex-col items-center gap-3 transition-all cursor-pointer btn-tactile',
-                  fulfillmentMethod === 'collect'
-                    ? 'bg-primary/8 border-primary ring-2 ring-primary/30 shadow-sm'
-                    : 'bg-surface-container-lowest hover:bg-surface-container border-outline-variant/50'
-                )}
-              >
-                <span className={clsx(
-                  'w-12 h-12 rounded-xl flex items-center justify-center transition-colors',
-                  fulfillmentMethod === 'collect' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant'
-                )}>
-                  <Icon name="storefront" className="text-[24px]" />
-                </span>
-                <div className="text-center">
-                  <p className="font-title-sm text-xs font-bold text-on-surface">Click & Collect</p>
-                  <p className="font-body-xs text-[10px] text-on-surface-variant mt-0.5">Cannon Park pickup</p>
-                  <p className="font-body-xs text-[9px] text-on-surface-variant/70 mt-1">Free over £25</p>
-                </div>
-              </button>
-            </div>
-
-            {/* Schedule */}
-            <div className="flex flex-col gap-md p-lg rounded-2xl bg-surface-container-low border border-outline-variant/40">
-              <h3 className="font-title-sm text-xs font-bold text-on-surface flex items-center gap-1.5">
-                <Icon name="schedule" className="text-[16px] text-primary" />
-                Weekly Schedule
-              </h3>
-
-              <label className="flex flex-col gap-xs">
-                <span className="font-body-sm text-xs font-semibold text-on-surface">
-                  {fulfillmentMethod === 'delivery' ? 'Delivery' : 'Collection'} Day
-                </span>
-                <select name="deliveryDay" value={deliveryDay} onChange={(e) => setDeliveryDay(e.target.value)} className={FIELD}>
-                  {WEEKDAYS.map((day) => (
-                    <option key={day} value={day}>
-                      {WEEKDAY_LABELS[day]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
+              {/* Fulfillment Mode */}
               <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFulfillmentMethod('delivery')}
+                  className={clsx(
+                    'p-4 rounded-2xl border flex flex-col items-center gap-3 transition-all cursor-pointer btn-tactile',
+                    fulfillmentMethod === 'delivery'
+                      ? 'bg-primary/8 border-primary ring-2 ring-primary/30 shadow-sm'
+                      : 'bg-surface-container-lowest hover:bg-surface-container border-outline-variant/50'
+                  )}
+                >
+                  <span
+                    className={clsx(
+                      'w-12 h-12 rounded-xl flex items-center justify-center transition-colors',
+                      fulfillmentMethod === 'delivery' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant'
+                    )}
+                  >
+                    <Icon name="local_shipping" className="text-[24px]" />
+                  </span>
+                  <div className="text-center">
+                    <p className="font-title-sm text-xs font-bold text-on-surface">Home Delivery</p>
+                    <p className="font-body-xs text-[10px] text-on-surface-variant mt-0.5">
+                      Van from {shortLocation}
+                    </p>
+                    <p className="font-body-xs text-[9px] text-on-surface-variant/70 mt-1">From £4.49</p>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setFulfillmentMethod('collect')}
+                  className={clsx(
+                    'p-4 rounded-2xl border flex flex-col items-center gap-3 transition-all cursor-pointer btn-tactile',
+                    fulfillmentMethod === 'collect'
+                      ? 'bg-primary/8 border-primary ring-2 ring-primary/30 shadow-sm'
+                      : 'bg-surface-container-lowest hover:bg-surface-container border-outline-variant/50'
+                  )}
+                >
+                  <span
+                    className={clsx(
+                      'w-12 h-12 rounded-xl flex items-center justify-center transition-colors',
+                      fulfillmentMethod === 'collect' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant'
+                    )}
+                  >
+                    <Icon name="storefront" className="text-[24px]" />
+                  </span>
+                  <div className="text-center">
+                    <p className="font-title-sm text-xs font-bold text-on-surface">Click &amp; Collect</p>
+                    <p className="font-body-xs text-[10px] text-on-surface-variant mt-0.5">
+                      {shortLocation} pickup
+                    </p>
+                    <p className="font-body-xs text-[9px] text-on-surface-variant/70 mt-1">Free over £25</p>
+                  </div>
+                </button>
+              </div>
+
+              {/* Schedule */}
+              <div className="flex flex-col gap-md p-lg rounded-2xl bg-surface-container-low border border-outline-variant/40">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-title-sm text-xs font-bold text-on-surface flex items-center gap-1.5">
+                    <Icon name="schedule" className="text-[16px] text-primary" />
+                    Weekly Schedule
+                  </h3>
+                  <span className="font-body-xs text-[10px] text-on-surface-variant">
+                    {fulfillmentMethod === 'delivery'
+                      ? `Delivery from ${shortLocation}`
+                      : `Collect at ${shortLocation}`}
+                  </span>
+                </div>
+
                 <label className="flex flex-col gap-xs">
-                  <span className="font-body-sm text-xs font-semibold text-on-surface">Plan Cutoff Day</span>
-                  <select name="cutoffDay" value={cutoffDay} onChange={(e) => setCutoffDay(e.target.value)} className={FIELD}>
+                  <span className="font-body-sm text-xs font-semibold text-on-surface">
+                    {fulfillmentMethod === 'delivery' ? 'Delivery' : 'Collection'} Day
+                  </span>
+                  <select name="deliveryDay" value={deliveryDay} onChange={(e) => setDeliveryDay(e.target.value)} className={FIELD}>
                     {WEEKDAYS.map((day) => (
                       <option key={day} value={day}>
                         {WEEKDAY_LABELS[day]}
@@ -474,24 +489,37 @@ export function CreateHouseForm() {
                   </select>
                 </label>
 
-                <label className="flex flex-col gap-xs">
-                  <span className="font-body-sm text-xs font-semibold text-on-surface">Cutoff Time</span>
-                  <input
-                    type="time"
-                    name="cutoffTime"
-                    value={cutoffTime}
-                    onChange={(e) => setCutoffTime(e.target.value)}
-                    className={`${FIELD} font-numeric-data px-2`}
-                  />
-                </label>
-              </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="flex flex-col gap-xs">
+                    <span className="font-body-sm text-xs font-semibold text-on-surface">Plan Cutoff Day</span>
+                    <select name="cutoffDay" value={cutoffDay} onChange={(e) => setCutoffDay(e.target.value)} className={FIELD}>
+                      {WEEKDAYS.map((day) => (
+                        <option key={day} value={day}>
+                          {WEEKDAY_LABELS[day]}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
 
-              <p className="font-body-xs text-[10px] text-on-surface-variant leading-relaxed">
-                After the cutoff, the weekly plan locks and Grub builds the basket. Everyone needs to have their meals picked before then.
-              </p>
+                  <label className="flex flex-col gap-xs">
+                    <span className="font-body-sm text-xs font-semibold text-on-surface">Cutoff Time</span>
+                    <input
+                      type="time"
+                      name="cutoffTime"
+                      value={cutoffTime}
+                      onChange={(e) => setCutoffTime(e.target.value)}
+                      className={`${FIELD} font-numeric-data px-2`}
+                    />
+                  </label>
+                </div>
+
+                <p className="font-body-xs text-[10px] text-on-surface-variant leading-relaxed">
+                  After the cutoff, the weekly plan locks and Grub builds the basket. Everyone needs to have their meals picked before then.
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {step === 4 && (
           <div className="flex flex-col gap-lg animate-fade-in-up">
