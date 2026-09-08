@@ -115,6 +115,53 @@ export async function joinHouse(
   }
 
   revalidatePath('/', 'layout');
+  redirect('/onboarding/profile');
+}
+
+/**
+ * Saves individual housemate profile preferences: room, budget, diets, vibes, accent.
+ */
+export async function saveProfilePreferences(
+  _prev: OnboardingState,
+  formData: FormData
+): Promise<OnboardingState> {
+  if (!isSupabaseConfigured) {
+    redirect('/');
+  }
+
+  const name = String(formData.get('name') ?? '').trim();
+  const room = String(formData.get('room') ?? '').trim();
+  const accent = String(formData.get('accent') ?? 'green');
+  const budget = String(formData.get('budget') ?? '30');
+  const dietsRaw = formData.getAll('diet');
+  const vibesRaw = formData.getAll('vibe');
+
+  const dietaryPreferences = [
+    ...dietsRaw.map(String),
+    ...vibesRaw.map((v) => `vibe:${v}`),
+    `budget:${budget}`,
+  ];
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    await supabase
+      .from('profiles')
+      .update({
+        name: name || user.email?.split('@')[0] || 'Housemate',
+        room: room || null,
+        accent: ['green', 'orange', 'blue', 'purple'].includes(accent)
+          ? (accent as any)
+          : 'green',
+        dietary_preferences: dietaryPreferences,
+      })
+      .eq('id', user.id);
+  }
+
+  revalidatePath('/', 'layout');
   redirect('/');
 }
 

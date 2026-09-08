@@ -39,14 +39,14 @@ export default async function InvitePage() {
 
       <div className="flex flex-col gap-sm">
         <Link
-          href="/plan"
-          className="w-full h-12 rounded-lg bg-secondary-container text-on-secondary font-title-md text-title-md flex items-center justify-center hover:bg-secondary transition-colors"
+          href="/onboarding/profile"
+          className="w-full h-12 rounded-xl bg-secondary-container text-on-secondary font-title-md text-title-md font-bold flex items-center justify-center hover:bg-secondary transition-colors shadow-sm btn-tactile"
         >
-          Start planning
+          Set up your personal profile
         </Link>
         <Link
           href="/"
-          className="w-full h-12 rounded-lg border border-primary text-primary font-title-md text-title-md flex items-center justify-center hover:bg-primary/10 transition-colors"
+          className="w-full h-12 rounded-xl border border-primary text-primary font-title-md text-title-md font-semibold flex items-center justify-center hover:bg-primary/10 transition-colors btn-tactile"
         >
           Go to the Feed
         </Link>
