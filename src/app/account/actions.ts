@@ -47,7 +47,7 @@ function normaliseAccountNumber(raw: string): string | null | 'invalid' {
   return digits;
 }
 
-/** Updates user display name and room number (supporting N/A or blank). */
+/** Updates user display name, room number, avatar accent, and custom avatar photo. */
 export async function updateProfileInfo(
   _prev: AccountActionState,
   formData: FormData
@@ -58,13 +58,33 @@ export async function updateProfileInfo(
   const roomRaw = String(formData.get('room') ?? '').trim();
   const room = roomRaw.toLowerCase() === 'n/a' || roomRaw === '' ? null : roomRaw;
 
+  const accentRaw = String(formData.get('accent') ?? '').trim();
+  const accent = ['green', 'orange', 'blue', 'purple'].includes(accentRaw)
+    ? (accentRaw as 'green' | 'orange' | 'blue' | 'purple')
+    : undefined;
+
+  const avatarUrlRaw = String(formData.get('avatarUrl') ?? '').trim();
+  const avatarUrl = avatarUrlRaw.length > 0 ? avatarUrlRaw : null;
+
   if (!name) return fail('Name is required.');
   if (name.length > 60) return fail('Keep your name under 60 characters.');
+
+  const updates: {
+    name: string;
+    room: string | null;
+    accent?: 'green' | 'orange' | 'blue' | 'purple';
+    avatar_url: string | null;
+  } = {
+    name,
+    room,
+    avatar_url: avatarUrl,
+  };
+  if (accent) updates.accent = accent;
 
   const supabase = await createClient();
   const result = await supabase
     .from('profiles')
-    .update({ name, room })
+    .update(updates)
     .eq('id', me.id)
     .select('id');
 
@@ -73,8 +93,9 @@ export async function updateProfileInfo(
   revalidatePath('/account');
   revalidatePath('/settings');
   revalidatePath('/plan');
+  revalidatePath('/', 'layout');
 
-  return { status: 'success', message: 'Profile updated.' };
+  return { status: 'success', message: 'Profile & avatar updated.' };
 }
 
 /** Logs the current user out and redirects to /welcome. */

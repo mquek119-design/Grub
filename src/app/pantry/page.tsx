@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Icon } from '@/components/media/Icon';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
@@ -96,6 +97,25 @@ export default async function PantryPage() {
         title="House Pantry"
         subtitle="What you already have. The optimiser skips these when building the basket."
       />
+
+      <div className="flex items-center justify-between p-sm px-md rounded-2xl bg-gradient-to-r from-secondary-fixed/40 via-surface-container-low to-secondary-fixed/20 border border-secondary/30 text-xs interactive-card card-glow">
+        <div className="flex items-center gap-sm min-w-0">
+          <span className="size-8 rounded-xl bg-secondary/15 flex items-center justify-center text-secondary shrink-0">
+            <Icon name="soup_kitchen" className="text-base" />
+          </span>
+          <div className="min-w-0">
+            <p className="font-title-md text-[13px] font-bold text-on-surface truncate">Looking for cooked leftovers & spare portions?</p>
+            <p className="font-body-sm text-[11px] text-on-surface-variant truncate">Check the fridge board to claim or offer food before it expires.</p>
+          </div>
+        </div>
+        <Link
+          href="/leftovers"
+          className="shrink-0 font-bold text-secondary hover:text-on-secondary-fixed-variant px-3 py-1.5 rounded-full bg-secondary-fixed/60 border border-secondary/30 hover:bg-secondary-fixed transition-all flex items-center gap-1 btn-tactile shadow-xs"
+        >
+          <span>Leftovers Board</span>
+          <Icon name="arrow_forward" className="text-sm" />
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
         {/* Left Column: Shared & Personal Pantry Lists */}

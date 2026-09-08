@@ -113,21 +113,59 @@ export default async function AccountPage() {
 
         {/* Right Column: Profile Hero, Impact & Danger Zone */}
         <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-lg lg:sticky lg:top-[90px]">
-          <Card className="flex flex-col items-center text-center gap-sm py-lg">
-            <Avatar user={user} size="xl" />
-            <div>
-              <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold">{user.name}</h1>
-              <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-                {user.room ? `Room ${user.room}` : 'No room set'} · {house.name}
-              </p>
+          <Card className="flex flex-col items-center text-center gap-md py-lg relative overflow-hidden border border-outline-variant/60 shadow-ambient-card">
+            {/* Soft decorative background tint */}
+            <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
+
+            <div className="relative mt-2">
+              <Avatar
+                user={user}
+                size="xl"
+                className="ring-4 ring-surface shadow-md"
+              />
+              {user.isAdmin && (
+                <span className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full bg-primary text-on-primary text-[10px] font-bold uppercase tracking-wider shadow-xs">
+                  Admin
+                </span>
+              )}
             </div>
-            <div className="w-full mt-xs">
+
+            <div className="flex flex-col items-center gap-1 min-w-0">
+              <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-on-surface font-bold tracking-tight">
+                {user.name}
+              </h1>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">
+                {user.room ? `Room ${user.room}` : 'No room assigned'} · {house.name}
+              </p>
+              {user.dietaryPreferences.length > 0 && (
+                <div className="flex flex-wrap justify-center gap-1 mt-1.5 max-w-xs">
+                  {user.dietaryPreferences.map((pref) => (
+                    <span
+                      key={pref}
+                      className="px-2 py-0.5 rounded-md bg-surface-container-highest text-on-surface-variant text-[11px] font-medium"
+                    >
+                      {pref}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <a
+                href="#profile-studio"
+                className="text-xs font-semibold text-primary hover:underline flex items-center gap-1 mt-2 px-3 py-1 rounded-full bg-primary/10 hover:bg-primary/15 transition-colors btn-tactile"
+              >
+                <Icon name="palette" className="text-sm" />
+                <span>Customise Avatar &amp; Profile</span>
+              </a>
+            </div>
+
+            <div className="w-full mt-xs pt-sm border-t border-surface-container-highest">
               <LogoutButton />
             </div>
           </Card>
 
           <section className="flex flex-col gap-sm">
-            <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs">
+            <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs font-bold">
               <Icon name="military_tech" className="text-primary text-lg" />
               My Impact
             </h2>
@@ -137,9 +175,16 @@ export default async function AccountPage() {
                 { label: 'Meals', value: mealsPlanned.toString(), icon: 'restaurant' },
                 { label: 'Saved', value: formatPence(savings.totalAllTime), icon: 'savings' },
               ].map((stat) => (
-                <Card key={stat.label} className="flex flex-col items-center gap-xs text-center p-sm">
-                  <Icon name={stat.icon} className="text-primary text-xl" />
-                  <span className="font-numeric-data text-title-md font-bold text-on-surface">{stat.value}</span>
+                <Card
+                  key={stat.label}
+                  className="flex flex-col items-center gap-xs text-center p-sm interactive-card hover:border-primary/40 transition-all"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <Icon name={stat.icon} className="text-base" />
+                  </div>
+                  <span className="font-numeric-data text-title-md font-bold text-on-surface">
+                    {stat.value}
+                  </span>
                   <span className="font-label-caps text-[10px] uppercase text-on-surface-variant tracking-wider">
                     {stat.label}
                   </span>

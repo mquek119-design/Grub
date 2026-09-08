@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useTransition, useActionState } from 'react';
+import { Avatar } from '@/components/avatars/Avatar';
 import { Icon } from '@/components/media/Icon';
 import { Button } from '@/components/ui/Button';
 import { SubmitButton } from '@/components/ui/SubmitButton';
@@ -56,35 +57,153 @@ function Status({ state }: { state: AccountActionState }) {
   );
 }
 
-/** Display name and room number (with N/A support). */
+const ACCENT_OPTIONS: { key: User['accent']; label: string; bg: string; text: string }[] = [
+  { key: 'green', label: 'Sage Green', bg: 'bg-[#D8F3DC]', text: 'text-[#1B4332]' },
+  { key: 'orange', label: 'Honey Amber', bg: 'bg-[#FDECD0]', text: 'text-[#7C4A1E]' },
+  { key: 'blue', label: 'Ocean Blue', bg: 'bg-[#cfe4ff]', text: 'text-[#001d36]' },
+  { key: 'purple', label: 'Lavender', bg: 'bg-[#e6ddff]', text: 'text-[#22005d]' },
+];
+
+/** Revamped Profile & Avatar Studio Panel. */
 export function ProfileInfoPanel({ user }: { user: User }) {
   const [state, action] = useActionState(updateProfileInfo, INITIAL);
+  const [selectedAccent, setSelectedAccent] = useState<User['accent']>(user.accent || 'green');
+  const [avatarUrl, setAvatarUrl] = useState<string>(user.avatarUrl || '');
+  const [name, setName] = useState<string>(user.name);
+
+  // Live avatar preview object
+  const previewUser = {
+    name: name || user.name || 'You',
+    accent: selectedAccent,
+    avatarUrl: avatarUrl.trim() || null,
+  };
 
   return (
-    <Card className="flex flex-col gap-sm">
-      <div className="min-w-0">
-        <h2 className="font-title-md text-title-md">Profile info</h2>
-        <p className="font-body-sm text-body-sm text-on-surface-variant">
-          Your display name and room number shown to housemates on meal rosters and splits.
-        </p>
+    <Card id="profile-studio" className="flex flex-col gap-lg interactive-card card-glow">
+      <div className="flex items-start justify-between gap-md">
+        <div className="min-w-0">
+          <h2 className="font-title-md text-title-md font-bold text-on-surface">Profile & Avatar Studio</h2>
+          <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+            Personalise your avatar, display name, and house room shown across rosters and splits.
+          </p>
+        </div>
       </div>
 
-      <form action={action} className="flex flex-col gap-md">
+      <form action={action} className="flex flex-col gap-lg">
+        {/* Avatar Live Studio Preview */}
+        <div className="p-md rounded-2xl bg-surface-container-low border border-outline-variant/40 flex flex-col sm:flex-row items-center gap-md">
+          <div className="relative group">
+            <Avatar user={previewUser} size="xl" className="ring-4 ring-primary/20 shadow-md transition-all duration-300" />
+            {previewUser.avatarUrl && (
+              <button
+                type="button"
+                onClick={() => setAvatarUrl('')}
+                title="Remove custom photo"
+                className="absolute -top-1 -right-1 size-6 rounded-full bg-error text-white grid place-items-center shadow-xs hover:opacity-90 btn-tactile"
+              >
+                <Icon name="close" className="text-xs" />
+              </button>
+            )}
+          </div>
+          <div className="flex flex-col gap-xs text-center sm:text-left min-w-0 flex-1">
+            <span className="font-title-md text-body-lg font-bold text-on-surface truncate">
+              {name || 'Your Name'}
+            </span>
+            <span className="font-body-sm text-xs text-on-surface-variant">
+              {previewUser.avatarUrl ? 'Using custom photo URL' : `Using ${selectedAccent} color avatar initials`}
+            </span>
+            {previewUser.avatarUrl && (
+              <button
+                type="button"
+                onClick={() => setAvatarUrl('')}
+                className="text-xs text-error font-semibold underline self-center sm:self-start mt-0.5 hover:opacity-80"
+              >
+                Switch to color initials
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Hidden inputs for accent and avatarUrl */}
+        <input type="hidden" name="accent" value={selectedAccent} />
+        <input type="hidden" name="avatarUrl" value={avatarUrl} />
+
+        {/* Avatar Color Accent Palette */}
+        <div className="flex flex-col gap-xs">
+          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold tracking-wider">
+            Avatar Color Accent
+          </span>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-xs">
+            {ACCENT_OPTIONS.map((opt) => {
+              const isSelected = selectedAccent === opt.key;
+              return (
+                <button
+                  key={opt.key}
+                  type="button"
+                  onClick={() => setSelectedAccent(opt.key)}
+                  className={clsx(
+                    'flex items-center gap-2 p-2 rounded-xl border transition-all btn-tactile text-left',
+                    isSelected
+                      ? 'border-primary bg-primary/8 ring-2 ring-primary/30 font-bold shadow-xs'
+                      : 'border-outline-variant/60 bg-surface-container-lowest hover:bg-surface-container'
+                  )}
+                >
+                  <span className={clsx('size-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0', opt.bg, opt.text)}>
+                    {(name || 'Y')[0]?.toUpperCase()}
+                  </span>
+                  <span className="font-body-sm text-xs text-on-surface truncate">{opt.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Custom Avatar Photo URL */}
         <label className="flex flex-col gap-xs">
-          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
+          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold tracking-wider">
+            Custom Photo URL (Optional)
+          </span>
+          <div className="relative">
+            <input
+              value={avatarUrl}
+              onChange={(e) => setAvatarUrl(e.target.value)}
+              placeholder="https://example.com/your-photo.jpg"
+              className={FIELD}
+            />
+            {avatarUrl && (
+              <button
+                type="button"
+                onClick={() => setAvatarUrl('')}
+                aria-label="Clear photo URL"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-error transition-colors"
+              >
+                <Icon name="close" className="text-sm" />
+              </button>
+            )}
+          </div>
+          <span className="font-body-sm text-[12px] text-on-surface-variant">
+            Paste a public image link or GitHub avatar URL. Leave blank to use your chosen color initials.
+          </span>
+        </label>
+
+        {/* Display Name */}
+        <label className="flex flex-col gap-xs">
+          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold tracking-wider">
             Display name
           </span>
           <input
             name="name"
-            defaultValue={user.name}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
             placeholder="Your Name"
             required
             className={FIELD}
           />
         </label>
 
+        {/* Room Number */}
         <label className="flex flex-col gap-xs">
-          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
+          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold tracking-wider">
             Room number / name (optional)
           </span>
           <input
@@ -98,7 +217,7 @@ export function ProfileInfoPanel({ user }: { user: User }) {
           </span>
         </label>
 
-        <SaveButton label="Save name & room" />
+        <SaveButton label="Save Profile & Avatar" />
         <Status state={state} />
       </form>
     </Card>

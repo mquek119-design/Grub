@@ -44,6 +44,12 @@ export const TABS: Tab[] = [
     icon: 'ti-receipt',
     owns: ['/split'],
   },
+  {
+    href: '/leftovers',
+    label: 'Leftovers',
+    icon: 'soup_kitchen',
+    owns: ['/leftovers'],
+  },
 ];
 
 export function activeTabHref(pathname: string): string {

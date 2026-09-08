@@ -57,7 +57,7 @@ export default async function RecipesPage({
   const locked = week === 'this' && Boolean(plan && plan.id && plan.status !== 'planning');
 
   return (
-    <PageShell>
+    <PageShell wide>
       <PageHeader
         title="Recipes"
         subtitle={
