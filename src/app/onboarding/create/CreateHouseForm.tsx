@@ -516,6 +516,13 @@ export function CreateHouseForm() {
                 <p className="font-body-xs text-[10px] text-on-surface-variant leading-relaxed">
                   After the cutoff, the weekly plan locks and Grub builds the basket. Everyone needs to have their meals picked before then.
                 </p>
+
+                <div className="flex items-start gap-2 pt-1 border-t border-outline-variant/30">
+                  <Icon name="edit_calendar" className="text-[15px] text-primary shrink-0 mt-0.5" />
+                  <p className="font-body-xs text-[11px] text-on-surface-variant leading-relaxed">
+                    <strong>Flexible schedule:</strong> You can change your delivery day, cutoff time, or fulfillment method anytime in <strong>House Settings</strong>.
+                  </p>
+                </div>
               </div>
             </div>
           );
