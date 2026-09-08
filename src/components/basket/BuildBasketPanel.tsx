@@ -32,24 +32,24 @@ export function BuildBasketPanel({
   }
 
   return (
-    <Card accent={state.status === 'error' ? 'error' : 'primary'} className="flex flex-col gap-sm">
+    <Card accent={state.status === 'error' ? 'error' : 'primary'} className="flex flex-col gap-sm shadow-xs border border-outline-variant/40">
       <div className="flex items-start justify-between gap-md">
         <div className="min-w-0">
-          <h2 className="font-title-md text-title-md">
-            {hasBasket ? 'Rebuild from the plan' : 'Build the basket'}
+          <h2 className="font-title-md text-title-md font-bold text-on-surface">
+            {hasBasket ? 'Plan Sync & Pooling' : 'Build the basket'}
           </h2>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
+          <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5 leading-relaxed">
             {mealCount === 0
-              ? 'Plan some meals first.'
-              : `Aggregates ingredients across ${mealCount} meal${mealCount === 1 ? '' : 's'}, subtracts the pantry, and rounds up to whole packs.`}
+              ? 'Plan some meals first in the Plan tab.'
+              : `Synced with ${mealCount} planned meal${mealCount === 1 ? '' : 's'}. Shared ingredients are pooled automatically to minimize cost.`}
           </p>
         </div>
         {overlapSavings > 0 && (
-          <span className="shrink-0 text-right">
-            <span className="block font-label-caps text-label-caps uppercase text-on-surface-variant">
-              Saved by pooling
+          <span className="shrink-0 text-right bg-primary/10 px-sm py-xs rounded-xl border border-primary/20">
+            <span className="block font-label-caps text-[10px] uppercase font-bold text-primary tracking-wider">
+              Saved pooling
             </span>
-            <span className="block font-numeric-data text-numeric-data text-primary">
+            <span className="block font-numeric-data text-body-lg font-bold text-primary">
               {formatPence(overlapSavings)}
             </span>
           </span>
@@ -57,22 +57,22 @@ export function BuildBasketPanel({
       </div>
 
       {confirming ? (
-        <div className="flex flex-col gap-sm">
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            This replaces the current basket. Quantity changes you made by hand will be lost.
+        <div className="flex flex-col gap-sm pt-xs border-t border-outline-variant/30">
+          <p className="font-body-sm text-xs text-on-surface-variant">
+            This re-optimizes from the meal plan. Any manual quantity edits you made in the basket will be reset.
           </p>
           <div className="flex gap-sm">
             <button
               type="button"
               onClick={run}
-              className="flex-1 h-11 rounded-lg bg-error text-on-error font-semibold hover:opacity-90 transition-opacity"
+              className="flex-1 h-10 rounded-xl bg-error text-on-error text-xs font-semibold hover:opacity-90 transition-opacity"
             >
-              Replace basket
+              Confirm re-sync
             </button>
             <button
               type="button"
               onClick={() => setConfirming(false)}
-              className="flex-1 h-11 rounded-lg border border-outline-variant text-on-surface-variant font-semibold hover:bg-surface-container transition-colors"
+              className="flex-1 h-10 rounded-xl border border-outline-variant/60 text-on-surface-variant text-xs font-semibold hover:bg-surface-container transition-colors"
             >
               Cancel
             </button>
@@ -83,12 +83,17 @@ export function BuildBasketPanel({
           type="button"
           disabled={pending || mealCount === 0}
           onClick={() => (hasBasket ? setConfirming(true) : run())}
-          className="w-full h-12 rounded-lg bg-secondary-container text-on-secondary font-title-md text-title-md flex items-center justify-center gap-sm hover:bg-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className={
+            hasBasket
+              ? 'w-full h-11 rounded-xl bg-surface-container hover:bg-surface-container-high border border-outline-variant/50 text-on-surface font-semibold text-xs flex items-center justify-center gap-xs transition-colors disabled:opacity-50 mt-xs shadow-xs'
+              : 'w-full h-12 rounded-xl bg-secondary text-on-secondary-container font-title-md text-title-md flex items-center justify-center gap-sm hover:shadow-md transition-all font-bold disabled:opacity-50 mt-xs'
+          }
         >
-          <Icon name={pending ? 'progress_activity' : 'auto_awesome'} />
-          {pending ? 'Optimising…' : hasBasket ? 'Rebuild basket' : 'Build basket'}
+          <Icon name={pending ? 'progress_activity' : 'sync'} className={pending ? 'animate-spin' : undefined} />
+          {pending ? 'Optimising…' : hasBasket ? 'Re-sync basket from plan' : 'Build basket from plan'}
         </button>
       )}
+
 
       {state.message && (
         <p

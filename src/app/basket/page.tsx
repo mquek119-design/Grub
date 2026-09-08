@@ -123,8 +123,8 @@ export default async function BasketPage() {
           )}
         </div>
 
-        {/* Right Column: Controls, Optimiser, Thresholds & Slot Picker */}
-        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-lg min-w-0">
+        {/* Right Column: Checkout Summary, Minimum Status, Slot Picker & Plan Sync */}
+        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-md min-w-0">
           <DesktopCheckoutCard
             items={items}
             isCollector={collector?.id === currentUser.id}
@@ -132,12 +132,6 @@ export default async function BasketPage() {
             planId={plan?.id}
             orderingEnabled={tescoOrderingEnabled}
             hasCookies={hasCookies}
-          />
-
-          <BuildBasketPanel
-            hasBasket={items.length > 0}
-            mealCount={mealCount}
-            overlapSavings={plan?.sharedSavings ?? 0}
           />
 
           {items.length > 0 && (
@@ -163,6 +157,12 @@ export default async function BasketPage() {
               orderingEnabled={tescoOrderingEnabled}
             />
           )}
+
+          <BuildBasketPanel
+            hasBasket={items.length > 0}
+            mealCount={mealCount}
+            overlapSavings={plan?.sharedSavings ?? 0}
+          />
         </div>
       </div>
     </PageShell>

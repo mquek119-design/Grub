@@ -28,28 +28,37 @@ export function MinimumOrderBar({
   const fraction = minimum > 0 ? Math.min(1, total / minimum) : 1;
   const label = method === 'collect' ? 'Click & Collect' : 'Delivery';
 
+  // When minimum is comfortably met, keep it compact and quiet
+  if (met) {
+    return (
+      <div className="flex items-center justify-between px-md py-sm rounded-xl bg-surface-container-low border border-outline-variant/40 text-on-surface text-xs shadow-xs">
+        <span className="flex items-center gap-1.5 font-medium">
+          <Icon name="check_circle" filled className="text-primary text-base" />
+          <span>Clears Tesco {label} minimum ({formatPence(minimum)})</span>
+        </span>
+        <span className="font-numeric-data font-bold text-primary">{formatPence(total)}</span>
+      </div>
+    );
+  }
+
+  // When under the threshold, display prominent shortfall alert and progress bar
   return (
-    <Card accent={met ? 'primary' : 'secondary'} className="flex flex-col gap-sm">
+    <Card accent="secondary" className="flex flex-col gap-sm animate-fade-in">
       <div className="flex items-start justify-between gap-md">
         <div className="min-w-0">
-          <h2 className="font-title-md text-title-md flex items-center gap-xs">
-            <Icon
-              name={met ? 'check_circle' : 'error'}
-              filled
-              className={met ? 'text-primary' : 'text-secondary'}
-            />
-            {met ? 'Minimum met' : `${formatPence(shortfall)} short`}
+          <h2 className="font-title-md text-title-md flex items-center gap-xs text-secondary">
+            <Icon name="error" filled className="text-secondary" />
+            {formatPence(shortfall)} short of {label} minimum
           </h2>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            {label} needs at least {formatPence(minimum)}. You have{' '}
-            <strong className="font-numeric-data">{formatPence(total)}</strong>.
-            {!met && ' Add more meals or a few household items to reach it.'}
+          <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+            Tesco {label} requires at least {formatPence(minimum)}. Currently at{' '}
+            <strong className="font-numeric-data">{formatPence(total)}</strong>. Add a few household items or snacks to qualify.
           </p>
         </div>
       </div>
 
       <div
-        className="w-full h-2 bg-surface-container-highest rounded-full overflow-hidden"
+        className="w-full h-2.5 bg-surface-container-highest rounded-full overflow-hidden"
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={minimum}
@@ -57,13 +66,11 @@ export function MinimumOrderBar({
         aria-label={`Progress toward the ${label} minimum`}
       >
         <div
-          className={clsx(
-            'h-full rounded-full transition-all duration-500',
-            met ? 'bg-primary' : 'bg-secondary-container'
-          )}
+          className="h-full rounded-full transition-all duration-500 bg-secondary"
           style={{ width: `${fraction * 100}%` }}
         />
       </div>
     </Card>
   );
 }
+

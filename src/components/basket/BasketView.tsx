@@ -78,6 +78,7 @@ export function BasketView({
   const [sessionAuth, setSessionAuth] = useState(initialHasCookies);
   const [sessionExpiry, setSessionExpiry] = useState<string | undefined>();
   const [syncStatusMsg, setSyncStatusMsg] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     checkTescoSession()
@@ -101,6 +102,16 @@ export function BasketView({
         })),
     [items, quantities, removed]
   );
+
+  const filteredItems = useMemo(() => {
+    if (!searchQuery.trim()) return liveItems;
+    const q = searchQuery.toLowerCase().trim();
+    return liveItems.filter(
+      (item) =>
+        item.name.toLowerCase().includes(q) ||
+        (item.subtitle && item.subtitle.toLowerCase().includes(q))
+    );
+  }, [liveItems, searchQuery]);
 
   // Unpriced lines contribute nothing to the total; the count is surfaced
   // separately so the figure is never mistaken for the finished bill.
@@ -128,7 +139,7 @@ export function BasketView({
 
   const grouped = CATEGORY_ORDER.map((category) => ({
     category,
-    items: liveItems.filter((item) => item.category === category),
+    items: filteredItems.filter((item) => item.category === category),
   })).filter((group) => group.items.length > 0);
 
   /** Days until the Tesco session lapses, or null when unknown. */
@@ -243,7 +254,8 @@ export function BasketView({
       </Card>
     )}
 
-      <Card className="flex flex-col gap-md">
+      {/* Mobile-only basket total card — on desktop, the sticky summary panel on the right handles totals */}
+      <Card className="flex flex-col gap-md lg:hidden">
         <div className="flex justify-between items-start gap-md">
           <div>
             <h2 className="font-title-md text-title-md text-on-surface">Basket Total</h2>
@@ -256,41 +268,75 @@ export function BasketView({
               </p>
             )}
           </div>
-          <div className="bg-primary-container text-on-primary-container rounded-lg px-sm py-xs flex flex-col items-end shrink-0">
-            <span className="font-label-caps text-label-caps opacity-80">Est. Savings</span>
-            <span className="font-numeric-data text-numeric-data">{formatPence(savings)}</span>
-          </div>
+          {savings > 0 && (
+            <div className="bg-primary-container text-on-primary-container rounded-lg px-sm py-xs flex flex-col items-end shrink-0">
+              <span className="font-label-caps text-label-caps opacity-80">Est. Savings</span>
+              <span className="font-numeric-data text-numeric-data">{formatPence(savings)}</span>
+            </div>
+          )}
         </div>
-
-        {/* This used to be a "Swap to Own-Brand" switch. It was a lie: it
-            flipped displayed prices in React state and wrote nothing, so the
-            total moved while the basket, the split and what would actually be
-            sent to Tesco all stayed exactly the same. The cheapest matching
-            product is already chosen when the basket is built, so there was
-            never a choice here to offer — only a fact to state. Per-item "Swap
-            brand" is the real control and it does write. */}
-        {availableSwapValue > 0 && (
-          <>
-            <div className="h-px bg-surface-container-highest w-full" />
-            <p className="flex items-start gap-sm font-body-sm text-body-sm text-on-surface-variant">
-              <Icon name="savings" className="text-primary mt-0.5 shrink-0 text-[18px]" />
-              <span>
-                Own-brand picks have already taken{' '}
-                <strong className="font-numeric-data text-on-surface">
-                  {formatPence(availableSwapValue)}
-                </strong>{' '}
-                off this shop. Swap any line back yourself if the house wants the brand.
-              </span>
-            </p>
-          </>
-        )}
       </Card>
 
+      {/* Own-brand savings tip banner */}
+      {availableSwapValue > 0 && (
+        <div className="flex items-start gap-sm px-md py-sm rounded-xl bg-surface-container-low border border-outline-variant/40 font-body-sm text-xs text-on-surface-variant">
+          <Icon name="savings" className="text-primary mt-0.5 shrink-0 text-[18px]" />
+          <span>
+            Own-brand picks have already taken{' '}
+            <strong className="font-numeric-data text-on-surface font-bold">
+              {formatPence(availableSwapValue)}
+            </strong>{' '}
+            off this shop. Tap <span className="font-semibold text-primary">Swap brand</span> on any item if the house prefers a specific brand.
+          </span>
+        </div>
+      )}
 
+      {/* Instant basket item search bar */}
+      <div className="flex flex-col gap-xs">
+        <div className="relative flex items-center">
+          <Icon
+            name="search"
+            className="absolute left-3 text-on-surface-variant pointer-events-none text-[20px]"
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search basket items (e.g. eggs, chicken, pasta)..."
+            aria-label="Filter basket items"
+            className="w-full h-11 pl-10 pr-9 rounded-xl bg-surface-container-low border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-md text-on-surface transition-all placeholder:text-on-surface-variant/70 shadow-xs"
+          />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              aria-label="Clear search"
+              className="absolute right-3 w-6 h-6 rounded-full bg-surface-container-highest hover:bg-surface-container-high text-on-surface-variant flex items-center justify-center transition-colors"
+            >
+              <Icon name="close" className="text-sm" />
+            </button>
+          )}
+        </div>
+
+        {searchQuery && (
+          <div className="flex items-center justify-between px-xs text-xs text-on-surface-variant">
+            <span>
+              Found <strong>{filteredItems.length}</strong> item{filteredItems.length === 1 ? '' : 's'} matching &ldquo;{searchQuery}&rdquo;
+            </span>
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              className="text-primary font-semibold hover:underline"
+            >
+              Clear filter
+            </button>
+          </div>
+        )}
+      </div>
 
       {grouped.map(({ category, items: categoryItems }) => {
         const meta = CATEGORY_META[category];
-        const isCollapsed = collapsed.has(category);
+        const isCollapsed = !searchQuery && collapsed.has(category);
         const sectionTotal = categoryItems
           .filter((item) => !item.needsPackData)
           .reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
@@ -308,29 +354,43 @@ export function BasketView({
                   return next;
                 })
               }
-              className="w-full min-h-11 flex items-center gap-sm py-sm text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
+              className={clsx(
+                'w-full min-h-12 flex items-center gap-md px-md py-2.5 rounded-xl border transition-all text-left shadow-xs',
+                'bg-surface-container-low hover:bg-surface-container border-outline-variant/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+                !isCollapsed && 'mb-sm'
+              )}
             >
-              <Icon name={meta.icon} className={meta.tone} />
-              <h3 className="font-title-md text-title-md text-on-surface">{meta.label}</h3>
-              <span className="font-numeric-data text-[12px] text-on-surface-variant">
-                {categoryItems.length}
+              <span className="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center shrink-0">
+                <Icon name={meta.icon} className={clsx('text-base', meta.tone)} />
               </span>
+
+              <div className="flex items-center gap-xs min-w-0">
+                <h3 className="font-title-md text-title-md font-bold text-on-surface">{meta.label}</h3>
+                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container-highest text-on-surface-variant">
+                  {categoryItems.length}
+                </span>
+              </div>
+
               <span className="flex-1" />
-              {/* The section total is why collapsing is worth having: folded up,
-                  a category still tells you what it costs. */}
-              <span className="font-numeric-data text-body-lg text-on-surface-variant">
-                {formatPence(sectionTotal)}
-              </span>
-              <Icon
-                name="expand_more"
-                className={clsx(
-                  'text-on-surface-variant transition-transform',
-                  isCollapsed && '-rotate-90'
-                )}
-              />
+
+              <div className="flex items-center gap-sm shrink-0">
+                <span className="font-numeric-data text-body-md font-bold text-on-surface">
+                  {formatPence(sectionTotal)}
+                </span>
+                <span className="w-7 h-7 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant transition-transform">
+                  <Icon
+                    name="expand_more"
+                    className={clsx(
+                      'text-lg transition-transform duration-200',
+                      !isCollapsed && 'rotate-180'
+                    )}
+                  />
+                </span>
+              </div>
             </button>
 
             <ul className={clsx('flex flex-col gap-sm', isCollapsed && 'hidden')}>
+
               {categoryItems.map((item) => {
                 const original = item.originalUnitPrice;
                 const swapped = original !== null && original > item.unitPrice;
@@ -463,13 +523,6 @@ export function BasketView({
           </section>
         );
       })}
-
-      {/* Persistent action bar — sits above the bottom nav on mobile only (lg:hidden). */}
-      {!orderingEnabled && (
-        <Notice tone="info" icon="computer" title="Checkout runs on the collector's desktop">
-          {TESCO_ORDERING_UNAVAILABLE_MESSAGE}
-        </Notice>
-      )}
 
       {orderingEnabled && sessionAuth && sessionDaysLeft !== null && sessionDaysLeft <= 2 && (
         <div

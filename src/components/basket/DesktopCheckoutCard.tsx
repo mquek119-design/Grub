@@ -5,7 +5,7 @@ import { useState, useTransition, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Icon } from '@/components/media/Icon';
 import { formatPence } from '@/lib/money';
-import { basketTotal } from '@/lib/calc';
+import { basketTotal, basketSavings } from '@/lib/calc';
 import type { BasketItem } from '@/lib/types';
 import { checkTescoSession, syncBasketToTesco, startTescoCheckout } from '@/app/basket/tescoActions';
 import { TESCO_ORDERING_UNAVAILABLE_MESSAGE } from '@/lib/tescoOrdering';
@@ -39,6 +39,8 @@ export function DesktopCheckoutCard({
   }, []);
 
   const total = basketTotal(items.filter((item) => !item.needsPackData));
+  const savings = basketSavings(items);
+  const unpricedCount = items.filter((item) => item.needsPackData).length;
 
   async function handleCheckoutClick() {
     if (!sessionAuth) {
@@ -89,13 +91,26 @@ export function DesktopCheckoutCard({
 
   return (
     <Card className="hidden lg:flex flex-col gap-md border border-primary/30 bg-gradient-to-br from-surface-container-lowest to-surface-container-low shadow-sm">
-      <div className="flex flex-col gap-xs">
-        <span className="font-label-caps text-label-caps text-on-surface-variant font-semibold uppercase tracking-wider">
-          {actualTotalCost !== null ? 'Tesco Actual Total' : 'Estimated Total'}
-        </span>
-        <span className="font-numeric-data text-headline-lg font-bold text-primary">
-          {actualTotalCost !== null ? formatPence(actualTotalCost) : formatPence(total)}
-        </span>
+      <div className="flex items-start justify-between gap-sm">
+        <div className="flex flex-col gap-xs">
+          <span className="font-label-caps text-label-caps text-on-surface-variant font-semibold uppercase tracking-wider">
+            {actualTotalCost !== null ? 'Tesco Actual Total' : 'Estimated Total'}
+          </span>
+          <span className="font-numeric-data text-headline-lg font-bold text-primary">
+            {actualTotalCost !== null ? formatPence(actualTotalCost) : formatPence(total)}
+          </span>
+          {unpricedCount > 0 && (
+            <span className="text-xs text-secondary font-medium">
+              Excludes {unpricedCount} unpriced item{unpricedCount === 1 ? '' : 's'}
+            </span>
+          )}
+        </div>
+        {savings > 0 && (
+          <div className="bg-primary/10 text-primary border border-primary/20 rounded-xl px-sm py-xs flex flex-col items-end shrink-0">
+            <span className="font-label-caps text-[10px] uppercase font-bold tracking-wider">Saved</span>
+            <span className="font-numeric-data text-sm font-bold">{formatPence(savings)}</span>
+          </div>
+        )}
       </div>
 
       {/* Reminder when Tesco session cookies are not in */}
