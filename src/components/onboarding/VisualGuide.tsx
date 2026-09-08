@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Icon } from '@/components/media/Icon';
 import { Badge } from '@/components/ui/Badge';
 import { clsx } from '@/lib/clsx';
+import { Stocky, type StockyMood } from '@/components/mascot/Stocky';
 
 const CHROME_EXTENSION_URL =
   'https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm?hl=en';
@@ -15,6 +16,8 @@ interface Slide {
   title: string;
   subtitle: string;
   badge: string;
+  stockyMood: StockyMood;
+  stockyCaption: string;
   renderIllustration: () => React.ReactNode;
   highlights: string[];
 }
@@ -30,6 +33,8 @@ export function VisualGuide() {
       title: 'The Weekly Household Pulse',
       subtitle: 'Never wonder what’s for dinner or who is cooking. Your house’s collective rhythm lives here.',
       badge: 'Feed',
+      stockyMood: 'stressed',
+      stockyCaption: '2h to cutoff!',
       highlights: [
         'Live countdown to your weekly grocery cutoff',
         'Tonight’s dinner card with cook assignment & diners',
@@ -79,6 +84,8 @@ export function VisualGuide() {
       title: 'Stack Dinners, Cut the Bill',
       subtitle: 'Pick what you fancy before the cutoff. Bring a friend or partner? Scale portions in 1 tap.',
       badge: 'Plan',
+      stockyMood: 'smug',
+      stockyCaption: '1 pack, 4 meals!',
       highlights: [
         'Shared ingredients are pooled so you never buy four bottles of oil',
         '+1 Guest toggle adds partner/friend portions fairly',
@@ -130,6 +137,8 @@ export function VisualGuide() {
       title: 'Tesco Automation & Session Link',
       subtitle: 'The collector connects Tesco once using the free Cookie-Editor extension. Grub builds the basket automatically.',
       badge: 'Automation',
+      stockyMood: 'neutral',
+      stockyCaption: 'Tesco cart filled!',
       highlights: [
         'Grub takes the entire flat’s meals and fills the Tesco trolley in seconds',
         'Clubcard discounts and price swaps applied automatically',
@@ -198,6 +207,8 @@ export function VisualGuide() {
       title: 'Grub Reserves the Slot For You',
       subtitle: 'Never miss a delivery or carry heavy bags alone. Grub holds the 1-hour slot when flatmates are home.',
       badge: 'Fulfillment',
+      stockyMood: 'asleep',
+      stockyCaption: 'Slot held for flat!',
       highlights: [
         'Home Delivery or Click & Collect (e.g. Cannon Park pickup)',
         'Grub holds the 1-hour window before cutoff so groceries arrive on schedule',
@@ -239,6 +250,8 @@ export function VisualGuide() {
       title: 'Penny-Perfect Split & Instant Settlement',
       subtitle: 'Pay exact pennies via Monzo or Revolut in 1 tap. No spreadsheets, receipt arguments, or chasing people.',
       badge: 'Split',
+      stockyMood: 'split',
+      stockyCaption: 'Down to the penny!',
       highlights: [
         'Split down to the penny for shared meals — never pay for someone else’s snacks',
         '1-tap Monzo & Revolut payment links pre-filled with the exact amount owed',
@@ -286,6 +299,8 @@ export function VisualGuide() {
       title: 'Kitchen Counter Cook Mode',
       subtitle: 'Prop your phone by the hob while you cook. Your screen never sleeps and steps are huge.',
       badge: 'Cook Mode',
+      stockyMood: 'cooking',
+      stockyCaption: 'Worktop mode on!',
       highlights: [
         'Screen Wake Lock keeps your recipe visible — no greasy fingers unlocking your phone',
         '20px bold typography legible from across the kitchen counter',
@@ -351,13 +366,23 @@ export function VisualGuide() {
 
       {/* Main visual card */}
       <div className="flex flex-col gap-md">
-        <div className="flex items-center gap-2">
-          <Badge tone="primary" className="text-xs font-bold uppercase tracking-wider">
-            {current.badge}
-          </Badge>
-          <h1 className="font-georgia text-title-lg font-bold text-on-surface">
-            {current.title}
-          </h1>
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col gap-1.5 min-w-0">
+            <div className="flex items-center gap-2">
+              <Badge tone="primary" className="text-xs font-bold uppercase tracking-wider">
+                {current.badge}
+              </Badge>
+            </div>
+            <h1 className="font-georgia text-title-lg font-bold text-on-surface">
+              {current.title}
+            </h1>
+          </div>
+          <Stocky
+            mood={current.stockyMood}
+            size="sm"
+            caption={current.stockyCaption}
+            className="shrink-0 pt-0.5"
+          />
         </div>
 
         <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">

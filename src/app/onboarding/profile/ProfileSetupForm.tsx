@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { Icon } from '@/components/media/Icon';
 import { clsx } from '@/lib/clsx';
+import { Stocky } from '@/components/mascot/Stocky';
 import { saveProfilePreferences, type OnboardingState } from '../actions';
 
 const INITIAL: OnboardingState = { status: 'idle', message: '' };
@@ -63,9 +64,12 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
     <form action={formAction} className="flex flex-col gap-xl">
       {/* 1. Identity */}
       <div className="flex flex-col gap-md">
-        <h2 className="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant font-bold">
-          1. Your Details
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant font-bold">
+            1. Your Details
+          </h2>
+          <Stocky mood="neutral" size="sm" caption="Ready!" />
+        </div>
 
         <label className="flex flex-col gap-xs">
           <span className="font-body-sm text-xs font-semibold text-on-surface">
@@ -113,13 +117,20 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
 
       {/* 2. Personal Weekly Budget Slider */}
       <div className="flex flex-col gap-sm p-lg rounded-2xl bg-surface-container-low border border-outline-variant/40">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           <span className="font-label-caps text-label-caps uppercase tracking-wider text-primary font-bold">
             2. Personal Weekly Food Target
           </span>
-          <span className="font-numeric-data text-title-md font-extrabold text-primary">
-            £{budget}/week
-          </span>
+          <div className="flex items-center gap-2">
+            <Stocky
+              mood={budget <= 25 ? 'smug' : budget >= 50 ? 'cooking' : 'neutral'}
+              size="sm"
+              caption={budget <= 25 ? 'Frugal master!' : budget >= 50 ? 'Feast mode!' : 'Balanced!'}
+            />
+            <span className="font-numeric-data text-title-md font-extrabold text-primary">
+              £{budget}/week
+            </span>
+          </div>
         </div>
 
         <p className="font-body-sm text-xs text-on-surface-variant">

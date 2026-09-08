@@ -105,12 +105,20 @@ In `Settings -> Notifications & Integrations`, each student can customize their 
 
 ---
 
-## 6. Brand Identity & Mascot Strategy (On Hold — TBD)
+## 6. Brand Identity & Official Mascot: Stocky the Bouillon Cube
 
-### 6.1 Brand Mascot Direction (Deferred / Future Roadmap)
-- **Status**: Strictly on hold. (Note: "Potto" from the Aussie meal planner reference was an external example, NOT Grub's mascot).
-- **Strategy when explored down the line**:
-  1. **Transforms Utility into Warmth**: When designed, a student-focused mascot should build emotional connection, keeping flat dinner coordination lighthearted rather than bureaucratic.
-  2. **Delightful Loading Moments**: Can replace generic progress bars during Tesco automation sync or slot reservation loading states once finalized.
-  3. **Physical Campus Touchpoints**: High sticker appeal for student laptops, water bottles, and kitchen fridge whiteboards across campus.
-- **Rollout Decision**: Mascot development is paused and on hold. Focus remains on utility, automation, kitchen cook mode, and seamless bill splitting.
+### 6.1 The Core Insight: One Ingredient, Multiplied
+- **The Product Truth**: One stock cube (or one bag of onions, one pack of mince, one block of cheese) stretching across multiple communal meals is literally what Grub’s grocery optimiser accomplishes.
+- **Why Stocky Resonates**:
+  1. **Subconscious Value Reinforcement**: Every time Stocky appears, it reinforces the core thesis: *"Grub makes one ingredient do more work"* without preaching in sales copy.
+  2. **Student Cupboard Hero**: Stock cubes are the indispensable workhorse of British student kitchens. Cheap, compact, and dissolving into everything from bolognese to lentil dahl.
+  3. **Rich Expressive Range Tied to Real UX Moments**:
+     - **Stressed Stocky** (*sweat drop, alarmed eyes, wavy mouth*): Cutoff in <2 hours, missing flatmate selections, or empty pantry alert.
+     - **Smug Stocky** (*winking, thumbs up, foil shine sparkle*): Weekly budget goal beat (£18/person/week), all 5 housemates confirmed, or Tesco Clubcard discount applied.
+     - **Asleep Stocky** (*curved eyes, floating 'z Z'*): Sunday late night post-delivery quiet hours; nothing left to coordinate.
+     - **Chef Stocky** (*mini chef toque, wooden spoon*): In Kitchen Counter Cook Mode, cheering on the designated cook.
+     - **Split Stocky** (*holding golden £ coin / receipt ribbon*): Bridges the culinary side with fair debt settlement ("Paid down to the penny!").
+
+### 6.2 Campus Touchpoint & Viral Sticker Strategy
+- **Metallic Foil Die-Cut Stickers**: High-appeal stickers mimicking foil-wrapped bouillon cubes handed out during Warwick Freshers' Week and Cannon Park flyering. High pickup rate for student laptops, drink flasks, and kitchen whiteboards.
+- **Micro-Interaction Moments**: Vector-rendered inside the web app for instant 0ms load times, subtle hover animations, and emotional feedback during cutoff count-downs, basket sync, and recipe steps.
