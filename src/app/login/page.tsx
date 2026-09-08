@@ -12,11 +12,12 @@ export default async function LoginPage({
   const params = await searchParams;
   let errorMessage: string | null = null;
   if (params.error) {
-    if (params.error === 'exchange_failed') {
-      errorMessage = 'That link has expired or was already used. Request a new one.';
-    } else if (params.error === 'missing_code') {
-      errorMessage = 'That sign-in link was incomplete or invalid. Request a new one.';
-    } else if (params.error === 'missing_config') {
+    const raw = params.error.toLowerCase();
+    if (raw === 'exchange_failed' || raw.includes('expired') || raw.includes('otp_expired') || raw.includes('invalid')) {
+      errorMessage = 'That sign-in link has expired or was already used. Enter your email below to get a fresh link.';
+    } else if (raw === 'missing_code') {
+      errorMessage = 'That sign-in link was incomplete or invalid. Request a new one below.';
+    } else if (raw === 'missing_config') {
       errorMessage = 'Authentication is not configured yet.';
     } else {
       try {
