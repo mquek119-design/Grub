@@ -19,7 +19,7 @@ import type { Expense, User } from '@/lib/types';
 
 /**
  * Purchases made outside the Tesco shop — a shower curtain, a replacement
- * toaster, something grabbed from Aldi.
+ * toaster, something grabbed from the shop.
  *
  * Equal split by default with optional per-person amounts, because "we split it
  * but Sam only used half" is a real sentence in a shared house. The custom
@@ -342,7 +342,7 @@ export function ExpensePanel({
         !open && (
           <p className="font-body-sm text-body-sm text-on-surface-variant">
             Nothing logged yet. Bin bags from the corner shop, a replacement kettle, someone&apos;s
-            Aldi run — it all lands on the same balances as the weekly shop.
+            quick corner-shop run — it all lands on the same balances as the weekly shop.
           </p>
         )
       )}

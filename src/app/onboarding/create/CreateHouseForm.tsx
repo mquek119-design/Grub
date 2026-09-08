@@ -31,15 +31,6 @@ const SUPERMARKETS = [
     colour: '#00539F',
     stripes: ['#EE1C2E', '#00539F', '#EE1C2E'],
   },
-  {
-    id: 'aldi_cannon_park',
-    name: 'Aldi',
-    location: 'Cannon Park / Shires',
-    tag: 'Coming Soon',
-    colour: '#081E3F',
-    stripes: ['#00A3E0', '#FFB300', '#DE2A27'],
-    comingSoon: true,
-  },
 ];
 
 /** Tesco-inspired grocery bag logo — adapted, not a direct copy */
@@ -70,89 +61,8 @@ function TescoInspiredLogo({ className }: { className?: string }) {
   );
 }
 
-/** Aldi-inspired logo — adapted geometric ribbon abstraction */
-function AldiInspiredLogo({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 36 36" className={className} xmlns="http://www.w3.org/2000/svg">
-      {/* Outer rounded container with deep navy background */}
-      <rect
-        x="3"
-        y="2"
-        width="30"
-        height="32"
-        rx="4.5"
-        fill="#081E3F"
-        stroke="#00A3E0"
-        strokeWidth="1"
-      />
-
-      {/* Characteristic concentric inner border trim in yellow and red */}
-      <rect
-        x="4.8"
-        y="3.8"
-        width="26.4"
-        height="28.4"
-        rx="3"
-        fill="none"
-        stroke="#FFB300"
-        strokeWidth="0.9"
-      />
-      <rect
-        x="6.2"
-        y="5.2"
-        width="23.6"
-        height="25.6"
-        rx="2"
-        fill="none"
-        stroke="#DE2A27"
-        strokeWidth="0.8"
-      />
-
-      {/* Iconic Aldi 3-band curved ribbon 'A' motif */}
-      {/* Outer cyan band */}
-      <path
-        d="M11 25.5 C11 18, 14.5 10, 20.5 8"
-        fill="none"
-        stroke="#00A3E0"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      {/* Middle electric blue band */}
-      <path
-        d="M13.5 25.5 C13.5 19.5, 16 13, 20.5 11"
-        fill="none"
-        stroke="#1E88E5"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-      {/* Inner deep navy-blue band */}
-      <path
-        d="M16 25.5 C16 22, 17.5 16, 20.5 14"
-        fill="none"
-        stroke="#283593"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-
-      {/* Right diagonal leg of the 'A' */}
-      <path
-        d="M20.5 8 L25.5 25.5"
-        fill="none"
-        stroke="#00A3E0"
-        strokeWidth="2"
-        strokeLinecap="round"
-      />
-
-      {/* Signature warm crossbars in red and golden yellow */}
-      <rect x="13" y="19" width="10" height="1.8" rx="0.9" fill="#DE2A27" />
-      <rect x="14" y="22" width="8.5" height="1.6" rx="0.8" fill="#FFB300" />
-    </svg>
-  );
-}
-
 function StoreIcon({ storeId, className }: { storeId: string; className?: string }) {
   if (storeId.startsWith('tesco')) return <TescoInspiredLogo className={className} />;
-  if (storeId.startsWith('aldi')) return <AldiInspiredLogo className={className} />;
   return <Icon name="storefront" className={clsx('text-[28px]', className)} />;
 }
 
@@ -198,7 +108,7 @@ export function CreateHouseForm() {
       case 1:
         return houseName.trim().length >= 1;
       case 2:
-        return !!supermarket && !SUPERMARKETS.find((m) => m.id === supermarket)?.comingSoon;
+        return !!supermarket;
       case 3:
         return true;
       case 4:
@@ -283,70 +193,38 @@ export function CreateHouseForm() {
             <div className="flex flex-col gap-3">
               {SUPERMARKETS.map((market) => {
                 const isSelected = supermarket === market.id;
-                const isComingSoon = market.comingSoon;
                 return (
-                  <div key={market.id} className="flex flex-col">
-                    <button
-                      type="button"
-                      disabled={isComingSoon}
-                      onClick={() => !isComingSoon && setSupermarket(market.id)}
+                  <button
+                    key={market.id}
+                    type="button"
+                    onClick={() => setSupermarket(market.id)}
+                    className={clsx(
+                      'p-4 rounded-2xl border text-left flex items-center gap-4 transition-all cursor-pointer btn-tactile',
+                      isSelected
+                        ? 'bg-primary/8 border-primary ring-2 ring-primary/30 shadow-sm'
+                        : 'bg-surface-container-lowest hover:bg-surface-container border-outline-variant/50'
+                    )}
+                  >
+                    <StoreIcon storeId={market.id} className="w-10 h-10 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-title-sm text-sm font-bold text-on-surface leading-tight">
+                        {market.name}
+                      </p>
+                      <p className="font-body-xs text-[11px] text-on-surface-variant mt-0.5">
+                        {market.location}
+                      </p>
+                    </div>
+                    <span
                       className={clsx(
-                        'p-4 rounded-2xl border text-left flex items-center gap-4 transition-all',
-                        isComingSoon
-                          ? 'bg-surface-container-lowest/60 border-dashed border-outline-variant/60 cursor-not-allowed opacity-90'
-                          : isSelected
-                            ? 'bg-primary/8 border-primary ring-2 ring-primary/30 shadow-sm cursor-pointer btn-tactile'
-                            : 'bg-surface-container-lowest hover:bg-surface-container border-outline-variant/50 cursor-pointer btn-tactile'
+                        'text-[9px] font-bold px-2 py-1 rounded-full whitespace-nowrap',
+                        isSelected
+                          ? 'bg-primary text-on-primary'
+                          : 'bg-surface-container text-on-surface-variant'
                       )}
                     >
-                      <StoreIcon storeId={market.id} className="w-10 h-10 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className="font-title-sm text-sm font-bold text-on-surface leading-tight">
-                            {market.name}
-                          </p>
-                          {isComingSoon && (
-                            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-200">
-                              Coming Soon
-                            </span>
-                          )}
-                        </div>
-                        <p className="font-body-xs text-[11px] text-on-surface-variant mt-0.5">
-                          {market.location}
-                        </p>
-                      </div>
-                      <span
-                        className={clsx(
-                          'text-[9px] font-bold px-2 py-1 rounded-full whitespace-nowrap',
-                          isComingSoon
-                            ? 'bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/20'
-                            : isSelected
-                              ? 'bg-primary text-on-primary'
-                              : 'bg-surface-container text-on-surface-variant'
-                        )}
-                      >
-                        {isComingSoon ? 'Budget Benchmark' : market.tag}
-                      </span>
-                    </button>
-
-                    {/* Explanatory callout for Aldi budget benchmark */}
-                    {isComingSoon && (
-                      <div className="mt-2 p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5">
-                        <Icon name="trending_down" className="text-[18px] text-amber-600 shrink-0 mt-0.5" />
-                        <div className="flex flex-col gap-1">
-                          <p className="font-body-sm text-xs text-on-surface font-bold">
-                            Why is Aldi our Budget Benchmark?
-                          </p>
-                          <p className="font-body-xs text-[11px] text-on-surface-variant leading-relaxed">
-                            Aldi does not offer nationwide grocery home delivery in the UK, but consistently sets the gold standard for student grocery affordability. Grub indexes Aldi prices as our baseline benchmark so your flat always sees how recipes compare to the lowest market price.
-                          </p>
-                          <p className="font-body-xs text-[10px] text-amber-800/80 dark:text-amber-300/80 font-medium">
-                            Direct in-store shopping list sync &amp; Click + Collect integration coming soon! Choose Tesco above for automated slot booking &amp; delivery today.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                      {market.tag}
+                    </span>
+                  </button>
                 );
               })}
             </div>

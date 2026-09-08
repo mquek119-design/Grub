@@ -184,7 +184,7 @@ Transforming the mobile web app into an installable PWA gives students a native 
 ### Phase 6: Mobile Onboarding, Budget Slider & Stocky Nuggets
 - [x] Mobile-optimised multi-step onboarding flow (`/onboarding/profile`, `/onboarding/create`, `/onboarding/join`).
 - [x] Direct appliance selector with tactile buttons and selected badge counts.
-- [x] Supermarket selection dynamically linked to delivery vs collection choice with transparent Aldi budget benchmark explanation.
+- [x] Supermarket selection dynamically linked to delivery vs collection choice with clear store tags and minimum spend guides.
 - [x] Progressive Stocky mascot nuggets across 4 budget tiers: Frugal (£10–£25 with coin floor nugget), Student (£26–£45), Gym (£46–£70 with dumbbell weight nugget), Premium (£71–£100 with gold bar nugget).
 - [x] Responsive layout fix preventing word-spacing expansion on narrow mobile screens at £35.
 
