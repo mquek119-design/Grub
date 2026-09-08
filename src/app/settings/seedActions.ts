@@ -107,7 +107,7 @@ export async function seedDemoData(): Promise<SeedResult> {
   // ---------------------------------------------------------------------
   // 1. Housemates — detect how many real accounts already live in this house.
   //    Real housemates are prioritized so everyone has meals, cook duties,
-  //    and split balances. We fill remaining spots up to a 4-person household.
+  //    and split balances. We fill remaining spots up to a 5-person household.
   // ---------------------------------------------------------------------
   const realProfilesRes = await supabase
     .from('profiles')
@@ -119,10 +119,10 @@ export async function seedDemoData(): Promise<SeedResult> {
   const realProfiles = realProfilesRes.data ?? [];
   const otherRealProfiles = realProfiles.filter((p) => p.id !== me.id);
 
-  // Pool of demo names to choose from if spots are needed to make a 4-person house
-  const demoNamesPool = ['Alex', 'Sam', 'Priya', 'Maya'];
+  // Pool of demo names to choose from if spots are needed to make a 5-person house
+  const demoNamesPool = ['Alex', 'Sam', 'Maya', 'Priya', 'Jordan'];
   const realNamesSet = new Set(realProfiles.map((p) => p.name.toLowerCase()));
-  const demoCountNeeded = Math.max(0, 4 - realProfiles.length);
+  const demoCountNeeded = Math.max(0, 5 - realProfiles.length);
   const demoNamesToSeed = demoNamesPool
     .filter((name) => !realNamesSet.has(name.toLowerCase()))
     .slice(0, demoCountNeeded);
@@ -151,13 +151,13 @@ export async function seedDemoData(): Promise<SeedResult> {
   if (profiles.error) return fail(profiles.error.message);
 
   // Map roles and names to UUIDs:
-  // 'me' is always the current caller.
+  // 'me' is always the current caller (Real Account 1).
   const idByName = new Map<string, string>([['me', me.id]]);
   if (me.name) {
     idByName.set(me.name.toLowerCase(), me.id);
   }
 
-  // 2nd real housemate takes the co-star role ('alex', 'partner', 'housemate2', and their real name)
+  // 2nd real housemate takes 'alex'
   if (otherRealProfiles.length > 0) {
     const p2 = otherRealProfiles[0];
     idByName.set('alex', p2.id);
@@ -170,14 +170,24 @@ export async function seedDemoData(): Promise<SeedResult> {
   if (otherRealProfiles.length > 1) {
     const p3 = otherRealProfiles[1];
     idByName.set('sam', p3.id);
+    idByName.set('housemate3', p3.id);
     idByName.set(p3.name.toLowerCase(), p3.id);
   }
 
-  // 4th real housemate takes 'priya'
+  // 4th real housemate takes 'maya'
   if (otherRealProfiles.length > 2) {
     const p4 = otherRealProfiles[2];
-    idByName.set('priya', p4.id);
+    idByName.set('maya', p4.id);
+    idByName.set('housemate4', p4.id);
     idByName.set(p4.name.toLowerCase(), p4.id);
+  }
+
+  // 5th real housemate takes 'priya'
+  if (otherRealProfiles.length > 3) {
+    const p5 = otherRealProfiles[3];
+    idByName.set('priya', p5.id);
+    idByName.set('housemate5', p5.id);
+    idByName.set(p5.name.toLowerCase(), p5.id);
   }
 
   // Also map all generated demo housemates and existing profiles by their names

@@ -164,14 +164,14 @@ export const DEMO_RECIPES: DemoRecipe[] = [
     title: 'Thai Green Curry',
     cookTimeMins: 35,
     difficulty: 'medium',
-    servings: 4,
+    servings: 5,
     tags: ['Asian', 'Thai', 'Curry'],
     instructions: ['Fry the paste.', 'Add coconut milk and chicken, simmer.', 'Serve with rice.'],
     ingredients: [
-      { name: 'Chicken breast', quantity: 600, unit: 'g', category: 'fresh' },
-      { name: 'Thai green curry paste', quantity: 120, unit: 'g', category: 'cupboard' },
+      { name: 'Chicken breast', quantity: 750, unit: 'g', category: 'fresh' },
+      { name: 'Thai green curry paste', quantity: 150, unit: 'g', category: 'cupboard' },
       { name: 'Coconut milk', quantity: 400, unit: 'ml', category: 'cupboard' },
-      { name: 'Rice', quantity: 300, unit: 'g', category: 'cupboard' },
+      { name: 'Rice', quantity: 375, unit: 'g', category: 'cupboard' },
     ],
   },
   {
@@ -222,15 +222,15 @@ export const DEMO_RECIPES: DemoRecipe[] = [
     title: 'Spaghetti Bolognese',
     cookTimeMins: 45,
     difficulty: 'easy',
-    servings: 4,
+    servings: 5,
     tags: ['Western', 'Pasta', 'Beef'],
     instructions: ['Brown the mince.', 'Add tomatoes and simmer.', 'Serve over spaghetti.'],
     ingredients: [
-      { name: 'Minced beef', quantity: 500, unit: 'g', category: 'fresh' },
+      { name: 'Minced beef', quantity: 650, unit: 'g', category: 'fresh' },
       { name: 'Onion', quantity: 1, unit: 'each', category: 'fresh' },
       { name: 'Garlic', quantity: 1, unit: 'each', category: 'fresh' },
       { name: 'Chopped tomatoes', quantity: 800, unit: 'g', category: 'cupboard' },
-      { name: 'Spaghetti', quantity: 400, unit: 'g', category: 'cupboard' },
+      { name: 'Spaghetti', quantity: 500, unit: 'g', category: 'cupboard' },
     ],
   },
   {
@@ -321,7 +321,7 @@ export const DEMO_SCHEDULE: DemoMeal[] = [
   // --- Wed: three solo dinners, and the stir fry vs green curry pair shares
   //     no ingredient at all — this is the day the conflict warning fires. ---
   { day: 'wed', mealType: 'dinner', recipe: 'Beef stir fry noodles', diners: ['me'], maxDiners: 3 },
-  { day: 'wed', mealType: 'dinner', recipe: 'Thai Green Curry', diners: ['Priya'] },
+  { day: 'wed', mealType: 'dinner', recipe: 'Thai Green Curry', diners: ['Sam'] },
   { day: 'wed', mealType: 'dinner', recipe: 'Chicken Caesar Salad', diners: ['Alex'] },
 
   // --- Thu and Fri: one shared meal each. -----------------------------------
@@ -329,14 +329,14 @@ export const DEMO_SCHEDULE: DemoMeal[] = [
     day: 'thu',
     mealType: 'dinner',
     recipe: 'Spaghetti Bolognese',
-    diners: ['me', 'Alex', 'Sam', 'Priya'],
+    diners: ['me', 'Alex', 'Sam', 'Maya', 'Priya'],
     cookOfferTo: 'me', // Alex offered to let 'me' cook Thursday dinner!
   },
   {
     day: 'fri',
     mealType: 'dinner',
     recipe: 'Chicken Tikka Masala',
-    diners: ['me', 'Alex', 'Sam', 'Priya'],
+    diners: ['me', 'Alex', 'Sam', 'Maya', 'Priya'],
   },
 
   // --- Sat and Sun: two shared meals each, at different sittings. -----------
@@ -344,28 +344,28 @@ export const DEMO_SCHEDULE: DemoMeal[] = [
     day: 'sat',
     mealType: 'lunch',
     recipe: 'Tuna Pasta Salad',
-    diners: ['me', 'Alex'],
+    diners: ['me', 'Alex', 'Sam'],
     // Alex has someone over and is covering them, so Saturday lunch is cooked
-    // for three and Alex carries two portions of it.
+    // for four and Alex carries two portions of it.
     guests: { who: 'Alex', count: 1, covered: true },
   },
   {
     day: 'sat',
     mealType: 'dinner',
     recipe: 'Classic Beef Burger',
-    diners: ['me', 'Alex', 'Sam', 'Priya'],
+    diners: ['me', 'Alex', 'Sam', 'Maya', 'Priya'],
   },
   {
     day: 'sun',
     mealType: 'breakfast',
     recipe: 'Full English Breakfast',
-    diners: ['me', 'Alex', 'Sam', 'Priya'],
+    diners: ['me', 'Alex', 'Sam', 'Maya', 'Priya'],
   },
   {
     day: 'sun',
     mealType: 'dinner',
     recipe: 'Thai Green Curry',
-    diners: ['me', 'Alex', 'Sam', 'Priya'],
+    diners: ['me', 'Alex', 'Sam', 'Maya', 'Priya'],
   },
 ];
 
