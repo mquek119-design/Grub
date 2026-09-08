@@ -1,7 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import { clsx } from '@/lib/clsx';
 import { Icon } from '@/components/media/Icon';
+import { Stocky } from '@/components/mascot/Stocky';
+
+export const STOCKY_PANTRY_QUOTES = [
+  "Oi! Shut the door, I'm resting between grocery deliveries.",
+  "Sneak peek: I live in the flat's pantry so nobody buys four bags of pasta.",
+  "You found me! The secret bouillon cube watching your Tesco basket.",
+  "Psst: Grub v2 is going to optimize your shared spice rack too.",
+  "Two housemates bought cumin last week. Tragic. I wept.",
+  "Keep this between us, but the collector always deserves the first slice.",
+];
 
 export interface Appliance {
   id: string;
@@ -26,6 +37,10 @@ interface KitchenSceneProps {
 }
 
 export function KitchenScene({ selected, onChange }: KitchenSceneProps) {
+  const [cabinetOpen, setCabinetOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [stockyQuoteIndex, setStockyQuoteIndex] = useState(0);
+
   const toggleAppliance = (id: string) => {
     if (selected.includes(id)) {
       onChange(selected.filter((x) => x !== id));
@@ -147,21 +162,209 @@ export function KitchenScene({ selected, onChange }: KitchenSceneProps) {
           {/* 4. LOWER CABINETS */}
           {/* Left cabinets */}
           <rect x="0" y="302" width="300" height="200" fill="#2D6A4F" />
-          {/* Left drawers */}
-          <rect x="25" y="318" width="250" height="48" rx="4" fill="#245A42" stroke="#1B4332" strokeWidth="1.2" />
-          <rect x="135" y="338" width="30" height="5" rx="2.5" fill="#D4A574" />
+
+          {/* Left top drawer - Cutlery Drawer */}
+          <g
+            className="cursor-pointer group select-none"
+            onClick={() => setDrawerOpen((prev) => !prev)}
+            role="button"
+            tabIndex={0}
+            aria-label="Kitchen cutlery drawer"
+          >
+            {drawerOpen ? (
+              <g className="animate-fade-in">
+                {/* Extended drawer body */}
+                <rect x="25" y="325" width="250" height="52" rx="4" fill="#1E4734" stroke="#132E20" strokeWidth="1.2" />
+                {/* Cutlery divider lines */}
+                <line x1="105" y1="332" x2="105" y2="370" stroke="#132E20" strokeWidth="1" />
+                <line x1="185" y1="332" x2="185" y2="370" stroke="#132E20" strokeWidth="1" />
+                {/* Forks */}
+                <rect x="55" y="338" width="4" height="24" rx="1" fill="#CFD8DC" />
+                <line x1="53" y1="338" x2="61" y2="338" stroke="#CFD8DC" strokeWidth="2" />
+                {/* Wooden Spoons */}
+                <rect x="140" y="342" width="4" height="22" rx="1" fill="#C89D73" />
+                <ellipse cx="142" cy="340" rx="5" ry="4" fill="#C89D73" />
+                {/* Whisk */}
+                <rect x="220" y="345" width="3" height="20" rx="1" fill="#B0BEC5" />
+                <ellipse cx="221.5" cy="342" rx="4" ry="5" fill="none" stroke="#B0BEC5" strokeWidth="1" />
+                {/* Handle */}
+                <rect x="135" y="365" width="30" height="5" rx="2.5" fill="#D4A574" />
+              </g>
+            ) : (
+              <>
+                <rect x="25" y="318" width="250" height="48" rx="4" fill="#245A42" stroke="#1B4332" strokeWidth="1.2" className="group-hover:brightness-105 transition-all" />
+                <rect x="135" y="338" width="30" height="5" rx="2.5" fill="#D4A574" className="group-hover:scale-105 origin-center transition-transform" />
+              </>
+            )}
+          </g>
+
+          {/* Middle drawer */}
           <rect x="25" y="378" width="250" height="55" rx="4" fill="#245A42" stroke="#1B4332" strokeWidth="1.2" />
           <rect x="135" y="401" width="30" height="5" rx="2.5" fill="#D4A574" />
+          {/* Bottom drawer */}
           <rect x="25" y="443" width="250" height="50" rx="4" fill="#245A42" stroke="#1B4332" strokeWidth="1.2" />
           <rect x="135" y="465" width="30" height="5" rx="2.5" fill="#D4A574" />
 
-          {/* Right cabinets */}
+          {/* Right cabinets - SECRET PANTRY */}
           <rect x="500" y="302" width="300" height="200" fill="#2D6A4F" />
-          {/* Right paneled doors */}
-          <rect x="515" y="318" width="125" height="175" rx="4" fill="#245A42" stroke="#1B4332" strokeWidth="1.2" />
-          <rect x="625" y="390" width="5" height="32" rx="2.5" fill="#D4A574" />
-          <rect x="655" y="318" width="120" height="175" rx="4" fill="#245A42" stroke="#1B4332" strokeWidth="1.2" />
-          <rect x="665" y="390" width="5" height="32" rx="2.5" fill="#D4A574" />
+
+          {cabinetOpen ? (
+            /* OPEN PANTRY INTERIOR WITH STOCKY */
+            <g>
+              {/* Dark interior pantry shadow */}
+              <rect x="505" y="308" width="285" height="190" rx="3" fill="#132E20" stroke="#0D1F16" strokeWidth="1.5" />
+
+              {/* Upper wooden shelf */}
+              <rect x="505" y="388" width="285" height="10" fill="#C89D73" stroke="#A97C52" strokeWidth="0.8" />
+
+              {/* Upper shelf pantry items */}
+              {/* Cans of chopped tomatoes */}
+              <rect x="525" y="342" width="28" height="46" rx="2" fill="#F8F9FA" stroke="#CFD8DC" strokeWidth="1" />
+              <rect x="525" y="354" width="28" height="22" fill="#EE1C2E" />
+              <text x="528" y="369" fill="#FFFFFF" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif">TOMS</text>
+
+              <rect x="558" y="342" width="28" height="46" rx="2" fill="#F8F9FA" stroke="#CFD8DC" strokeWidth="1" />
+              <rect x="558" y="354" width="28" height="22" fill="#EE1C2E" />
+              <text x="561" y="369" fill="#FFFFFF" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif">TOMS</text>
+
+              {/* Olive oil bottle with cork */}
+              <rect x="598" y="338" width="22" height="50" rx="3" fill="#FFE082" stroke="#B38656" strokeWidth="1" />
+              <rect x="605" y="328" width="8" height="10" rx="1" fill="#C89D73" />
+              <line x1="598" y1="360" x2="620" y2="360" stroke="#B38656" strokeWidth="0.8" />
+
+              {/* Bag of pasta with red clip */}
+              <rect x="632" y="330" width="42" height="58" rx="4" fill="#FFF8E1" stroke="#FFE082" strokeWidth="1.2" />
+              <rect x="643" y="325" width="20" height="6" rx="2" fill="#EE1C2E" />
+              <text x="638" y="362" fill="#C49666" fontSize="7" fontWeight="bold" fontFamily="sans-serif">PASTA</text>
+
+              {/* Bouillon cube box on lower shelf */}
+              <rect x="525" y="442" width="46" height="50" rx="3" fill="#F4E285" stroke="#1B4332" strokeWidth="1.2" />
+              <text x="530" y="468" fill="#1B4332" fontSize="6.5" fontWeight="bold" fontFamily="sans-serif">STOCK</text>
+              <text x="532" y="478" fill="#2D6A4F" fontSize="5.5" fontWeight="bold" fontFamily="sans-serif">CUBES</text>
+
+              {/* Wooden riser for Stocky */}
+              <rect x="590" y="478" width="105" height="18" rx="2" fill="#C89D73" stroke="#A97C52" strokeWidth="1" />
+
+              {/* STOCKY HIMSELF SITTING ON THE SHELF */}
+              <g
+                transform="translate(610, 395) scale(0.95)"
+                className="cursor-pointer group select-none transition-transform hover:scale-100"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setStockyQuoteIndex((prev) => (prev + 1) % STOCKY_PANTRY_QUOTES.length);
+                }}
+              >
+                {/* Cast Shadow */}
+                <polygon points="24,78 72,78 88,88 38,88" fill="#1B4332" fillOpacity="0.35" />
+
+                {/* Top Isometric Face (Foil wrapper top) */}
+                <polygon points="24,34 56,16 88,34 56,52" fill="#F4E285" stroke="#1B4332" strokeWidth="2.5" strokeLinejoin="round" />
+                <line x1="24" y1="34" x2="88" y2="34" stroke="#1B4332" strokeWidth="1.2" strokeDasharray="2 2" strokeOpacity="0.6" />
+
+                {/* Right Isometric Face (Foil envelope fold) */}
+                <polygon points="56,52 88,34 88,72 56,88" fill="#1B4332" stroke="#1B4332" strokeWidth="2.5" strokeLinejoin="round" />
+                <line x1="56" y1="52" x2="88" y2="72" stroke="#2D6A4F" strokeWidth="1.5" />
+                <line x1="56" y1="88" x2="88" y2="34" stroke="#2D6A4F" strokeWidth="1.5" />
+
+                {/* Left Isometric Face (Vintage grocer green body) */}
+                <polygon points="24,34 56,52 56,88 24,72" fill="#2D6A4F" stroke="#1B4332" strokeWidth="2.5" strokeLinejoin="round" />
+
+                {/* Front label banner */}
+                <polygon points="28,42 52,55 52,65 28,52" fill="#F4E285" stroke="#1B4332" strokeWidth="1.2" />
+
+                {/* Eyes */}
+                <circle cx="37" cy="56" r="2.5" fill="#1B4332" />
+                <circle cx="47" cy="62" r="2.5" fill="#1B4332" />
+                <circle cx="36.2" cy="55.2" r="0.8" fill="#FAF7F2" />
+                <circle cx="46.2" cy="61.2" r="0.8" fill="#FAF7F2" />
+
+                {/* Smug smile */}
+                <path d="M37 63 Q43 68 49 67" fill="none" stroke="#1B4332" strokeWidth="1.6" strokeLinecap="round" />
+
+                {/* Cheeks */}
+                <ellipse cx="34" cy="61" rx="2.5" ry="1.5" fill="#EE1C2E" fillOpacity="0.3" />
+                <ellipse cx="50" cy="68" rx="2.5" ry="1.5" fill="#EE1C2E" fillOpacity="0.3" />
+
+                <text x="31" y="50" fill="#1B4332" fontSize="5.5" fontWeight="bold" fontFamily="sans-serif">STOCKY</text>
+              </g>
+
+              {/* Swung Open Left Door */}
+              <polygon
+                points="505,310 522,314 522,492 505,498"
+                fill="#245A42"
+                stroke="#1B4332"
+                strokeWidth="1.4"
+                className="cursor-pointer hover:brightness-110"
+                onClick={() => setCabinetOpen(false)}
+              />
+              <rect x="517" y="395" width="3" height="24" rx="1.5" fill="#D4A574" />
+
+              {/* Swung Open Right Door */}
+              <polygon
+                points="785,310 768,314 768,492 785,498"
+                fill="#245A42"
+                stroke="#1B4332"
+                strokeWidth="1.4"
+                className="cursor-pointer hover:brightness-110"
+                onClick={() => setCabinetOpen(false)}
+              />
+              <rect x="769" y="395" width="3" height="24" rx="1.5" fill="#D4A574" />
+
+              {/* Speech balloon from Stocky */}
+              <g transform="translate(515, 316)">
+                <rect x="0" y="0" width="265" height="66" rx="8" fill="#FAF7F2" stroke="#1B4332" strokeWidth="1.5" />
+                <polygon points="130,66 138,74 146,66" fill="#FAF7F2" stroke="#1B4332" strokeWidth="1.5" />
+                <line x1="131" y1="65" x2="145" y2="65" stroke="#FAF7F2" strokeWidth="2.5" />
+                <text x="10" y="18" fill="#D66A4E" fontSize="9" fontWeight="bold" fontFamily="sans-serif">
+                  🎉 SNEAK PEEK UNLOCKED!
+                </text>
+                <text x="10" y="34" fill="#1B4332" fontSize="10.5" fontWeight="bold" fontFamily="sans-serif">
+                  &ldquo;{STOCKY_PANTRY_QUOTES[stockyQuoteIndex]}&rdquo;
+                </text>
+                <text x="10" y="50" fill="#2D6A4F" fontSize="8.5" fontWeight="500" fontFamily="sans-serif">
+                  Tap Stocky for more · Tap doors to close
+                </text>
+              </g>
+            </g>
+          ) : (
+            /* CLOSED PANTRY DOORS */
+            <g
+              className="cursor-pointer group select-none"
+              role="button"
+              tabIndex={0}
+              onClick={() => setCabinetOpen(true)}
+              aria-label="Pantry cabinet (tap to open secret feature)"
+            >
+              {/* Right paneled doors */}
+              <rect
+                x="515"
+                y="318"
+                width="125"
+                height="175"
+                rx="4"
+                fill="#245A42"
+                stroke="#1B4332"
+                strokeWidth="1.2"
+                className="transition-all group-hover:brightness-110"
+              />
+              <rect x="625" y="390" width="5" height="32" rx="2.5" fill="#D4A574" className="transition-transform group-hover:scale-105 origin-center" />
+              <rect
+                x="655"
+                y="318"
+                width="120"
+                height="175"
+                rx="4"
+                fill="#245A42"
+                stroke="#1B4332"
+                strokeWidth="1.2"
+                className="transition-all group-hover:brightness-110"
+              />
+              <rect x="665" y="390" width="5" height="32" rx="2.5" fill="#D4A574" className="transition-transform group-hover:scale-105 origin-center" />
+
+              {/* Playful sparkling keyhole hint */}
+              <circle cx="645" cy="406" r="3.5" fill="#F4E285" className="animate-pulse" />
+            </g>
+          )}
 
           {/* 5. FLOOR & BOHO HALF-SUN RUG */}
           <rect x="0" y="502" width="800" height="78" fill="#EAE2D5" />
@@ -516,6 +719,61 @@ export function KitchenScene({ selected, onChange }: KitchenSceneProps) {
           </g>
         </svg>
       </div>
+
+      {/* Secret Sneak Peek Card when Cabinet is Open */}
+      {cabinetOpen && (
+        <div className="p-3.5 rounded-2xl bg-gradient-to-r from-secondary-fixed/30 via-surface-container-lowest to-secondary-fixed/20 border-2 border-secondary/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-ambient-card animate-fade-in">
+          <div className="flex items-center gap-3 min-w-0">
+            <Stocky mood="smug" size="sm" className="shrink-0" />
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="font-label-caps text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-secondary text-on-secondary shadow-xs">
+                  🎉 Secret Sneak Peek Unlocked
+                </span>
+                <span className="text-xs font-bold text-on-surface">
+                  Stocky lives in the pantry!
+                </span>
+              </div>
+              <p className="font-body-xs text-xs text-on-surface-variant mt-1 leading-relaxed italic">
+                &ldquo;{STOCKY_PANTRY_QUOTES[stockyQuoteIndex]}&rdquo;
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+            <button
+              type="button"
+              onClick={() => setStockyQuoteIndex((prev) => (prev + 1) % STOCKY_PANTRY_QUOTES.length)}
+              className="px-3 py-1.5 rounded-xl bg-surface-container-high hover:bg-surface-container-highest border border-outline-variant/40 text-on-surface text-xs font-bold transition-colors cursor-pointer"
+            >
+              Ask Stocky
+            </button>
+            <button
+              type="button"
+              onClick={() => setCabinetOpen(false)}
+              className="px-3 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-bold hover:bg-primary/90 transition-colors cursor-pointer shadow-xs"
+            >
+              Close Cupboard
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Drawer hint if user opened the cutlery drawer */}
+      {drawerOpen && !cabinetOpen && (
+        <div className="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between text-xs animate-fade-in">
+          <span className="text-on-surface-variant flex items-center gap-2">
+            <span>🍴</span>
+            <span><strong>Cutlery drawer:</strong> Just spoons & whisks here! Try clicking the right cabinet doors ➔</span>
+          </span>
+          <button
+            type="button"
+            onClick={() => setDrawerOpen(false)}
+            className="text-on-surface-variant hover:text-primary font-bold text-xs"
+          >
+            Close
+          </button>
+        </div>
+      )}
 
       {/* Quick Interactive Pills Tray below kitchen */}
       <div className="flex flex-col gap-xs pt-1">
