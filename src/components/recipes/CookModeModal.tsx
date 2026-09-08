@@ -245,6 +245,47 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
     }
   }
 
+  // Touch Swipe Gesture Handling for Mobile Flashcards
+  const [dragX, setDragX] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const didSwipeRef = useRef(false);
+
+  function handleTouchStart(e: React.TouchEvent) {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    setIsSwiping(true);
+    didSwipeRef.current = false;
+  }
+
+  function handleTouchMove(e: React.TouchEvent) {
+    if (!touchStartRef.current) return;
+    const touch = e.touches[0];
+    const diffX = touch.clientX - touchStartRef.current.x;
+    const diffY = touch.clientY - touchStartRef.current.y;
+
+    if (Math.abs(diffX) > Math.abs(diffY)) {
+      setDragX(diffX);
+      if (Math.abs(diffX) > 10) {
+        didSwipeRef.current = true;
+      }
+    }
+  }
+
+  function handleTouchEnd() {
+    if (!touchStartRef.current) return;
+    const threshold = 50;
+    if (dragX < -threshold) {
+      handleNextStep();
+    } else if (dragX > threshold) {
+      handlePrevStep();
+    }
+
+    setDragX(0);
+    setIsSwiping(false);
+    touchStartRef.current = null;
+  }
+
   const cookUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/recipes/${recipe.id}?cook=true`
     : `/recipes/${recipe.id}?cook=true`;
@@ -444,14 +485,40 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
 
               {/* Active Flashcard */}
               <div
-                onClick={() => setIsFlipped((prev) => !prev)}
+                onClick={() => {
+                  if (didSwipeRef.current) {
+                    didSwipeRef.current = false;
+                    return;
+                  }
+                  setIsFlipped((prev) => !prev);
+                }}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                style={{
+                  transform: dragX !== 0 ? `translateX(${dragX}px) rotate(${dragX * 0.035}deg)` : undefined,
+                  transition: isSwiping ? 'none' : 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)',
+                }}
                 className={clsx(
-                  'w-full min-h-[420px] max-h-[72vh] flex flex-col justify-between p-6 sm:p-8 rounded-3xl transition-all duration-200 cursor-pointer shadow-ambient-modal border',
+                  'w-full min-h-[420px] max-h-[72vh] flex flex-col justify-between p-6 sm:p-8 rounded-3xl transition-all duration-200 cursor-pointer shadow-ambient-modal border touch-pan-y relative select-none',
                   isFlipped
                     ? 'bg-[#1E2E25] border-secondary/50 text-white ring-1 ring-secondary/30'
                     : 'bg-[#FAF7F2] text-[#1B4332] border-white/20 shadow-2xl'
                 )}
               >
+                {/* Swipe Direction Overlay Cues */}
+                {dragX < -25 && (
+                  <div className="absolute top-4 right-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-on-primary text-xs font-bold shadow-lg animate-fade-in pointer-events-none">
+                    <span>Next Card</span>
+                    <Icon name="arrow_forward" className="text-sm" />
+                  </div>
+                )}
+                {dragX > 25 && (
+                  <div className="absolute top-4 left-4 z-20 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 text-white backdrop-blur-md text-xs font-bold shadow-lg animate-fade-in pointer-events-none">
+                    <Icon name="arrow_back" className="text-sm" />
+                    <span>Previous Card</span>
+                  </div>
+                )}
                 {/* Flashcard Header */}
                 <div className="flex items-center justify-between gap-sm shrink-0">
                   <div className="flex items-center gap-2">
@@ -583,8 +650,9 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
 
                 {/* Flashcard Footer Tip */}
                 <div className="flex items-center justify-between text-xs shrink-0 pt-2 border-t border-black/10 dark:border-white/10">
-                  <span className={clsx('font-label-caps text-[11px] font-semibold', isFlipped ? 'text-white/60' : 'text-[#2D6A4F]/80')}>
-                    Tap card or spacebar to flip
+                  <span className={clsx('font-label-caps text-[11px] font-semibold flex items-center gap-1.5', isFlipped ? 'text-white/60' : 'text-[#2D6A4F]/80')}>
+                    <Icon name="swipe" className="text-sm opacity-80" />
+                    Swipe left/right to change card · Tap to flip
                   </span>
                   <span className={clsx('font-numeric-data text-xs font-bold', isFlipped ? 'text-secondary' : 'text-[#1B4332]')}>
                     {servings} Servings
