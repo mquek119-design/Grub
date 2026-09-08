@@ -28,9 +28,14 @@ Grub is built around a clear operational split:
 | **Week Plan** | ✅ **Shipped** | Sticky weekday jump rail (`lg:hidden sticky top-[72px]`) with smooth scroll to day cards (`[Today]`, `Mon`, `Tue`...). |
 | **Cook Mode** | ✅ **Shipped** | **Kitchen Counter Experience**: Screen Wake Lock API (`navigator.wakeLock`), bold step typography, knuckle-tap checklist, and leftover logger. |
 | **Split & Settle Up** | ✅ **Shipped** | **1-Tap Banking Links**: Direct Monzo (`monzo.me`) and Revolut (`revolut.me`) payment triggers; copyable bank details with instant feedback. |
-| **Auth & 6-Digit OTP** | ✅ **Shipped** | Mobile-responsive login with 6-digit numeric OTP inputs + magic link; iOS Safari auto-zoom prevention (`text-base` enforced). |
+| **Auth & Magic Links** | ✅ **Shipped** | Mobile-responsive login with 1-tap magic links, quick-jump email client buttons (Gmail/Outlook); iOS Safari auto-zoom prevention (`text-base` enforced). |
 | **PWA & Standalone** | ✅ **Shipped** | Next.js manifest (`display: standalone`), SVG branded icons, and service worker push notification support. |
 | **Calendar Sync** | ✅ **Shipped** | Live RFC 5545 Webcal / iCal subscription feed (`/api/calendar/[houseId]`) with native alarms for Apple/Google calendars. |
+| **Avatar Studio** | ✅ **Shipped** | 5 unique Grub characters (Ricky, Onion, Bap, Beanie, Noodz) + 6 accessible accents; collision prevention (`Taken by [Name]`); initial letter + color conflict guards; custom pfp removed. |
+| **Room Removal** | ✅ **Shipped** | Purged room numbers/names across all mobile UI (splits, balances, meal sheets, rosters, collector panels) to reduce visual clutter. |
+| **Mobile Onboarding** | ✅ **Shipped** | Multi-step touch flow: house setup, kitchen appliance buttons with badge counters, supermarket selector linked to delivery/collection, and responsive layout. |
+| **Budget Slider & Stocky** | ✅ **Shipped** | Touch-friendly £10–£100 slider with 4 progressive student tiers (Frugal, Student, Gym, Premium) and visual mascot evolution nuggets (coins, weights, gold bar). |
+| **Dietary Profile Sync** | ✅ **Shipped** | `/account` panel fully synced with onboarding habits: interactive budget slider, Stocky mascot, diet safety chips, custom allergy manager, and 2-column meal vibe cards. |
 
 ---
 
@@ -164,6 +169,25 @@ Transforming the mobile web app into an installable PWA gives students a native 
 - [x] Add Apple Touch Icon and web app meta tags in `src/app/layout.tsx`.
 - [x] Add gentle "Install Grub / Add to Home Screen" PWA install prompt card for mobile visitors (`InstallPrompt.tsx`).
 - [x] Launch Stocky the Bouillon Cube mascot with multi-mood vector component (`Stocky.tsx`).
+
+### Phase 5: Avatar Studio & Flat Identity Collision Prevention
+- [x] Launch 5 unique Grub food character glyphs (Ricky Rice, Onion, Bap, Beanie, Noodz) with accessible WCAG AAA accent colors (`AvatarGlyphs.tsx`, `Avatar.tsx`).
+- [x] Prevent character collision: taken characters render disabled with `Taken by [Name]` in mobile rosters and setup.
+- [x] Prevent initial + color collision: housemates with the same first initial cannot select the same accent color.
+- [x] Remove custom photo URL input and file upload friction on mobile devices; avatars are strictly unique character glyphs or initial badges.
+- [x] Purge room numbers/names across all mobile UI surfaces (split panels, rosters, meal options, balances, planner).
+
+### Phase 6: Mobile Onboarding, Budget Slider & Stocky Nuggets
+- [x] Mobile-optimised multi-step onboarding flow (`/onboarding/profile`, `/onboarding/create`, `/onboarding/join`).
+- [x] Direct appliance selector with tactile buttons and selected badge counts.
+- [x] Supermarket selection dynamically linked to delivery vs collection choice with transparent Aldi budget benchmark explanation.
+- [x] Progressive Stocky mascot nuggets across 4 budget tiers: Frugal (£10–£25 with coin floor nugget), Student (£26–£45), Gym (£46–£70 with dumbbell weight nugget), Premium (£71–£100 with gold bar nugget).
+- [x] Responsive layout fix preventing word-spacing expansion on narrow mobile screens at £35.
+
+### Phase 7: Dietary Profile & Habits Synchronization
+- [x] Create unified shared dietary module (`src/lib/dietary.ts`) for `DIETS`, `VIBES`, `getBudgetTier`, `parseDietaryPreferences`, and `formatDietaryBadge`.
+- [x] Synchronize `/account` Dietary Profile with onboarding setup: interactive budget slider, Stocky mascot, diet safety chips, custom allergy manager, and meal vibe cards.
+- [x] Format profile hero tags with custom color coding across mobile account and house settings.
 
 ---
 

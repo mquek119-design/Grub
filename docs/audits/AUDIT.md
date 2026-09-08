@@ -36,12 +36,14 @@ Audited against live code and the live Supabase database advisors:
 | Priority | Gap / Area | Evidence & User Impact | Recommended Scope |
 |---|---|---|---|
 | P1 | **Tesco Order Confirmation** | `syncBasketToTesco` pushes items to Tesco trolley; actual checkout is completed by the collector. | Maintain explicit handoff: collector clicks checkout, syncs trolley, reviews on Tesco.com, and confirms the placed order in Grub to lock the week. |
-| P1 | **Profile Details Editing** | Account displays name and room, but only payment/dietary info has active edit actions. | Profile editing form on Account page to change display name and room number. |
-| P1 | **Rotate Shared House Invite** | House settings displays the 6-character code; no manual reset exists. | Allow house members to rotate/revoke the invite code if shared outside the house. |
-| P2 | **Leftover Concurrency** | Decrementing portions should use an atomic update or version check. | Ensure `portions - 1` doesn't race on simultaneous takes. |
+| P1 | **Rotate Shared House Invite** | House settings displays the 6-character code; no manual reset exists. | Allow house members to rotate/revoke the invite code if shared outside the house (`rotate_invite_code` RPC). |
+| P2 | **Leftover Concurrency** | Decrementing portions should use an atomic update or version check. | Ensure `portions - 1` uses an atomic SQL condition (`WHERE portions >= 1`) to prevent race conditions on concurrent claims. |
 | P2 | **Account Erasure Hardening** | Deletion checks outstanding balance before profile removal. | Ensure debt checks fail closed on query errors. |
+| P2 | **Database Advisor Optimizations** | Mutable search path on `generate_invite_code`; RLS `auth.uid()` evaluation. | Pin `search_path = 'public'` and wrap `(select auth.uid())` in RLS policies for subquery caching. |
 
 ### Already Implemented — Do Not Rebuild
+- **Profile & Avatar Studio**: Display name editing, 5 unique character avatars with collision prevention (`Taken by [Name]`), same initial+color prevention, and complete removal of room clutter.
+- **Synchronized Dietary Profile**: Interactive budget slider (£10–£100), Stocky mascot tiers, diet safety chips, custom allergy manager, and meal vibes matching onboarding.
 - Feed action cards and role-aware banners
 - First-run tips and tactile toast notifications
 - Starter recipes and instant recipe import
