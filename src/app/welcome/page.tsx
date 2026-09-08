@@ -100,12 +100,21 @@ export default async function WelcomePage() {
   );
 
   const secondaryCta = !currentUser && (
-    <Link
-      href="/onboarding/join"
-      className="inline-flex items-center justify-center h-12 px-lg font-body-sm text-body-sm font-semibold text-on-surface-variant hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-0 rounded-full"
-    >
-      Got an invite code? Join a house
-    </Link>
+    <div className="flex flex-wrap items-center gap-xs">
+      <Link
+        href="/onboarding/instructions"
+        className="inline-flex items-center justify-center gap-1.5 h-12 px-lg rounded-full border border-primary/25 bg-surface-container-lowest/80 text-primary font-title-sm text-title-sm hover:bg-primary/5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-xs"
+      >
+        <Icon name="slideshow" className="text-[18px]" />
+        See how it works (9 steps)
+      </Link>
+      <Link
+        href="/onboarding/join"
+        className="inline-flex items-center justify-center h-12 px-lg font-body-sm text-body-sm font-semibold text-on-surface-variant hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-0 rounded-full"
+      >
+        Got an invite code? Join a house
+      </Link>
+    </div>
   );
 
   const closingCta = currentUser ? (
@@ -288,6 +297,7 @@ export default async function WelcomePage() {
           <p className="mt-xl text-center font-body-sm text-body-sm text-on-surface-variant flex flex-col items-center gap-2">
             <span><span className="font-georgia text-primary font-bold">Grub</span> · one house, automated Tesco shop, split fair</span>
             <span className="flex gap-4">
+              <Link href="/onboarding/instructions" className="hover:text-primary transition-colors font-medium">How Grub Works</Link>
               <Link href="/privacy" className="hover:text-primary transition-colors">Privacy</Link>
               <Link href="/terms" className="hover:text-primary transition-colors">Terms</Link>
             </span>
