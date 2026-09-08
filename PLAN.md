@@ -47,6 +47,9 @@ _Last updated: 2026-09-08. This is the single consolidated view of what is left,
 ### T1.6 — Voice & Tone Audit
 **Status: Complete.** Copy aligned with `VOICE.md` (70/30 dry British split, zero exclamation marks, strictly factual financial screens).
 
+### T1.7 — Mobile & Phone Web Experience
+**Status: Spec & Plan Complete (`docs/phone-plan.md`).** Implementation roadmap covering thumb-zone ergonomics, virtual keyboard avoidance, kitchen Cook Mode wake-lock, 1-tap Monzo/Revolut links, and PWA standalone manifest.
+
 ---
 
 ## Tier 2 — Pre-Launch Checklist
