@@ -111,7 +111,7 @@ export async function seedDemoData(): Promise<SeedResult> {
   // ---------------------------------------------------------------------
   const realProfilesRes = await supabase
     .from('profiles')
-    .select('id, name')
+    .select('id, name, is_demo')
     .eq('house_id', me.houseId)
     .eq('is_demo', false)
     .order('created_at');
@@ -119,13 +119,35 @@ export async function seedDemoData(): Promise<SeedResult> {
   const realProfiles = realProfilesRes.data ?? [];
   const otherRealProfiles = realProfiles.filter((p) => p.id !== me.id);
 
-  // Pool of demo names to choose from if spots are needed to make a 5-person house
-  const demoNamesPool = ['Alex', 'Sam', 'Maya', 'Priya', 'Jordan'];
-  const realNamesSet = new Set(realProfiles.map((p) => p.name.toLowerCase()));
-  const demoCountNeeded = Math.max(0, 5 - realProfiles.length);
-  const demoNamesToSeed = demoNamesPool
-    .filter((name) => !realNamesSet.has(name.toLowerCase()))
-    .slice(0, demoCountNeeded);
+  // The 5 canonical identities/slots in the schedule:
+  // Slot 0: 'me' (the user who pressed seed)
+  // Slot 1: 'alex'
+  // Slot 2: 'sam'
+  // Slot 3: 'maya'
+  // Slot 4: 'priya'
+  const SLOT_KEYS = ['me', 'alex', 'sam', 'maya', 'priya'] as const;
+  const SLOT_DEFAULT_NAMES = ['Me', 'Alex', 'Sam', 'Maya', 'Priya'] as const;
+
+  // The real housemates occupy slots 0 .. otherRealProfiles.length.
+  // The remaining slots from (1 + otherRealProfiles.length) to 4 are filled by demo accounts.
+  const realNamesLower = new Set(realProfiles.map((p) => p.name.toLowerCase()));
+  const fallbackPool = ['Jordan', 'Taylor', 'Casey', 'Morgan', 'Riley'];
+  let fallbackIdx = 0;
+
+  const demoNamesToSeed: string[] = [];
+  const slotToDemoName = new Map<number, string>();
+
+  for (let slotIdx = 1 + otherRealProfiles.length; slotIdx < 5; slotIdx++) {
+    let chosenName: string = SLOT_DEFAULT_NAMES[slotIdx];
+    if (realNamesLower.has(chosenName.toLowerCase())) {
+      while (fallbackIdx < fallbackPool.length && realNamesLower.has(fallbackPool[fallbackIdx].toLowerCase())) {
+        fallbackIdx++;
+      }
+      chosenName = fallbackPool[fallbackIdx++] ?? `Demo ${chosenName}`;
+    }
+    demoNamesToSeed.push(chosenName);
+    slotToDemoName.set(slotIdx, chosenName);
+  }
 
   if (demoNamesToSeed.length > 0) {
     const seeded = await supabase.rpc('seed_demo_housemates', {
@@ -145,52 +167,45 @@ export async function seedDemoData(): Promise<SeedResult> {
 
   const profiles = await supabase
     .from('profiles')
-    .select('id, name')
+    .select('id, name, is_demo')
     .eq('house_id', me.houseId);
 
   if (profiles.error) return fail(profiles.error.message);
 
   // Map roles and names to UUIDs:
-  // 'me' is always the current caller (Real Account 1).
-  const idByName = new Map<string, string>([['me', me.id]]);
+  const idByName = new Map<string, string>();
+
+  // Slot 0 is always 'me'
+  idByName.set('me', me.id);
   if (me.name) {
     idByName.set(me.name.toLowerCase(), me.id);
   }
 
-  // 2nd real housemate takes 'alex'
-  if (otherRealProfiles.length > 0) {
-    const p2 = otherRealProfiles[0];
-    idByName.set('alex', p2.id);
-    idByName.set('partner', p2.id);
-    idByName.set('housemate2', p2.id);
-    idByName.set(p2.name.toLowerCase(), p2.id);
-  }
+  // Real housemates fill slots 1 .. otherRealProfiles.length
+  otherRealProfiles.forEach((p, idx) => {
+    const slotIdx = 1 + idx;
+    if (slotIdx < 5) {
+      idByName.set(SLOT_KEYS[slotIdx], p.id);
+    }
+    idByName.set(p.name.toLowerCase(), p.id);
+    idByName.set(`housemate${slotIdx + 1}`, p.id);
+    if (slotIdx === 1) idByName.set('partner', p.id);
+  });
 
-  // 3rd real housemate takes 'sam'
-  if (otherRealProfiles.length > 1) {
-    const p3 = otherRealProfiles[1];
-    idByName.set('sam', p3.id);
-    idByName.set('housemate3', p3.id);
-    idByName.set(p3.name.toLowerCase(), p3.id);
+  // Demo housemates fill remaining slots
+  const allDemoProfiles = (profiles.data ?? []).filter((p) => p.is_demo);
+  for (const demoP of allDemoProfiles) {
+    idByName.set(demoP.name.toLowerCase(), demoP.id);
   }
+  slotToDemoName.forEach((seededName, slotIdx) => {
+    const demoP = allDemoProfiles.find((p) => p.name.toLowerCase() === seededName.toLowerCase());
+    if (demoP) {
+      idByName.set(SLOT_KEYS[slotIdx], demoP.id);
+      idByName.set(`housemate${slotIdx + 1}`, demoP.id);
+    }
+  });
 
-  // 4th real housemate takes 'maya'
-  if (otherRealProfiles.length > 2) {
-    const p4 = otherRealProfiles[2];
-    idByName.set('maya', p4.id);
-    idByName.set('housemate4', p4.id);
-    idByName.set(p4.name.toLowerCase(), p4.id);
-  }
-
-  // 5th real housemate takes 'priya'
-  if (otherRealProfiles.length > 3) {
-    const p5 = otherRealProfiles[3];
-    idByName.set('priya', p5.id);
-    idByName.set('housemate5', p5.id);
-    idByName.set(p5.name.toLowerCase(), p5.id);
-  }
-
-  // Also map all generated demo housemates and existing profiles by their names
+  // Ensure all house profiles are accessible by their lowercased name
   for (const row of profiles.data ?? []) {
     idByName.set(row.name.toLowerCase(), row.id);
   }
@@ -294,35 +309,54 @@ export async function seedDemoData(): Promise<SeedResult> {
       .map((name) => idByName.get(name.toLowerCase()))
       .filter((id): id is string => Boolean(id));
 
-    if (diners.length === 0) {
-      skipped.push(`${entry.recipe} (nobody to eat it)`);
-      continue;
-    }
+    // Fallback so no meal is dropped if a name is missing
+    const effectiveDiners = diners.length > 0 ? diners : [me.id];
 
-    const offerTargetId = entry.cookOfferTo ? idByName.get(entry.cookOfferTo.toLowerCase()) : undefined;
+    // Determine cook: designated cook from schedule or first diner, fallback to me
+    const cookId = (entry.cook ? idByName.get(entry.cook.toLowerCase()) : undefined) ?? effectiveDiners[0] ?? me.id;
 
-    const meal = await supabase
+    // Determine cook offer target: only valid if distinct from the cook (satisfying DB constraint)
+    const rawOfferTargetId = entry.cookOfferTo ? idByName.get(entry.cookOfferTo.toLowerCase()) : undefined;
+    const offerTargetId = rawOfferTargetId && rawOfferTargetId !== cookId ? rawOfferTargetId : undefined;
+
+    let meal = await supabase
       .from('planned_meals')
       .insert({
         plan_id: plan.data.id,
         recipe_id: recipeId,
         day: entry.day,
         meal_type: entry.mealType,
-        is_shared: diners.length > 1,
-        created_by: diners[0],
-        cooked_by_user_id: diners[0],
+        is_shared: effectiveDiners.length > 1,
+        created_by: me.id,
+        cooked_by_user_id: cookId,
         ...(offerTargetId ? { cook_offer_to: offerTargetId } : {}),
         ...(entry.maxDiners ? { max_diners: entry.maxDiners } : {}),
       })
       .select('id')
       .single();
 
+    // If an optional column doesn't exist in an unmigrated DB, fallback to basic schema
+    if (meal.error && meal.error.code === '42703') {
+      meal = await supabase
+        .from('planned_meals')
+        .insert({
+          plan_id: plan.data.id,
+          recipe_id: recipeId,
+          day: entry.day,
+          meal_type: entry.mealType,
+          is_shared: effectiveDiners.length > 1,
+          cooked_by_user_id: cookId,
+        })
+        .select('id')
+        .single();
+    }
+
     if (meal.error) return fail(`Meal "${entry.recipe}" on ${entry.day}: ${meal.error.message}`);
 
     const guestHostId = entry.guests ? idByName.get(entry.guests.who.toLowerCase()) : undefined;
 
     const participants = await supabase.from('meal_participants').insert(
-      diners.map((userId) => ({
+      effectiveDiners.map((userId) => ({
         planned_meal_id: meal.data.id,
         user_id: userId,
         ...(entry.guests && userId === guestHostId
@@ -339,7 +373,7 @@ export async function seedDemoData(): Promise<SeedResult> {
       }
       const plain = await supabase
         .from('meal_participants')
-        .insert(diners.map((userId) => ({ planned_meal_id: meal.data.id, user_id: userId })));
+        .insert(effectiveDiners.map((userId) => ({ planned_meal_id: meal.data.id, user_id: userId })));
       if (plain.error) return fail(`Diners for "${entry.recipe}": ${plain.error.message}`);
     }
     mealsAdded += 1;
@@ -441,6 +475,11 @@ export async function seedDemoData(): Promise<SeedResult> {
   }
 
   revalidatePath('/', 'layout');
+  revalidatePath('/');
+  revalidatePath('/plan');
+  revalidatePath('/pantry');
+  revalidatePath('/split');
+  revalidatePath('/settings');
 
   const note = skipped.length > 0 ? ` Skipped: ${skipped.join(', ')}.` : '';
 

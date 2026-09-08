@@ -112,7 +112,7 @@ export const DEMO_RECIPES: DemoRecipe[] = [
     title: 'Tuna Pasta Salad',
     cookTimeMins: 20,
     difficulty: 'easy',
-    servings: 3,
+    servings: 4,
     tags: ['Lunch', 'Pasta'],
     instructions: [
       'Boil the pasta and cool it under the tap.',
@@ -120,10 +120,10 @@ export const DEMO_RECIPES: DemoRecipe[] = [
       'Season heavily; it needs it.',
     ],
     ingredients: [
-      { name: 'Penne pasta', quantity: 300, unit: 'g', category: 'cupboard' },
+      { name: 'Penne pasta', quantity: 400, unit: 'g', category: 'cupboard' },
       { name: 'Tuna chunks', quantity: 320, unit: 'g', category: 'cupboard' },
       { name: 'Sweetcorn', quantity: 200, unit: 'g', category: 'cupboard' },
-      { name: 'Mayonnaise', quantity: 100, unit: 'ml', category: 'cupboard' },
+      { name: 'Mayonnaise', quantity: 120, unit: 'ml', category: 'cupboard' },
     ],
   },
   {
@@ -298,6 +298,8 @@ interface DemoMeal {
   recipe: string;
   /** Names, resolved to ids by the seeder. `me` is whoever pressed the button. */
   diners: string[];
+  /** Optional designated cook. If omitted, defaults to diners[0]. */
+  cook?: string;
   /** Optional +1, so the guest weighting is visible without setting it up. */
   guests?: { who: string; count: number; covered: boolean };
   /** Optional cook offer/hand-over target. */
@@ -329,8 +331,9 @@ export const DEMO_SCHEDULE: DemoMeal[] = [
     day: 'thu',
     mealType: 'dinner',
     recipe: 'Spaghetti Bolognese',
-    diners: ['me', 'Alex', 'Sam', 'Maya', 'Priya'],
-    cookOfferTo: 'me', // Alex offered to let 'me' cook Thursday dinner!
+    diners: ['Alex', 'me', 'Sam', 'Maya', 'Priya'],
+    cook: 'Alex',
+    cookOfferTo: 'me', // Alex is cooking, but offered to hand it over to 'me'!
   },
   {
     day: 'fri',
@@ -344,7 +347,8 @@ export const DEMO_SCHEDULE: DemoMeal[] = [
     day: 'sat',
     mealType: 'lunch',
     recipe: 'Tuna Pasta Salad',
-    diners: ['me', 'Alex', 'Sam'],
+    diners: ['Alex', 'me', 'Sam'],
+    cook: 'Alex',
     // Alex has someone over and is covering them, so Saturday lunch is cooked
     // for four and Alex carries two portions of it.
     guests: { who: 'Alex', count: 1, covered: true },
@@ -365,7 +369,8 @@ export const DEMO_SCHEDULE: DemoMeal[] = [
     day: 'sun',
     mealType: 'dinner',
     recipe: 'Thai Green Curry',
-    diners: ['me', 'Alex', 'Sam', 'Maya', 'Priya'],
+    diners: ['Sam', 'me', 'Alex', 'Maya', 'Priya'],
+    cook: 'Sam',
   },
 ];
 
