@@ -139,7 +139,7 @@ export default async function WelcomePage() {
     <main className="min-h-screen bg-surface-0 text-on-background overflow-x-hidden">
       {/* ---- Hero ---------------------------------------------------------- */}
       <section className="relative w-full pt-lg md:pt-xl pb-[3rem] md:pb-[3.5rem]">
-        <div className="px-margin-mobile md:px-margin-desktop mx-auto flex items-center justify-between gap-xl animate-fade-in">
+        <div className="px-6 md:px-margin-desktop mx-auto flex items-center justify-between gap-xl animate-fade-in">
           <Link href="/welcome" aria-label="Grub home" className="inline-flex min-w-0 items-center gap-sm hover:opacity-90 transition-opacity">
             <LogoMark className="h-9 w-auto" />
             <span className="font-georgia font-bold text-title-md text-primary">Grub</span>
@@ -147,7 +147,7 @@ export default async function WelcomePage() {
           {headerLink}
         </div>
 
-        <div className="px-margin-mobile md:px-margin-desktop mx-auto pt-[2.5rem] md:pt-[3.5rem] max-w-3xl">
+        <div className="px-6 md:px-margin-desktop mx-auto pt-[2.5rem] md:pt-[3.5rem] max-w-3xl">
           <h1 className="font-georgia text-[2.75rem] leading-[1.05] md:text-[4.5rem] md:leading-[1.02] font-bold text-primary animate-fade-in-up">
             Stop buying four bags of pasta.
           </h1>
@@ -184,7 +184,7 @@ export default async function WelcomePage() {
       </Marquee>
 
       {/* ---- Why Grub ------------------------------------------------------ */}
-      <section className="w-full px-margin-mobile md:px-margin-desktop py-[4rem]">
+      <section className="w-full px-6 md:px-margin-desktop py-[4rem]">
         <div className="mx-auto max-w-5xl">
           <Reveal as="h2" className="font-georgia text-headline-lg-mobile md:text-headline-lg text-primary mb-lg">
             Why Grub
@@ -198,7 +198,7 @@ export default async function WelcomePage() {
       </section>
 
       {/* ---- Benefits ------------------------------------------------------ */}
-      <section className="w-full px-margin-mobile md:px-margin-desktop py-[4rem]">
+      <section className="w-full px-6 md:px-margin-desktop py-[4rem]">
         <div className="mx-auto max-w-5xl">
           <Reveal as="h2" className="font-georgia text-headline-lg-mobile md:text-headline-lg text-primary max-w-2xl">
             The buying unit is the household, not the individual.
@@ -222,7 +222,7 @@ export default async function WelcomePage() {
       </section>
 
       {/* ---- How it works -------------------------------------------------- */}
-      <section className="w-full px-margin-mobile md:px-margin-desktop py-[4rem]">
+      <section className="w-full px-6 md:px-margin-desktop py-[4rem]">
         <div className="mx-auto max-w-5xl">
           <Reveal as="h2" className="font-georgia text-headline-lg-mobile md:text-headline-lg text-primary">
             How a week runs
@@ -240,7 +240,7 @@ export default async function WelcomePage() {
       </section>
 
       {/* ---- Closing CTA --------------------------------------------------- */}
-      <section className="w-full px-margin-mobile md:px-margin-desktop pb-[4rem]">
+      <section className="w-full px-6 md:px-margin-desktop pb-[4rem]">
         <div className="mx-auto max-w-5xl">
           <Reveal className="rounded-xl bg-primary text-on-primary p-xl md:p-[3rem] flex flex-col items-start gap-md">
             <h2 className="font-georgia text-headline-lg-mobile md:text-headline-lg text-secondary max-w-2xl">

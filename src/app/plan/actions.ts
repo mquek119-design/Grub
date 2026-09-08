@@ -239,7 +239,26 @@ export async function leaveMeal(
   if (count === 0) {
     await supabase.from('planned_meals').delete().eq('id', mealId);
   } else {
-    await supabase.from('planned_meals').update({ is_shared: count > 1 }).eq('id', mealId);
+    const isCurrentCook = context.meal.cookedByUserId === me.id;
+    const isOfferTarget = context.meal.cookOfferTo === me.id;
+
+    const updates: {
+      is_shared: boolean;
+      cooked_by_user_id?: string | null;
+      cook_offer_to?: string | null;
+    } = {
+      is_shared: count > 1,
+    };
+
+    // If the cook leaves, meal becomes unclaimed so remaining dependents can volunteer
+    if (isCurrentCook) {
+      updates.cooked_by_user_id = null;
+      updates.cook_offer_to = null;
+    } else if (isOfferTarget) {
+      updates.cook_offer_to = null;
+    }
+
+    await supabase.from('planned_meals').update(updates).eq('id', mealId);
   }
 
   revalidatePath('/plan');

@@ -29,7 +29,7 @@ export default async function LoginPage({
   }
 
   return (
-    <main className="min-h-screen flex flex-col justify-center px-margin-mobile py-xl max-w-md mx-auto gap-lg">
+    <main className="min-h-screen flex flex-col justify-center px-6 sm:px-8 py-xl max-w-md mx-auto gap-lg">
       <div className="flex flex-col gap-sm">
         {/* Hidden on desktop, where the AuthShell brand panel carries the mark;
             the heading stays so the page keeps its h1. */}

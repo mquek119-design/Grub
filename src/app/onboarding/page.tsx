@@ -25,7 +25,7 @@ const BENEFITS = [
 
 export default function OnboardingWelcomePage() {
   return (
-    <main className="min-h-screen flex flex-col justify-between px-margin-mobile py-xl max-w-md mx-auto">
+    <main className="min-h-screen flex flex-col justify-between px-6 sm:px-8 py-xl max-w-md mx-auto">
       <div className="flex flex-col gap-xl">
         <div className="flex flex-col gap-sm pt-xl animate-fade-in-up">
           {/* The mark is hidden on desktop, where the layout's brand panel

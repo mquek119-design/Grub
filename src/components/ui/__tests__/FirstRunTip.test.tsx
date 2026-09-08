@@ -7,7 +7,12 @@ describe('FirstRunTip', () => {
   it('persists dismissal for each tab independently', async () => {
     const { unmount } = render(<FirstRunTip tab="feed" />);
 
+    // Starts hidden by default
+    expect(screen.queryByText('Your house at a glance')).toBeNull();
+    // Open via guide button
+    fireEvent.click(screen.getByRole('button', { name: 'Open feed guide' }));
     expect(await screen.findByText('Your house at a glance')).not.toBeNull();
+
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss feed guide' }));
     expect(screen.queryByText('Your house at a glance')).toBeNull();
     expect(window.localStorage.getItem('grub:first-run-tip:feed')).toBe('dismissed');
@@ -17,6 +22,7 @@ describe('FirstRunTip', () => {
     expect(screen.queryByText('Your house at a glance')).toBeNull();
 
     render(<FirstRunTip tab="plan" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open plan guide' }));
     expect(await screen.findByText('Build the week together')).not.toBeNull();
   });
 
@@ -29,6 +35,7 @@ describe('FirstRunTip', () => {
     });
 
     render(<FirstRunTip tab="basket" />);
+    fireEvent.click(screen.getByRole('button', { name: 'Open basket guide' }));
     expect(await screen.findByText('Check the shop before it goes')).not.toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss basket guide' }));
     expect(screen.queryByText('Check the shop before it goes')).toBeNull();

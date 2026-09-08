@@ -39,25 +39,9 @@ export function FirstRunTip({
   const tip = TIPS[tab];
 
   useEffect(() => {
-    let isDismissed = false;
-    try {
-      isDismissed = window.localStorage.getItem(storageKey) === 'dismissed';
-    } catch {
-      // Storage can be unavailable in restricted contexts
-    }
-
-    if (!isDismissed) {
-      setVisible(true);
-
-      // Auto-close after 7 seconds
-      const timer = setTimeout(() => {
-        dismiss();
-      }, 7000);
-
-      return () => clearTimeout(timer);
-    } else {
-      setVisible(false);
-    }
+    // Hidden first by default on all platforms as requested.
+    // User can tap the lightbulb guide button whenever they want to open it.
+    setVisible(false);
   }, [storageKey]);
 
   function dismiss() {

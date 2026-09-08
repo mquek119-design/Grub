@@ -292,6 +292,8 @@ function CapacityChoice({ meal, mouths }: { meal: PlannedMeal; mouths: number })
   const [state, action] = useActionState(setMealCapacity, INITIAL);
   const floor = Math.max(1, mouths);
   const max = meal.maxDiners;
+  const isLocked = max !== null && max <= floor;
+  const hasCustomCap = max !== null && max > floor;
 
   return (
     <form action={action} className="flex flex-col gap-xs">
@@ -304,15 +306,23 @@ function CapacityChoice({ meal, mouths }: { meal: PlannedMeal; mouths: number })
         </ChoicePill>
         <ChoicePill
           name="maxDiners"
-          value={String(max ?? floor)}
-          selected={max !== null}
+          value={String(floor)}
+          selected={isLocked}
           tone="secondary"
         >
-          Cooking for a set number
+          🔒 Lock sitting ({mouths} diners)
+        </ChoicePill>
+        <ChoicePill
+          name="maxDiners"
+          value={String(hasCustomCap ? max : floor + 1)}
+          selected={hasCustomCap}
+          tone="secondary"
+        >
+          Custom limit
         </ChoicePill>
       </div>
 
-      {max !== null && (
+      {hasCustomCap && (
         <div className="flex items-center gap-sm">
           <StepperButton
             name="maxDiners"

@@ -18,7 +18,7 @@ export default async function InvitePage() {
   const house = await getHouse();
 
   return (
-    <main className="min-h-screen flex flex-col justify-between px-margin-mobile py-xl max-w-md mx-auto gap-xl">
+    <main className="min-h-screen flex flex-col justify-between px-6 sm:px-8 py-xl max-w-md mx-auto gap-xl">
       <div className="flex flex-col gap-lg">
         <div className="flex flex-col items-center text-center gap-sm pt-xl">
           <span className="w-16 h-16 rounded-full bg-primary text-on-primary flex items-center justify-center">

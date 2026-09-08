@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { KitchenPanel } from '@/components/plan/KitchenPanel';
 import { OverlapHints } from '@/components/plan/OverlapHints';
@@ -6,7 +5,6 @@ import { WeekPlan } from '@/components/plan/WeekPlan';
 import { WeekSwitcher } from '@/components/plan/WeekSwitcher';
 import { ReopenPlanningBanner } from '@/components/plan/ReopenPlanningBanner';
 import { FirstMealModal } from '@/components/plan/FirstMealModal';
-import { CopyRosterButton } from '@/components/plan/CopyRosterButton';
 import { Icon } from '@/components/media/Icon';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Notice } from '@/components/ui/Notice';
@@ -65,26 +63,10 @@ export default async function PlanPage({
     />
   );
 
-  const recipeBookButton = (
-    <Link
-      href="/recipes"
-      className="inline-flex items-center gap-xs px-md py-2 rounded-full border border-primary/30 text-primary hover:bg-primary/5 text-sm font-semibold transition-colors"
-    >
-      <Icon name="menu_book" className="text-base" />
-      Recipe Book
-    </Link>
-  );
-
   if (showKitchen) {
     return (
       <PageShell wide>
-        <div className="flex items-center justify-between gap-md flex-wrap">
-          <PageHeader title="Your Week" subtitle="Shop's in. This is what you're working with." />
-          <div className="flex items-center gap-xs flex-wrap">
-            {recipeBookButton}
-            <CopyRosterButton plan={thisWeek} />
-          </div>
-        </div>
+        <PageHeader title="Your Week" subtitle="Shop's in. This is what you're working with." />
         <FirstRunTip tab="plan" />
         {switcher}
         <ReopenPlanningBanner status={thisWeek.status} />
@@ -95,20 +77,14 @@ export default async function PlanPage({
 
   return (
     <PageShell wide>
-      <div className="flex items-center justify-between gap-md flex-wrap">
-        <PageHeader
-          title="Your Week"
-          subtitle={
-            week === 'next'
-              ? "Nothing here is bought yet. Get ahead while this week cooks itself."
-              : `Say what you fancy before ${cutoff}. After that it's whatever everyone else wanted.`
-          }
-        />
-        <div className="flex items-center gap-xs flex-wrap">
-          {recipeBookButton}
-          <CopyRosterButton plan={plan} />
-        </div>
-      </div>
+      <PageHeader
+        title="Your Week"
+        subtitle={
+          week === 'next'
+            ? "Nothing here is bought yet. Get ahead while this week cooks itself."
+            : `Say what you fancy before ${cutoff}. After that it's whatever everyone else wanted.`
+        }
+      />
 
       <FirstRunTip tab="plan" />
 

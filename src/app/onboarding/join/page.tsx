@@ -24,7 +24,7 @@ export default async function JoinHousePage({
   }
 
   return (
-    <main className="min-h-screen flex flex-col px-margin-mobile py-lg max-w-md mx-auto gap-lg">
+    <main className="min-h-screen flex flex-col px-6 sm:px-8 py-lg max-w-md mx-auto gap-lg">
       <Link
         href="/onboarding"
         className="flex items-center gap-xs text-primary font-semibold text-[14px] w-fit hover:opacity-80"

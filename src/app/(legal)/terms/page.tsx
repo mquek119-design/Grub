@@ -5,7 +5,7 @@ export const metadata = { title: 'Terms & Conditions · Grub', description: 'Gru
 
 export default function TermsPage() {
   return (
-    <main className="min-h-screen flex flex-col justify-start px-margin-mobile py-xl max-w-md mx-auto gap-lg">
+    <main className="min-h-screen flex flex-col justify-start px-6 sm:px-8 py-xl max-w-md mx-auto gap-lg">
       <div className="flex flex-col gap-sm">
         <Link href="/welcome" aria-label="Grub home" className="inline-block lg:hidden hover:opacity-90 transition-opacity">
           <LogoMark className="h-16 w-auto" />
