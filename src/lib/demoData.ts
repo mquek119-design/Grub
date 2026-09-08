@@ -310,18 +310,18 @@ export const DEMO_SCHEDULE: DemoMeal[] = [
   // --- Mon: three people, three different dinners, nothing in common. -------
   { day: 'mon', mealType: 'dinner', recipe: 'Sushi Roll', diners: ['me'] },
   { day: 'mon', mealType: 'dinner', recipe: 'Classic Beef Burger', diners: ['Alex'] },
-  { day: 'mon', mealType: 'dinner', recipe: 'Mac and Cheese', diners: ['Maya'] },
+  { day: 'mon', mealType: 'dinner', recipe: 'Mac and Cheese', diners: ['Sam'] },
 
   // --- Tue: a solo breakfast and two solo dinners. The breakfast exists to
   //     prove a different sitting is not a clash — it must not warn. ---------
   { day: 'tue', mealType: 'breakfast', recipe: 'Scrambled Eggs on Toast', diners: ['me'] },
-  { day: 'tue', mealType: 'dinner', recipe: 'Pizza Margherita', diners: ['Sam'] },
+  { day: 'tue', mealType: 'dinner', recipe: 'Pizza Margherita', diners: ['Alex'] },
   { day: 'tue', mealType: 'dinner', recipe: 'Chicken Miso Ramen', diners: ['Priya'] },
 
   // --- Wed: three solo dinners, and the stir fry vs green curry pair shares
   //     no ingredient at all — this is the day the conflict warning fires. ---
   { day: 'wed', mealType: 'dinner', recipe: 'Beef stir fry noodles', diners: ['me'], maxDiners: 3 },
-  { day: 'wed', mealType: 'dinner', recipe: 'Thai Green Curry', diners: ['Maya'] },
+  { day: 'wed', mealType: 'dinner', recipe: 'Thai Green Curry', diners: ['Priya'] },
   { day: 'wed', mealType: 'dinner', recipe: 'Chicken Caesar Salad', diners: ['Alex'] },
 
   // --- Thu and Fri: one shared meal each. -----------------------------------
@@ -329,14 +329,14 @@ export const DEMO_SCHEDULE: DemoMeal[] = [
     day: 'thu',
     mealType: 'dinner',
     recipe: 'Spaghetti Bolognese',
-    diners: ['me', 'Alex', 'Maya', 'Sam'],
-    cookOfferTo: 'me', // Alex asked me to cook Thursday dinner!
+    diners: ['me', 'Alex', 'Sam', 'Priya'],
+    cookOfferTo: 'me', // Alex offered to let 'me' cook Thursday dinner!
   },
   {
     day: 'fri',
     mealType: 'dinner',
     recipe: 'Chicken Tikka Masala',
-    diners: ['me', 'Alex', 'Maya', 'Sam', 'Priya'],
+    diners: ['me', 'Alex', 'Sam', 'Priya'],
   },
 
   // --- Sat and Sun: two shared meals each, at different sittings. -----------
@@ -344,28 +344,28 @@ export const DEMO_SCHEDULE: DemoMeal[] = [
     day: 'sat',
     mealType: 'lunch',
     recipe: 'Tuna Pasta Salad',
-    diners: ['me', 'Alex', 'Priya'],
+    diners: ['me', 'Alex'],
     // Alex has someone over and is covering them, so Saturday lunch is cooked
-    // for four and Alex carries two portions of it.
+    // for three and Alex carries two portions of it.
     guests: { who: 'Alex', count: 1, covered: true },
   },
   {
     day: 'sat',
     mealType: 'dinner',
     recipe: 'Classic Beef Burger',
-    diners: ['me', 'Alex', 'Maya', 'Sam', 'Priya'],
+    diners: ['me', 'Alex', 'Sam', 'Priya'],
   },
   {
     day: 'sun',
     mealType: 'breakfast',
     recipe: 'Full English Breakfast',
-    diners: ['me', 'Alex', 'Maya', 'Sam', 'Priya'],
+    diners: ['me', 'Alex', 'Sam', 'Priya'],
   },
   {
     day: 'sun',
     mealType: 'dinner',
     recipe: 'Thai Green Curry',
-    diners: ['me', 'Maya', 'Sam', 'Priya'],
+    diners: ['me', 'Alex', 'Sam', 'Priya'],
   },
 ];
 

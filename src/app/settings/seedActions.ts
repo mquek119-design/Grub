@@ -8,7 +8,6 @@ import { WEEKDAYS } from '@/lib/types';
 import { currentWeekStart, isoWeekNumber } from '@/lib/weeks';
 import { getCurrentUser } from '@/lib/queries';
 import {
-  DEMO_HOUSEMATES,
   DEMO_RECIPES,
   DEMO_SCHEDULE,
   DEMO_PANTRY,
@@ -106,20 +105,42 @@ export async function seedDemoData(): Promise<SeedResult> {
   const supabase = await createClient();
 
   // ---------------------------------------------------------------------
-  // 1. Housemates — four demo profiles, five people counting the caller.
+  // 1. Housemates — detect how many real accounts already live in this house.
+  //    Real housemates are prioritized so everyone has meals, cook duties,
+  //    and split balances. We fill remaining spots up to a 4-person household.
   // ---------------------------------------------------------------------
-  const seeded = await supabase.rpc('seed_demo_housemates', {
-    p_names: DEMO_HOUSEMATES,
-  });
+  const realProfilesRes = await supabase
+    .from('profiles')
+    .select('id, name')
+    .eq('house_id', me.houseId)
+    .eq('is_demo', false)
+    .order('created_at');
 
-  if (seeded.error) {
-    return fail(
-      `Could not add demo housemates: ${seeded.error.message}${
-        seeded.error.code === 'PGRST202'
-          ? ' — run supabase/migrations/0008_demo_housemates.sql.'
-          : ''
-      }`
-    );
+  const realProfiles = realProfilesRes.data ?? [];
+  const otherRealProfiles = realProfiles.filter((p) => p.id !== me.id);
+
+  // Pool of demo names to choose from if spots are needed to make a 4-person house
+  const demoNamesPool = ['Alex', 'Sam', 'Priya', 'Maya'];
+  const realNamesSet = new Set(realProfiles.map((p) => p.name.toLowerCase()));
+  const demoCountNeeded = Math.max(0, 4 - realProfiles.length);
+  const demoNamesToSeed = demoNamesPool
+    .filter((name) => !realNamesSet.has(name.toLowerCase()))
+    .slice(0, demoCountNeeded);
+
+  if (demoNamesToSeed.length > 0) {
+    const seeded = await supabase.rpc('seed_demo_housemates', {
+      p_names: demoNamesToSeed,
+    });
+
+    if (seeded.error) {
+      return fail(
+        `Could not add demo housemates: ${seeded.error.message}${
+          seeded.error.code === 'PGRST202'
+            ? ' — run supabase/migrations/0008_demo_housemates.sql.'
+            : ''
+        }`
+      );
+    }
   }
 
   const profiles = await supabase
@@ -129,12 +150,41 @@ export async function seedDemoData(): Promise<SeedResult> {
 
   if (profiles.error) return fail(profiles.error.message);
 
-  // Names are the seed's handle on people: the schedule says "Maya", and only
-  // this map knows which uuid that is. The caller answers to "me".
+  // Map roles and names to UUIDs:
+  // 'me' is always the current caller.
   const idByName = new Map<string, string>([['me', me.id]]);
+  if (me.name) {
+    idByName.set(me.name.toLowerCase(), me.id);
+  }
+
+  // 2nd real housemate takes the co-star role ('alex', 'partner', 'housemate2', and their real name)
+  if (otherRealProfiles.length > 0) {
+    const p2 = otherRealProfiles[0];
+    idByName.set('alex', p2.id);
+    idByName.set('partner', p2.id);
+    idByName.set('housemate2', p2.id);
+    idByName.set(p2.name.toLowerCase(), p2.id);
+  }
+
+  // 3rd real housemate takes 'sam'
+  if (otherRealProfiles.length > 1) {
+    const p3 = otherRealProfiles[1];
+    idByName.set('sam', p3.id);
+    idByName.set(p3.name.toLowerCase(), p3.id);
+  }
+
+  // 4th real housemate takes 'priya'
+  if (otherRealProfiles.length > 2) {
+    const p4 = otherRealProfiles[2];
+    idByName.set('priya', p4.id);
+    idByName.set(p4.name.toLowerCase(), p4.id);
+  }
+
+  // Also map all generated demo housemates and existing profiles by their names
   for (const row of profiles.data ?? []) {
     idByName.set(row.name.toLowerCase(), row.id);
   }
+
   const everyone = (profiles.data ?? []).map((row) => row.id);
 
   // ---------------------------------------------------------------------
