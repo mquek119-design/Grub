@@ -8,27 +8,10 @@ import { Stocky } from '@/components/mascot/Stocky';
 import { AvatarGlyph, AVATAR_OPTIONS, parseAvatarUrl, type AvatarId } from '@/components/avatars/AvatarGlyphs';
 import { ACCENT_CLASSES } from '@/components/avatars/Avatar';
 import { saveProfilePreferences, type OnboardingState } from '../actions';
+import { DIETS, VIBES, getBudgetTier } from '@/lib/dietary';
 import type { User } from '@/lib/types';
 
 const INITIAL: OnboardingState = { status: 'idle', message: '' };
-
-const DIETS = [
-  { id: 'vegetarian', label: 'Vegetarian', icon: 'eco' },
-  { id: 'vegan', label: 'Vegan', icon: 'spa' },
-  { id: 'pescatarian', label: 'Pescatarian', icon: 'set_meal' },
-  { id: 'halal', label: 'Halal', icon: 'verified' },
-  { id: 'gluten_free', label: 'Gluten-Free', icon: 'grain' },
-  { id: 'dairy_free', label: 'Dairy-Free', icon: 'water_drop' },
-  { id: 'nut_allergy', label: 'Nut Allergy', icon: 'warning' },
-];
-
-const VIBES = [
-  { id: 'speedy', label: 'Speedy (<20m)', hint: 'Quick lecture-night fuel', icon: 'bolt' },
-  { id: 'high_protein', label: 'High Protein', hint: 'Gym staples & clean gains', icon: 'fitness_center' },
-  { id: 'budget_king', label: 'Budget King (<£1.50)', hint: 'Pasta bakes & dahl', icon: 'savings' },
-  { id: 'fakeaway', label: 'Fakeaway Night', hint: 'Curry, burgers & stir-fry', icon: 'takeout_dining' },
-  { id: 'comfort_food', label: 'Comfort Food', hint: 'Sunday roast & stews', icon: 'soup_kitchen' },
-];
 
 const ACCENTS: { id: User['accent']; label: string; bg: string }[] = [
   { id: 'green', label: 'Sage', bg: 'bg-[#2D6A4F]' },
@@ -38,35 +21,6 @@ const ACCENTS: { id: User['accent']; label: string; bg: string }[] = [
   { id: 'purple', label: 'Lavender', bg: 'bg-[#7C3AED]' },
   { id: 'olive', label: 'Olive', bg: 'bg-[#4A6B3E]' },
 ];
-
-function getBudgetTier(budget: number) {
-  if (budget <= 25) {
-    return {
-      tier: 'frugal' as const,
-      mood: 'smug' as const,
-      label: 'Frugal Tier',
-    };
-  }
-  if (budget <= 45) {
-    return {
-      tier: 'student' as const,
-      mood: 'neutral' as const,
-      label: 'Student Tier',
-    };
-  }
-  if (budget <= 70) {
-    return {
-      tier: 'gym' as const,
-      mood: 'cooking' as const,
-      label: 'Gym / High Protein',
-    };
-  }
-  return {
-    tier: 'rich' as const,
-    mood: 'cooking' as const,
-    label: 'Premium Tier',
-  };
-}
 
 export function ProfileSetupForm({
   defaultName = '',

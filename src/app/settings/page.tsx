@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { PageShell } from '@/components/ui/PageShell';
 import { getCollector, getCurrentUser, getHouse, getHouseStaples, getHousemates } from '@/lib/queries';
+import { formatDietaryBadge } from '@/lib/dietary';
 import { FulfillmentSettingsPanel } from '@/components/settings/FulfillmentSettingsPanel';
 import { TescoSessionPanel } from '@/components/settings/TescoSessionPanel';
 import { SlotPreferencePanel } from '@/components/settings/SlotPreferencePanel';
@@ -162,7 +163,7 @@ export default async function SettingsPage() {
                       </div>
                       {user.dietaryPreferences.length > 0 && (
                         <p className="font-body-sm text-body-sm text-on-surface-variant truncate">
-                          {user.dietaryPreferences.join(', ')}
+                          {user.dietaryPreferences.map((p) => formatDietaryBadge(p).label).join(' · ')}
                         </p>
                       )}
                     </div>

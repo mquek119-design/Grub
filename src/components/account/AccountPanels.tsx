@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useTransition, useActionState } from 'react';
+import { useState, useRef, useTransition, useActionState } from 'react';
 import { Avatar, ACCENT_CLASSES } from '@/components/avatars/Avatar';
 import { AvatarGlyph, AVATAR_OPTIONS, parseAvatarUrl, isAvatarId, type AvatarId } from '@/components/avatars/AvatarGlyphs';
+import { Stocky } from '@/components/mascot/Stocky';
+import { DIETS, VIBES, getBudgetTier, parseDietaryPreferences } from '@/lib/dietary';
 import { Icon } from '@/components/media/Icon';
 import { Button } from '@/components/ui/Button';
 import { SubmitButton } from '@/components/ui/SubmitButton';
@@ -23,17 +25,6 @@ const INITIAL: AccountActionState = { status: 'idle', message: '' };
 
 const FIELD =
   'w-full px-3 py-3 rounded-lg bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-body-lg';
-
-const COMMON_PREFERENCES = [
-  'Vegetarian',
-  'Vegan',
-  'Pescatarian',
-  'Halal',
-  'No pork',
-  'Gluten free',
-  'Dairy free',
-  'Nut allergy',
-];
 
 function SaveButton({ label = 'Save' }: { label?: string }) {
   return (
@@ -405,56 +396,257 @@ export function PaymentDetailsPanel({ user }: { user: User }) {
   );
 }
 
-/** Dietary preferences. The same field the Plan tab writes. */
+/** Dietary profile and meal habits panel. Synced with onboarding setup. */
 export function DietaryPanel({ user }: { user: User }) {
   const [state, action] = useActionState(updateDietaryPreferences, INITIAL);
-  const custom = user.dietaryPreferences.filter((p) => !COMMON_PREFERENCES.includes(p));
+
+  const initial = parseDietaryPreferences(user.dietaryPreferences);
+  const [budget, setBudget] = useState<number>(initial.budget);
+  const [selectedDiets, setSelectedDiets] = useState<string[]>(initial.diets);
+  const [selectedVibes, setSelectedVibes] = useState<string[]>(
+    initial.vibes.length > 0 ? initial.vibes : ['speedy', 'budget_king']
+  );
+  const [customAllergies, setCustomAllergies] = useState<string[]>(initial.customAllergies);
+  const [customAllergyInput, setCustomAllergyInput] = useState('');
+  const customAllergyRef = useRef<HTMLInputElement>(null);
+
+  const tier = getBudgetTier(budget);
+
+  const toggleDiet = (id: string) => {
+    setSelectedDiets((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const toggleVibe = (id: string) => {
+    if (selectedVibes.includes(id)) {
+      setSelectedVibes((prev) => prev.filter((x) => x !== id));
+    } else {
+      if (selectedVibes.length >= 3) {
+        setSelectedVibes((prev) => [...prev.slice(1), id]);
+      } else {
+        setSelectedVibes((prev) => [...prev, id]);
+      }
+    }
+  };
+
+  const addCustomAllergy = () => {
+    const val = customAllergyInput.trim();
+    if (val && !customAllergies.includes(val.toLowerCase())) {
+      setCustomAllergies((prev) => [...prev, val.toLowerCase()]);
+      setCustomAllergyInput('');
+      customAllergyRef.current?.focus();
+    }
+  };
+
+  const removeCustomAllergy = (allergy: string) => {
+    setCustomAllergies((prev) => prev.filter((x) => x !== allergy));
+  };
 
   return (
-    <Card className="flex flex-col gap-sm">
-      <div className="min-w-0">
-        <h2 className="font-title-md text-title-md">Dietary profile</h2>
-        <p className="font-body-sm text-body-sm text-on-surface-variant">
-          Visible to the house when planning meals, so nobody cooks something you can&apos;t eat.
-        </p>
+    <Card className="flex flex-col gap-lg interactive-card card-glow">
+      <div className="flex items-start justify-between gap-md">
+        <div className="min-w-0">
+          <h2 className="font-title-md text-title-md font-bold text-on-surface">Dietary Profile &amp; Habits</h2>
+          <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
+            Visible to the house when planning meals, budgeting, and avoiding allergens.
+          </p>
+        </div>
       </div>
 
-      <form action={action} className="flex flex-col gap-md">
-        <div className="flex flex-wrap gap-sm">
-          {COMMON_PREFERENCES.map((preference) => (
-            <label
-              key={preference}
-              className={clsx(
-                'px-md py-sm rounded-full border flex items-center gap-xs text-[14px] font-semibold cursor-pointer transition-colors',
-                'has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary',
-                'border-outline-variant bg-surface text-on-surface-variant hover:bg-surface-container'
-              )}
-            >
-              <input
-                type="checkbox"
-                name="preference"
-                value={preference}
-                defaultChecked={user.dietaryPreferences.includes(preference)}
-                className="sr-only"
-              />
-              {preference}
-            </label>
-          ))}
+      <form action={action} className="flex flex-col gap-lg">
+        {/* Hidden inputs for custom allergies */}
+        {customAllergies.map((allergy) => (
+          <input key={allergy} type="hidden" name="customAllergy" value={allergy} />
+        ))}
+
+        {/* 1. Personal Weekly Budget Slider */}
+        <div className="flex flex-col gap-sm p-md rounded-2xl bg-surface-container-low border border-outline-variant/40">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <span className="font-label-caps text-label-caps uppercase tracking-wider text-primary font-bold block">
+                Personal Weekly Food Target
+              </span>
+              <p className="font-body-sm text-xs text-on-surface-variant mt-0.5">
+                Grub tracks your individual total in Split so you can see if you&apos;re staying on budget.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5 shrink-0">
+              <Stocky mood={tier.mood} tier={tier.tier} size="md" />
+              <div className="flex flex-col items-end">
+                <span className="font-numeric-data text-title-md font-extrabold text-primary leading-tight">
+                  £{budget}/week
+                </span>
+                <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/80">
+                  {tier.label}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <input
+            type="range"
+            name="budget"
+            min={10}
+            max={100}
+            step={5}
+            value={budget}
+            onChange={(e) => setBudget(Number(e.target.value))}
+            className="w-full accent-primary h-2 bg-surface-container-highest rounded-lg cursor-pointer my-2"
+          />
+
+          <div className="flex justify-between text-[11px] text-on-surface-variant/70 font-numeric-data font-semibold">
+            <span>£10</span>
+            <span>£25</span>
+            <span>£50</span>
+            <span>£75</span>
+            <span>£100</span>
+          </div>
         </div>
 
-        <label className="flex flex-col gap-xs">
-          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
-            Anything else
-          </span>
-          <input
-            name="custom"
-            defaultValue={custom.join(', ')}
-            placeholder="Comma separated, e.g. no shellfish"
-            className={FIELD}
-          />
-        </label>
+        {/* 2. Diets & Allergies */}
+        <div className="flex flex-col gap-xs">
+          <div className="flex items-center justify-between">
+            <span className="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant font-bold">
+              Diets &amp; Safety Requirements
+            </span>
+            <span className="text-xs text-on-surface-variant">Flags meal safety warnings</span>
+          </div>
 
-        <SaveButton label="Save profile" />
+          <div className="flex flex-wrap gap-2">
+            {DIETS.map((diet) => {
+              const isSelected = selectedDiets.includes(diet.id);
+              return (
+                <label
+                  key={diet.id}
+                  className={clsx(
+                    'px-3.5 py-2 rounded-xl border text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all btn-tactile select-none',
+                    isSelected
+                      ? 'bg-primary text-on-primary border-primary shadow-xs'
+                      : 'bg-surface-container-lowest text-on-surface hover:bg-surface-container border-outline-variant/50'
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    name="diet"
+                    value={diet.id}
+                    checked={isSelected}
+                    onChange={() => toggleDiet(diet.id)}
+                    className="sr-only"
+                  />
+                  <Icon name={diet.icon} className="text-[15px]" />
+                  <span>{diet.label}</span>
+                </label>
+              );
+            })}
+          </div>
+
+          {/* Custom allergies */}
+          {customAllergies.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 pt-1">
+              {customAllergies.map((allergy) => (
+                <span
+                  key={allergy}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-error/10 text-error text-[11px] font-semibold border border-error/20"
+                >
+                  <Icon name="warning" className="text-[12px]" />
+                  {allergy}
+                  <button
+                    type="button"
+                    onClick={() => removeCustomAllergy(allergy)}
+                    className="ml-0.5 hover:opacity-70 transition-opacity cursor-pointer"
+                    aria-label={`Remove ${allergy}`}
+                  >
+                    <Icon name="close" className="text-[12px]" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 pt-1">
+            <input
+              ref={customAllergyRef}
+              type="text"
+              value={customAllergyInput}
+              onChange={(e) => setCustomAllergyInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  addCustomAllergy();
+                }
+              }}
+              placeholder="Add custom allergy (e.g. shellfish, peanuts)"
+              className="flex-1 h-10 px-3 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:ring-2 focus:ring-primary text-body-sm text-[13px]"
+            />
+            <button
+              type="button"
+              onClick={addCustomAllergy}
+              disabled={!customAllergyInput.trim()}
+              className="h-10 px-3.5 rounded-xl bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all btn-tactile flex items-center gap-1 cursor-pointer"
+            >
+              <Icon name="add" className="text-[16px]" />
+              Add
+            </button>
+          </div>
+        </div>
+
+        {/* 3. Meal Vibes (Pick up to 3) */}
+        <div className="flex flex-col gap-xs">
+          <div className="flex items-center justify-between">
+            <span className="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant font-bold">
+              Meal Vibes <span className="text-[11px] font-normal lowercase">(pick up to 3)</span>
+            </span>
+            <span className="text-xs text-on-surface-variant font-medium">
+              {selectedVibes.length}/3 selected
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {VIBES.map((vibe) => {
+              const isSelected = selectedVibes.includes(vibe.id);
+              return (
+                <label
+                  key={vibe.id}
+                  className={clsx(
+                    'flex items-center gap-3 p-3 rounded-xl border text-left cursor-pointer transition-all select-none btn-tactile',
+                    isSelected
+                      ? 'border-secondary bg-secondary/10 ring-1 ring-secondary'
+                      : 'border-outline-variant/40 bg-surface-container-lowest hover:bg-surface-container'
+                  )}
+                >
+                  <input
+                    type="checkbox"
+                    name="vibe"
+                    value={vibe.id}
+                    checked={isSelected}
+                    onChange={() => toggleVibe(vibe.id)}
+                    className="sr-only"
+                  />
+                  <span
+                    className={clsx(
+                      'w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors',
+                      isSelected ? 'bg-secondary text-on-secondary' : 'bg-surface-container text-on-surface-variant'
+                    )}
+                  >
+                    <Icon name={vibe.icon} className="text-[18px]" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-title-sm text-xs font-bold text-on-surface leading-tight">
+                      {vibe.label}
+                    </p>
+                    <p className="font-body-xs text-[10px] text-on-surface-variant mt-0.5 leading-tight">
+                      {vibe.hint}
+                    </p>
+                  </div>
+                </label>
+              );
+            })}
+          </div>
+        </div>
+
+        <SaveButton label="Save Dietary Profile" />
         <Status state={state} />
       </form>
     </Card>

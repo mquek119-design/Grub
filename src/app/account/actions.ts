@@ -217,24 +217,45 @@ export async function updatePaymentDetails(
   };
 }
 
-/** Saves dietary preferences. Same field the Plan tab writes. */
+/** Saves dietary preferences and habits. Matches the setup process. */
 export async function updateDietaryPreferences(
   _prev: AccountActionState,
   formData: FormData
 ): Promise<AccountActionState> {
   const me = await getCurrentUser();
 
-  const preferences = formData
+  const budgetRaw = formData.get('budget');
+  const budget = budgetRaw ? String(budgetRaw).trim() : null;
+
+  const dietsRaw = formData
+    .getAll('diet')
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+
+  const vibesRaw = formData
+    .getAll('vibe')
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+
+  const customAllergies = formData
+    .getAll('customAllergy')
+    .map((value) => String(value).trim())
+    .filter(Boolean);
+
+  const legacyPreferences = formData
     .getAll('preference')
     .map((value) => String(value).trim())
     .filter(Boolean);
 
-  const custom = String(formData.get('custom') ?? '')
-    .split(',')
-    .map((entry) => entry.trim())
-    .filter(Boolean);
-
-  const merged = [...new Set([...preferences, ...custom])];
+  const merged = [
+    ...new Set([
+      ...dietsRaw,
+      ...legacyPreferences,
+      ...customAllergies.map((a) => (a.startsWith('allergy:') ? a : `allergy:${a}`)),
+      ...vibesRaw.map((v) => (v.startsWith('vibe:') ? v : `vibe:${v}`)),
+      ...(budget ? [`budget:${budget}`] : []),
+    ]),
+  ];
 
   const supabase = await createClient();
   const actingAs = await readViewAsId();
@@ -260,7 +281,8 @@ export async function updateDietaryPreferences(
   revalidatePath('/account');
   revalidatePath('/plan');
   revalidatePath('/settings');
-  return { status: 'success', message: 'Dietary profile saved.' };
+  revalidatePath('/', 'layout');
+  return { status: 'success', message: 'Dietary profile and habits saved.' };
 }
 
 /**

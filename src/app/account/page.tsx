@@ -5,7 +5,9 @@ import { Icon } from '@/components/media/Icon';
 import { Card } from '@/components/ui/Card';
 import { PageShell } from '@/components/ui/PageShell';
 import { Notice } from '@/components/ui/Notice';
+import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
+import { formatDietaryBadge } from '@/lib/dietary';
 import {
   getCurrentUser,
   getHouse,
@@ -139,15 +141,28 @@ export default async function AccountPage() {
                 {house.name}
               </p>
               {user.dietaryPreferences.length > 0 && (
-                <div className="flex flex-wrap justify-center gap-1 mt-1.5 max-w-xs">
-                  {user.dietaryPreferences.map((pref) => (
-                    <span
-                      key={pref}
-                      className="px-2 py-0.5 rounded-md bg-surface-container-highest text-on-surface-variant text-[11px] font-medium"
-                    >
-                      {pref}
-                    </span>
-                  ))}
+                <div className="flex flex-wrap justify-center gap-1.5 mt-1.5 max-w-xs">
+                  {user.dietaryPreferences.map((pref) => {
+                    const badge = formatDietaryBadge(pref);
+                    return (
+                      <span
+                        key={pref}
+                        className={clsx(
+                          'inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium',
+                          badge.type === 'allergy'
+                            ? 'bg-error/10 text-error border border-error/20'
+                            : badge.type === 'budget'
+                            ? 'bg-primary/10 text-primary font-bold'
+                            : badge.type === 'vibe'
+                            ? 'bg-secondary/10 text-secondary'
+                            : 'bg-surface-container-highest text-on-surface-variant'
+                        )}
+                      >
+                        {badge.icon && <Icon name={badge.icon} className="text-[12px]" />}
+                        {badge.label}
+                      </span>
+                    );
+                  })}
                 </div>
               )}
 
