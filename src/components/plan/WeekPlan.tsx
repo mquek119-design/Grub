@@ -151,39 +151,46 @@ const MealRow = memo(function MealRow({
   const ownerName = owner ? byId.get(owner)?.name : undefined;
 
   return (
-    <article className={clsx('flex flex-col gap-xs px-md py-sm transition-all duration-200', joined ? 'bg-primary-fixed/30 border-l-2 border-l-primary' : 'hover:bg-surface-container-low/50')}>
-      <div className="flex items-center gap-sm min-w-0">
+    <article
+      className={clsx(
+        'flex flex-col gap-sm px-md md:px-lg py-3.5 md:py-4 transition-all duration-200',
+        joined ? 'bg-primary-fixed/25 border-l-4 border-l-primary' : 'hover:bg-surface-container-low/60'
+      )}
+    >
+      <div className="flex items-center gap-md min-w-0">
         <Link
           href={`/recipes/${meal.recipeId}`}
-          className="shrink-0 rounded-xl overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-xs group"
+          className="shrink-0 rounded-2xl overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-xs group"
         >
           <FoodImage
             seed={meal.recipeId}
             src={recipe?.imageUrl}
             alt={meal.recipeTitle}
-            className="w-12 h-12 rounded-xl text-[20px] object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-14 h-14 md:w-16 md:h-16 rounded-2xl text-[24px] object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </Link>
 
-        <div className="min-w-0 flex-1">
-          {/* Sitting sits inline with the title rather than above it: a whole
-              line per meal for one word is a line the week cannot spare. */}
-          <div className="flex items-baseline gap-xs min-w-0">
-            <span className="flex items-center gap-0.5 font-label-caps text-label-caps uppercase text-on-surface-variant shrink-0">
-              <Icon name={MEAL_TYPE_ICONS[meal.mealType]} className="text-[13px]" />
-              {MEAL_TYPE_LABELS[meal.mealType]}
-            </span>
-            <Link href={`/recipes/${meal.recipeId}`} className="min-w-0 hover:underline flex items-center gap-xs group">
-              <h4 className="font-title-md text-title-md text-on-surface leading-tight truncate group-hover:text-primary transition-colors">
-                {meal.recipeTitle}
-              </h4>
-              {full && <Badge tone="error">FULL</Badge>}
-            </Link>
+        <div className="min-w-0 flex-1 flex flex-col justify-center">
+          {/* Sitting eyebrow placed cleanly on its own line above the dish name */}
+          <div className="flex items-center gap-1.5 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant font-bold mb-0.5">
+            <Icon name={MEAL_TYPE_ICONS[meal.mealType]} className="text-[13px] text-primary" />
+            <span>{MEAL_TYPE_LABELS[meal.mealType]}</span>
+            {full && (
+              <Badge tone="error" className="text-[9px] py-0 px-1.5 ml-1">
+                FULL
+              </Badge>
+            )}
           </div>
 
-          <div className="flex items-center gap-x-sm gap-y-0 flex-wrap font-body-sm text-[12px] text-on-surface-variant">
+          <Link href={`/recipes/${meal.recipeId}`} className="min-w-0 hover:underline block group">
+            <h4 className="font-title-md text-[15px] md:text-title-md font-bold text-on-surface leading-snug truncate group-hover:text-primary transition-colors">
+              {meal.recipeTitle}
+            </h4>
+          </Link>
+
+          <div className="flex items-center gap-x-3 gap-y-1 flex-wrap font-body-sm text-[12px] text-on-surface-variant mt-1">
             {diners.length > 0 ? (
-              <span className="flex items-center gap-xs">
+              <span className="flex items-center gap-1.5">
                 <span className="flex items-center -space-x-1.5">
                   {diners.slice(0, 5).map(({ user }) => (
                     <Avatar
@@ -194,7 +201,7 @@ const MealRow = memo(function MealRow({
                     />
                   ))}
                 </span>
-                <span className="font-numeric-data">
+                <span className="font-numeric-data font-medium">
                   {mouths}
                   {meal.maxDiners !== null && ` of ${meal.maxDiners}`} in
                 </span>
@@ -204,7 +211,7 @@ const MealRow = memo(function MealRow({
               <span className="italic">Nobody&apos;s in yet</span>
             )}
 
-            <span className={clsx('flex items-center gap-0.5', !cook && 'italic opacity-70')}>
+            <span className={clsx('flex items-center gap-1', !cook && 'italic opacity-70')}>
               <Icon name="skillet" className="text-[13px]" />
               {cook ? (
                 <>
@@ -219,7 +226,7 @@ const MealRow = memo(function MealRow({
 
             {cleaner && (
               <span
-                className="flex items-center gap-0.5 text-primary font-medium"
+                className="flex items-center gap-1 text-primary font-medium"
                 title={`${cleaner.name} is on wash-up duty`}
               >
                 <Icon name="cleaning_services" className="text-[13px]" />
@@ -232,7 +239,7 @@ const MealRow = memo(function MealRow({
                 end up cooking it. */}
             {offeredTo && (
               <span
-                className="flex items-center gap-0.5 text-on-secondary-fixed"
+                className="flex items-center gap-1 text-on-secondary-fixed"
                 title={`${cook?.name ?? 'They'} asked ${offeredTo.name} to take it`}
               >
                 <Icon name="pending" className="text-[13px]" />
@@ -241,7 +248,7 @@ const MealRow = memo(function MealRow({
             )}
 
             {(mine?.guests ?? 0) > 0 && (
-              <span className="flex items-center gap-0.5">
+              <span className="flex items-center gap-1">
                 <Icon name="person_add" className="text-[13px]" />
                 you +{mine?.guests}
               </span>
@@ -251,7 +258,7 @@ const MealRow = memo(function MealRow({
                 mystery — you can see the number and whose call it was. */}
             {meal.maxDiners !== null && !isOwner && (
               <span
-                className="flex items-center gap-0.5 text-on-secondary-fixed"
+                className="flex items-center gap-1 text-on-secondary-fixed"
                 title={
                   ownerName
                     ? `${ownerName} is cooking for ${meal.maxDiners}`
@@ -273,7 +280,7 @@ const MealRow = memo(function MealRow({
         )}
 
         {!locked && (
-          <div className="flex items-center gap-xs shrink-0">
+          <div className="flex items-center gap-xs shrink-0 ml-auto">
             {/* Cook, guests, capacity and who's in all live behind this. They
                 are settings you change once, not information you read every
                 time, and three permanent controls per meal buried the week. */}
@@ -478,7 +485,7 @@ export function WeekPlan({
                 <Link
                   href={`/recipes?day=${day}${week === 'next' ? '&week=next' : ''}`}
                   className={clsx(
-                    'flex items-center justify-center gap-xs py-sm text-on-surface-variant',
+                    'flex items-center justify-center gap-xs py-3 text-on-surface-variant',
                     'hover:text-primary hover:bg-primary/5 transition-colors',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary'
                   )}
