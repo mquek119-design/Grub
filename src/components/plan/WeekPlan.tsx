@@ -137,6 +137,8 @@ const MealRow = memo(function MealRow({
   const mine = meal.participants.find((participant) => participant.userId === currentUser.id);
   const joined = Boolean(mine);
   const cook = meal.cookedByUserId ? byId.get(meal.cookedByUserId) : undefined;
+  const coCook = meal.coCookUserId ? byId.get(meal.coCookUserId) : undefined;
+  const cleaner = meal.cleanerUserId ? byId.get(meal.cleanerUserId) : undefined;
   const offeredTo = meal.cookOfferTo ? byId.get(meal.cookOfferTo) : undefined;
   const askedMe = meal.cookOfferTo === currentUser.id;
   const mouths = mouthsAt(meal);
@@ -204,10 +206,26 @@ const MealRow = memo(function MealRow({
 
             <span className={clsx('flex items-center gap-0.5', !cook && 'italic opacity-70')}>
               <Icon name="skillet" className="text-[13px]" />
-              {cook
-                ? `${cook.name}${cook.room ? ` (Room ${cook.room})` : ''} cooks`
-                : 'No cook yet'}
+              {cook ? (
+                <>
+                  {cook.name}{cook.room ? ` (Room ${cook.room})` : ''}
+                  {coCook && ` & ${coCook.name}`}
+                  {coCook ? ' cook' : ' cooks'}
+                </>
+              ) : (
+                'No cook yet'
+              )}
             </span>
+
+            {cleaner && (
+              <span
+                className="flex items-center gap-0.5 text-primary font-medium"
+                title={`${cleaner.name} is on wash-up duty`}
+              >
+                <Icon name="cleaning_services" className="text-[13px]" />
+                {cleaner.id === currentUser.id ? 'you clean' : `${cleaner.name} cleans`}
+              </span>
+            )}
 
             {/* A pending hand-over is worth seeing from the week: it is the one
                 state where the person on the meal is not the person who will

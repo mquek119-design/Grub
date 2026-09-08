@@ -15,6 +15,10 @@ import {
   setGuests,
   setMealCapacity,
   standDownAsCook,
+  volunteerToHelpCook,
+  standDownFromHelpCook,
+  volunteerToClean,
+  standDownFromClean,
   type PlanActionState,
 } from '@/app/plan/actions';
 import { canSetCapacity, mouthsAt } from '@/lib/meals';
@@ -221,6 +225,116 @@ function CookChoice({
           </form>
         </>
       )}
+
+      {error && (
+        <p role="alert" className="font-body-sm text-[12px] text-error">
+          {error.message}
+        </p>
+      )}
+    </div>
+  );
+}
+
+function RolesChoice({
+  meal,
+  diners,
+  currentUser,
+}: {
+  meal: PlannedMeal;
+  diners: User[];
+  currentUser: User;
+}) {
+  const [helpCookState, helpCookAction] = useActionState(volunteerToHelpCook, INITIAL);
+  const [standDownHelpState, standDownHelpAction] = useActionState(standDownFromHelpCook, INITIAL);
+  const [cleanState, cleanAction] = useActionState(volunteerToClean, INITIAL);
+  const [standDownCleanState, standDownCleanAction] = useActionState(standDownFromClean, INITIAL);
+
+  const byId = useMemo(() => new Map(diners.map((user) => [user.id, user])), [diners]);
+  const cook = meal.cookedByUserId ? byId.get(meal.cookedByUserId) : undefined;
+  const coCook = meal.coCookUserId ? byId.get(meal.coCookUserId) : undefined;
+  const cleaner = meal.cleanerUserId ? byId.get(meal.cleanerUserId) : undefined;
+
+  const iAmCook = meal.cookedByUserId === currentUser.id;
+  const iAmCoCook = meal.coCookUserId === currentUser.id;
+  const iAmCleaner = meal.cleanerUserId === currentUser.id;
+
+  const error = [helpCookState, standDownHelpState, cleanState, standDownCleanState].find(
+    (s) => s.status === 'error'
+  );
+
+  return (
+    <div className="flex flex-col gap-sm p-sm rounded-xl bg-surface-container-low border border-outline-variant/40">
+      <SectionTitle>Cook Together & Wash-up</SectionTitle>
+
+      {/* Co-cook section */}
+      <div className="flex items-center justify-between gap-sm text-[13px]">
+        <div className="flex items-center gap-xs">
+          <Icon name="skillet" className="text-primary text-[18px]" />
+          <span className="text-on-surface">
+            {coCook ? (
+              <span>
+                <strong className="font-semibold">{iAmCoCook ? 'You' : coCook.name}</strong> helping cook
+              </span>
+            ) : (
+              <span className="text-on-surface-variant italic">No co-cook yet</span>
+            )}
+          </span>
+        </div>
+
+        {!iAmCook && (
+          <div>
+            {iAmCoCook ? (
+              <form action={standDownHelpAction}>
+                <input type="hidden" name="mealId" value={meal.id} />
+                <SubmitButton size="sm" variant="ghost" className="text-xs">
+                  Step down
+                </SubmitButton>
+              </form>
+            ) : !coCook ? (
+              <form action={helpCookAction}>
+                <input type="hidden" name="mealId" value={meal.id} />
+                <SubmitButton size="sm" variant="outline" icon="handshake" className="text-xs">
+                  {cook ? `Help ${cook.name}` : 'Help cook'}
+                </SubmitButton>
+              </form>
+            ) : null}
+          </div>
+        )}
+      </div>
+
+      {/* Cleaner section */}
+      <div className="flex items-center justify-between gap-sm text-[13px] pt-xs border-t border-outline-variant/30">
+        <div className="flex items-center gap-xs">
+          <Icon name="cleaning_services" className="text-secondary text-[18px]" />
+          <span className="text-on-surface">
+            {cleaner ? (
+              <span>
+                <strong className="font-semibold">{iAmCleaner ? 'You' : cleaner.name}</strong> on wash-up
+              </span>
+            ) : (
+              <span className="text-on-surface-variant italic">No wash-up volunteer</span>
+            )}
+          </span>
+        </div>
+
+        <div>
+          {iAmCleaner ? (
+            <form action={standDownCleanAction}>
+              <input type="hidden" name="mealId" value={meal.id} />
+              <SubmitButton size="sm" variant="ghost" className="text-xs">
+                Step down
+              </SubmitButton>
+            </form>
+          ) : !cleaner && !iAmCook ? (
+            <form action={cleanAction}>
+              <input type="hidden" name="mealId" value={meal.id} />
+              <SubmitButton size="sm" variant="outline" icon="cleaning_services" className="text-xs">
+                Take wash-up
+              </SubmitButton>
+            </form>
+          ) : null}
+        </div>
+      </div>
 
       {error && (
         <p role="alert" className="font-body-sm text-[12px] text-error">
@@ -533,6 +647,11 @@ export function MealOptionsSheet({
         />
 
         <CookChoice
+          meal={meal}
+          diners={diners.map((entry) => entry.user)}
+          currentUser={currentUser}
+        />
+        <RolesChoice
           meal={meal}
           diners={diners.map((entry) => entry.user)}
           currentUser={currentUser}

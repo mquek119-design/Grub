@@ -188,6 +188,10 @@ export interface PlannedMeal {
    * never removes anybody already in.
    */
   maxDiners: number | null;
+  /** Optional co-cook / kitchen assistant cooking alongside the lead cook. */
+  coCookUserId?: string | null;
+  /** Optional housemate on wash-up duty. */
+  cleanerUserId?: string | null;
   status: MealStatus;
   participants: MealParticipant[];
 }

@@ -657,6 +657,120 @@ export async function takeOverCooking(
   return OK;
 }
 
+/** Volunteers as co-cook / kitchen assistant for a meal. */
+export async function volunteerToHelpCook(
+  _prev: PlanActionState,
+  formData: FormData
+): Promise<PlanActionState> {
+  const me = await getCurrentUser();
+  const mealId = String(formData.get('mealId') ?? '');
+  if (!mealId) return fail('Missing meal.');
+
+  const context = await getMealContext(mealId);
+  if (!context) return fail('That meal is not in your house.');
+
+  const isDiner = context.meal.participants.some((p) => p.userId === me.id);
+  if (!isDiner) return fail('Only somebody eating the meal can help cook.');
+
+  if (context.meal.cookedByUserId === me.id) {
+    return fail('You are already the lead cook.');
+  }
+
+  const supabase = await createClient();
+  const updated = await supabase
+    .from('planned_meals')
+    .update({ co_cook_user_id: me.id })
+    .eq('id', mealId);
+
+  if (updated.error && updated.error.code !== '42703') {
+    return fail(updated.error.message);
+  }
+
+  revalidatePath('/plan');
+  revalidatePath('/');
+  return OK;
+}
+
+/** Steps down from co-cooking. */
+export async function standDownFromHelpCook(
+  _prev: PlanActionState,
+  formData: FormData
+): Promise<PlanActionState> {
+  const me = await getCurrentUser();
+  const mealId = String(formData.get('mealId') ?? '');
+  if (!mealId) return fail('Missing meal.');
+
+  const supabase = await createClient();
+  const updated = await supabase
+    .from('planned_meals')
+    .update({ co_cook_user_id: null })
+    .eq('id', mealId)
+    .eq('co_cook_user_id', me.id);
+
+  if (updated.error && updated.error.code !== '42703') {
+    return fail(updated.error.message);
+  }
+
+  revalidatePath('/plan');
+  revalidatePath('/');
+  return OK;
+}
+
+/** Volunteers for wash-up duty on a meal. */
+export async function volunteerToClean(
+  _prev: PlanActionState,
+  formData: FormData
+): Promise<PlanActionState> {
+  const me = await getCurrentUser();
+  const mealId = String(formData.get('mealId') ?? '');
+  if (!mealId) return fail('Missing meal.');
+
+  const context = await getMealContext(mealId);
+  if (!context) return fail('That meal is not in your house.');
+
+  const isDiner = context.meal.participants.some((p) => p.userId === me.id);
+  if (!isDiner) return fail('Only somebody eating the meal can take wash-up duty.');
+
+  const supabase = await createClient();
+  const updated = await supabase
+    .from('planned_meals')
+    .update({ cleaner_user_id: me.id })
+    .eq('id', mealId);
+
+  if (updated.error && updated.error.code !== '42703') {
+    return fail(updated.error.message);
+  }
+
+  revalidatePath('/plan');
+  revalidatePath('/');
+  return OK;
+}
+
+/** Steps down from wash-up duty. */
+export async function standDownFromClean(
+  _prev: PlanActionState,
+  formData: FormData
+): Promise<PlanActionState> {
+  const me = await getCurrentUser();
+  const mealId = String(formData.get('mealId') ?? '');
+  if (!mealId) return fail('Missing meal.');
+
+  const supabase = await createClient();
+  const updated = await supabase
+    .from('planned_meals')
+    .update({ cleaner_user_id: null })
+    .eq('id', mealId)
+    .eq('cleaner_user_id', me.id);
+
+  if (updated.error && updated.error.code !== '42703') {
+    return fail(updated.error.message);
+  }
+
+  revalidatePath('/plan');
+  revalidatePath('/');
+  return OK;
+}
+
 /**
  * How many mouths a meal is cooked for.
  *

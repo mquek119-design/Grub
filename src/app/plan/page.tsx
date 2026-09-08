@@ -21,6 +21,8 @@ import {
 } from '@/lib/queries';
 import { nextWeekStart, parseWeekChoice } from '@/lib/weeks';
 
+import { PlanActionsMenu } from '@/components/plan/PlanActionsMenu';
+
 export const metadata = { title: 'Plan · Grub', description: 'Plan this week\'s meals and choose what to cook together.' };
 
 export const dynamic = 'force-dynamic';
@@ -66,7 +68,11 @@ export default async function PlanPage({
   if (showKitchen) {
     return (
       <PageShell wide>
-        <PageHeader title="Your Week" subtitle="Shop's in. This is what you're working with." />
+        <PageHeader
+          title="Your Week"
+          subtitle="Shop's in. This is what you're working with."
+          action={<PlanActionsMenu plan={thisWeek} />}
+        />
         <FirstRunTip tab="plan" />
         {switcher}
         <ReopenPlanningBanner status={thisWeek.status} />
@@ -84,6 +90,7 @@ export default async function PlanPage({
             ? "Nothing here is bought yet. Get ahead while this week cooks itself."
             : `Say what you fancy before ${cutoff}. After that it's whatever everyone else wanted.`
         }
+        action={<PlanActionsMenu plan={plan} />}
       />
 
       <FirstRunTip tab="plan" />

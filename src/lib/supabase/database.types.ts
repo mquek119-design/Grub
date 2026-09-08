@@ -144,6 +144,10 @@ type PlannedMealRow = {
   cooked_by_user_id: string | null;
   /** Asked to take the cooking, not yet answered. Null = nothing pending. */
   cook_offer_to: string | null;
+  /** Co-cook / kitchen assistant (migration 0029). */
+  co_cook_user_id: string | null;
+  /** Wash-up duty volunteer (migration 0029). */
+  cleaner_user_id: string | null;
   status: MealStatus;
   /** Mouths this meal is cooked for. Null = open to anyone. */
   max_diners: number | null;
@@ -321,7 +325,7 @@ export type Database = {
       recipes: TableDef<RecipeRow, Insertable<RecipeRow, 'id' | 'created_at' | 'house_id' | 'created_by' | 'source_url' | 'image_url' | 'cook_time_mins' | 'difficulty' | 'servings' | 'cost_per_portion' | 'tags' | 'instructions' | 'pro_tip'>>;
       recipe_ingredients: TableDef<RecipeIngredientRow, RecipeIngredientRow>;
       weekly_plans: TableDef<WeeklyPlanRow, Insertable<WeeklyPlanRow, 'id' | 'created_at' | 'status' | 'shared_savings' | 'slot_id' | 'slot_method' | 'slot_starts_at' | 'slot_ends_at' | 'slot_charge'>>;
-      planned_meals: TableDef<PlannedMealRow, Insertable<PlannedMealRow, 'id' | 'meal_type' | 'is_shared' | 'cooked_by_user_id' | 'cook_offer_to' | 'status' | 'max_diners' | 'created_by'>>;
+      planned_meals: TableDef<PlannedMealRow, Insertable<PlannedMealRow, 'id' | 'meal_type' | 'is_shared' | 'cooked_by_user_id' | 'cook_offer_to' | 'co_cook_user_id' | 'cleaner_user_id' | 'status' | 'max_diners' | 'created_by'>>;
       meal_participants: TableDef<MealParticipantRow, Insertable<MealParticipantRow, 'opted_out' | 'bailed' | 'guests' | 'guests_covered'>>;
       expenses: TableDef<ExpenseRow, Insertable<ExpenseRow, 'id' | 'created_at' | 'spent_on' | 'note'>>;
       expense_shares: TableDef<ExpenseShareRow, Insertable<ExpenseShareRow, 'settled'>>;

@@ -34,6 +34,9 @@ export function TonightDinnerCard({
     0
   );
 
+  const coCook = meal.coCookUserId ? byId.get(meal.coCookUserId) : undefined;
+  const cleaner = meal.cleanerUserId ? byId.get(meal.cleanerUserId) : undefined;
+
   return (
     <Card className="flex flex-col gap-sm border-l-4 border-l-primary bg-gradient-to-br from-surface-container-lowest to-surface-container-low/60">
       <div className="flex items-center justify-between gap-sm">
@@ -70,6 +73,12 @@ export function TonightDinnerCard({
             {cook ? (
               <span>
                 Cooked by <strong>{isCook ? 'you' : cook.name}</strong>
+                {coCook && (
+                  <> & <strong>{coCook.id === currentUser.id ? 'you' : coCook.name}</strong></>
+                )}
+                {cleaner && (
+                  <> · <strong>{cleaner.id === currentUser.id ? 'you' : cleaner.name}</strong> on wash-up</>
+                )}
               </span>
             ) : (
               <span className="text-secondary font-medium">No cook assigned yet</span>
