@@ -68,7 +68,7 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
           <h2 className="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant font-bold">
             1. Your Details
           </h2>
-          <Stocky mood="neutral" size="sm" caption="Ready!" />
+          <Stocky mood="neutral" size="sm" caption="Profile" />
         </div>
 
         <label className="flex flex-col gap-xs">
@@ -125,7 +125,7 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
             <Stocky
               mood={budget <= 25 ? 'smug' : budget >= 50 ? 'cooking' : 'neutral'}
               size="sm"
-              caption={budget <= 25 ? 'Frugal master!' : budget >= 50 ? 'Feast mode!' : 'Balanced!'}
+              caption={budget <= 25 ? 'Frugal tier' : budget >= 50 ? 'High protein' : 'Average tier'}
             />
             <span className="font-numeric-data text-title-md font-extrabold text-primary">
               £{budget}/week
