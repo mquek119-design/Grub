@@ -26,7 +26,7 @@ export function VisualGuide() {
     // Slide 1: Feed (The Weekly Pulse)
     {
       id: 'feed',
-      step: '01 / 05',
+      step: '01 / 06',
       title: 'The Weekly Household Pulse',
       subtitle: 'Never wonder what’s for dinner or who is cooking. Your house’s collective rhythm lives here.',
       badge: 'Feed',
@@ -75,7 +75,7 @@ export function VisualGuide() {
     // Slide 2: Plan (Communal Dinners + Partner/Guest seats)
     {
       id: 'plan',
-      step: '02 / 05',
+      step: '02 / 06',
       title: 'Stack Dinners, Cut the Bill',
       subtitle: 'Pick what you fancy before the cutoff. Bring a friend or partner? Scale portions in 1 tap.',
       badge: 'Plan',
@@ -126,7 +126,7 @@ export function VisualGuide() {
     // Slide 3: Tesco Automation & 1-Click Cookie Export
     {
       id: 'tesco-automation',
-      step: '03 / 05',
+      step: '03 / 06',
       title: 'Tesco Automation & Session Link',
       subtitle: 'The collector connects Tesco once using the free Cookie-Editor extension. Grub builds the basket automatically.',
       badge: 'Automation',
@@ -194,7 +194,7 @@ export function VisualGuide() {
     // Slide 4: Automatic Delivery & Collection Slot Reservation
     {
       id: 'slot-reservation',
-      step: '04 / 05',
+      step: '04 / 06',
       title: 'Grub Reserves the Slot For You',
       subtitle: 'Never miss a delivery or carry heavy bags alone. Grub holds the 1-hour slot when flatmates are home.',
       badge: 'Fulfillment',
@@ -232,44 +232,99 @@ export function VisualGuide() {
       ),
     },
 
-    // Slide 5: Split & Cook Mode
+    // Slide 5: Fair Splits & 1-Tap Settle Up (Monzo / Revolut)
     {
-      id: 'split-cook',
-      step: '05 / 05',
-      title: 'Fair Splits & Dirty-Hands Cook Mode',
-      subtitle: 'Pay exact pennies via Monzo/Revolut. Prop your phone in the kitchen — the screen stays awake.',
-      badge: 'Kitchen',
+      id: 'split',
+      step: '05 / 06',
+      title: 'Penny-Perfect Split & Instant Settlement',
+      subtitle: 'Pay exact pennies via Monzo or Revolut in 1 tap. No spreadsheets, receipt arguments, or chasing people.',
+      badge: 'Split',
       highlights: [
-        'Split down to the penny for what you ate, not someone else’s protein powder',
-        '1-tap deep links open your banking app with the amount pre-filled',
-        'Screen Wake Lock keeps your recipe visible while chopping garlic',
+        'Split down to the penny for shared meals — never pay for someone else’s snacks',
+        '1-tap Monzo & Revolut payment links pre-filled with the exact amount owed',
+        'Personal grocery items (e.g. oat milk, gym fuel) stay completely separate',
       ],
       renderIllustration: () => (
         <div className="flex flex-col gap-sm w-full max-w-sm mx-auto p-md rounded-2xl bg-surface-container-lowest border border-outline-variant/40 shadow-ambient-card animate-fade-in">
-          {/* Split row */}
-          <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold text-on-surface">Your Share: £18.40</p>
-              <p className="text-[10px] text-on-surface-variant">4 shared dinners + personal oat milk</p>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-primary text-on-primary shadow-xs">
-                Pay Monzo
+          {/* Split summary card */}
+          <div className="p-3.5 rounded-xl bg-surface-container-low border border-outline-variant/30 flex flex-col gap-2.5">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Your Flat Share</p>
+                <p className="text-base font-extrabold text-on-surface font-numeric-data">£18.40</p>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold">
+                4 Meals + Personal Milk
               </span>
+            </div>
+
+            {/* 1-Tap Banking Settlement Buttons */}
+            <div className="grid grid-cols-2 gap-2 pt-1">
+              <div className="h-9 px-3 rounded-lg bg-[#FF3B69] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs">
+                <span>Pay Monzo</span>
+                <Icon name="arrow_forward" className="text-[13px]" />
+              </div>
+              <div className="h-9 px-3 rounded-lg bg-[#0075EB] text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs">
+                <span>Pay Revolut</span>
+                <Icon name="arrow_forward" className="text-[13px]" />
+              </div>
             </div>
           </div>
 
-          {/* Kitchen Cook Mode card */}
-          <div className="p-3 rounded-xl bg-primary text-on-primary flex items-center gap-2.5">
-            <span className="text-2xl">👨‍🍳</span>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-bold text-secondary">Kitchen Counter Mode</p>
-                <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-on-primary/15">WAKE LOCK ON</span>
+          <div className="flex items-center gap-2 text-[11px] text-on-surface-variant px-1">
+            <Icon name="check_circle" className="text-primary text-[15px]" />
+            <span>Collector is marked paid instantly — zero awkward reminders</span>
+          </div>
+        </div>
+      ),
+    },
+
+    // Slide 6: Kitchen Counter Cook Mode (Wake Lock & Leftovers)
+    {
+      id: 'kitchen-cook',
+      step: '06 / 06',
+      title: 'Kitchen Counter Cook Mode',
+      subtitle: 'Prop your phone by the hob while you cook. Your screen never sleeps and steps are huge.',
+      badge: 'Cook Mode',
+      highlights: [
+        'Screen Wake Lock keeps your recipe visible — no greasy fingers unlocking your phone',
+        '20px bold typography legible from across the kitchen counter',
+        'Knuckle-tap step checkoffs & 1-tap spare portion logging to the house fridge',
+      ],
+      renderIllustration: () => (
+        <div className="flex flex-col gap-sm w-full max-w-sm mx-auto p-md rounded-2xl bg-surface-container-lowest border border-outline-variant/40 shadow-ambient-card animate-fade-in">
+          {/* Active cooking card */}
+          <div className="p-3.5 rounded-xl bg-primary text-on-primary flex flex-col gap-2.5 shadow-xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">🍳</span>
+                <div>
+                  <p className="text-xs font-bold text-secondary">Spaghetti Bolognese</p>
+                  <p className="text-[10px] text-on-primary/80">Step 2 of 5 · 4 portions</p>
+                </div>
               </div>
-              <p className="text-[11px] text-on-primary/85 truncate mt-0.5">
-                24px legible steps & knuckle-tap step completion
+              <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-on-primary/15 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse" />
+                Screen Awake
+              </span>
+            </div>
+
+            {/* Big step text */}
+            <div className="p-2.5 rounded-lg bg-on-primary/10 border border-on-primary/10">
+              <p className="text-xs font-semibold leading-relaxed text-on-primary">
+                &ldquo;Brown 500g beef mince over medium heat until caramelised...&rdquo;
               </p>
+            </div>
+
+            {/* Knuckle tap & leftover pill */}
+            <div className="flex items-center justify-between pt-0.5">
+              <span className="text-[10px] font-semibold text-secondary flex items-center gap-1">
+                <Icon name="touch_app" className="text-[14px]" />
+                Knuckle-tap check
+              </span>
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-secondary text-on-secondary shadow-xs">
+                + Fridge Leftover
+              </span>
             </div>
           </div>
         </div>

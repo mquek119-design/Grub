@@ -130,7 +130,6 @@ export async function saveProfilePreferences(
   }
 
   const name = String(formData.get('name') ?? '').trim();
-  const room = String(formData.get('room') ?? '').trim();
   const accent = String(formData.get('accent') ?? 'green');
   const budget = String(formData.get('budget') ?? '30');
   const dietsRaw = formData.getAll('diet');
@@ -152,7 +151,6 @@ export async function saveProfilePreferences(
       .from('profiles')
       .update({
         name: name || user.email?.split('@')[0] || 'Housemate',
-        room: room || null,
         accent: ['green', 'orange', 'blue', 'purple'].includes(accent)
           ? (accent as any)
           : 'green',

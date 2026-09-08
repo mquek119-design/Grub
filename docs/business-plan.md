@@ -105,12 +105,12 @@ In `Settings -> Notifications & Integrations`, each student can customize their 
 
 ---
 
-## 6. Brand Identity & Mascot Strategy (Future Roadmap)
+## 6. Brand Identity & Mascot Strategy (On Hold — TBD)
 
-### 6.1 The Brand Character: "Potto" / The Simmering Cast-Iron Companion
-- **Character Concept**: A charming anthropomorphic cast-iron dutch oven / pot with expressive animated eyes, gentle steam puffs, and fresh vegetable companions (carrot, spring onion, mushroom).
-- **Brand Purpose**:
-  1. **Transforms Boring Utility into Warmth**: Student flat apps often feel cold, clinical, or bureaucratic. A warm, humorous culinary mascot builds emotional connection and brand memorability.
-  2. **Delightful Loading & Feedback Moments**: Replaces generic spinning progress bars during onboarding setup, Tesco cart synchronization, and delivery morning reconciliation with lively micro-animations (e.g. Potto happily tossing veggies or holding a Tesco receipt).
-  3. **Campus Word of Mouth**: High viral sticker appeal for student laptops, water bottles, and kitchen fridge magnets across Warwick halls and Leamington flatshares.
-- **Rollout Timeline**: Currently on hold for the initial onboarding release; scheduled for Phase 2 brand animation and onboarding celebration polish.
+### 6.1 Brand Mascot Direction (Deferred / Future Roadmap)
+- **Status**: Strictly on hold. (Note: "Potto" from the Aussie meal planner reference was an external example, NOT Grub's mascot).
+- **Strategy when explored down the line**:
+  1. **Transforms Utility into Warmth**: When designed, a student-focused mascot should build emotional connection, keeping flat dinner coordination lighthearted rather than bureaucratic.
+  2. **Delightful Loading Moments**: Can replace generic progress bars during Tesco automation sync or slot reservation loading states once finalized.
+  3. **Physical Campus Touchpoints**: High sticker appeal for student laptops, water bottles, and kitchen fridge whiteboards across campus.
+- **Rollout Decision**: Mascot development is paused and on hold. Focus remains on utility, automation, kitchen cook mode, and seamless bill splitting.

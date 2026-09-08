@@ -36,7 +36,6 @@ const ACCENTS = [
 export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string }) {
   const [state, formAction] = useActionState(saveProfilePreferences, INITIAL);
   const [name, setName] = useState(defaultName);
-  const [room, setRoom] = useState('');
   const [accent, setAccent] = useState('green');
   const [budget, setBudget] = useState(30);
   const [selectedDiets, setSelectedDiets] = useState<string[]>([]);
@@ -62,40 +61,25 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
 
   return (
     <form action={formAction} className="flex flex-col gap-xl">
-      {/* 1. Identity & Room */}
+      {/* 1. Identity */}
       <div className="flex flex-col gap-md">
         <h2 className="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant font-bold">
           1. Your Details
         </h2>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-          <label className="flex flex-col gap-xs">
-            <span className="font-body-sm text-xs font-semibold text-on-surface">
-              Preferred Name <span className="text-error">*</span>
-            </span>
-            <input
-              name="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              placeholder="e.g. Maya"
-              className="h-12 px-3 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:ring-2 focus:ring-primary text-body-md"
-            />
-          </label>
-
-          <label className="flex flex-col gap-xs">
-            <span className="font-body-sm text-xs font-semibold text-on-surface">
-              Room / Flat Tag
-            </span>
-            <input
-              name="room"
-              value={room}
-              onChange={(e) => setRoom(e.target.value)}
-              placeholder="e.g. Room 3 or Upstairs"
-              className="h-12 px-3 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:ring-2 focus:ring-primary text-body-md"
-            />
-          </label>
-        </div>
+        <label className="flex flex-col gap-xs">
+          <span className="font-body-sm text-xs font-semibold text-on-surface">
+            Preferred Name <span className="text-error">*</span>
+          </span>
+          <input
+            name="name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            placeholder="e.g. Maya"
+            className="h-12 px-3.5 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:ring-2 focus:ring-primary text-body-md"
+          />
+        </label>
 
         {/* Avatar Color Accent */}
         <div className="flex flex-col gap-xs pt-1">

@@ -4,7 +4,7 @@ import { ProfileSetupForm } from './ProfileSetupForm';
 
 export const metadata = {
   title: 'Your Flat Profile · Grub',
-  description: 'Set your room, budget target, and dietary preferences.',
+  description: 'Set your name, budget target, and dietary preferences.',
 };
 
 export const dynamic = 'force-dynamic';
