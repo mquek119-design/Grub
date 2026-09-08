@@ -4,7 +4,14 @@ import { SUPABASE_ANON_KEY, SUPABASE_URL, isSupabaseConfigured } from '@/lib/sup
 
 /** Routes reachable while signed out. */
 const PUBLIC_PREFIXES = ['/welcome', '/login', '/auth', '/onboarding', '/privacy', '/terms'];
-const PUBLIC_METADATA_PATHS = new Set(['/robots.txt', '/sitemap.xml', '/opengraph-image']);
+const PUBLIC_METADATA_PATHS = new Set([
+  '/robots.txt',
+  '/sitemap.xml',
+  '/opengraph-image',
+  '/manifest.webmanifest',
+  '/manifest.json',
+  '/icon.svg',
+]);
 
 function isPublic(pathname: string): boolean {
   return PUBLIC_METADATA_PATHS.has(pathname) || PUBLIC_PREFIXES.some(

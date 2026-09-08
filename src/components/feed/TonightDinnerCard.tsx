@@ -1,0 +1,107 @@
+import Link from 'next/link';
+import { Card } from '@/components/ui/Card';
+import { Icon } from '@/components/media/Icon';
+import { Badge } from '@/components/ui/Badge';
+import { AvatarStack } from '@/components/avatars/Avatar';
+import { FoodImage } from '@/components/media/FoodImage';
+import type { PlannedMeal, Recipe, User } from '@/lib/types';
+import { MEAL_TYPE_ICONS, MEAL_TYPE_LABELS } from '@/lib/types';
+
+interface TonightDinnerCardProps {
+  meal: PlannedMeal;
+  recipe?: Recipe;
+  cook?: User;
+  currentUser: User;
+  housemates: User[];
+}
+
+export function TonightDinnerCard({
+  meal,
+  recipe,
+  cook,
+  currentUser,
+  housemates,
+}: TonightDinnerCardProps) {
+  const byId = new Map(housemates.map((u) => [u.id, u]));
+  const diners = meal.participants
+    .map((p) => byId.get(p.userId))
+    .filter((u): u is User => Boolean(u));
+
+  const joined = meal.participants.some((p) => p.userId === currentUser.id);
+  const isCook = meal.cookedByUserId === currentUser.id;
+  const mouths = meal.participants.reduce(
+    (sum, p) => sum + 1 + (p.guests ?? 0),
+    0
+  );
+
+  return (
+    <Card className="flex flex-col gap-sm border-l-4 border-l-primary bg-gradient-to-br from-surface-container-lowest to-surface-container-low/60">
+      <div className="flex items-center justify-between gap-sm">
+        <span className="flex items-center gap-1.5 font-label-caps text-label-caps uppercase font-bold text-primary tracking-wider">
+          <Icon name={MEAL_TYPE_ICONS[meal.mealType]} className="text-sm" />
+          <span>Tonight&apos;s {MEAL_TYPE_LABELS[meal.mealType]}</span>
+        </span>
+        {joined ? (
+          <Badge tone="solid-primary" className="text-[11px]">
+            YOU&apos;RE IN
+          </Badge>
+        ) : (
+          <Badge tone="neutral" className="text-[11px]">
+            NOT JOINED
+          </Badge>
+        )}
+      </div>
+
+      <div className="flex items-start gap-md mt-0.5">
+        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-surface-container-high border border-outline-variant/40">
+          <FoodImage
+            src={recipe?.imageUrl ?? null}
+            seed={meal.recipeTitle}
+            alt={meal.recipeTitle}
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        <div className="flex-1 min-w-0">
+          <h3 className="font-title-md text-title-md font-bold text-on-surface truncate">
+            {meal.recipeTitle}
+          </h3>
+          <p className="font-body-sm text-xs text-on-surface-variant mt-0.5">
+            {cook ? (
+              <span>
+                Cooked by <strong>{isCook ? 'you' : cook.name}</strong>
+              </span>
+            ) : (
+              <span className="text-secondary font-medium">No cook assigned yet</span>
+            )}
+            {recipe?.cookTimeMins ? ` · ${recipe.cookTimeMins}m` : ''}
+          </p>
+
+          <div className="flex items-center gap-sm mt-2">
+            <AvatarStack users={diners.slice(0, 4)} size="sm" />
+            <span className="font-numeric-data text-xs text-on-surface-variant font-medium">
+              {mouths} {mouths === 1 ? 'diner' : 'diners'}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-xs mt-xs border-t border-outline-variant/30">
+        <span className="font-body-sm text-[11px] text-on-surface-variant">
+          {isCook
+            ? 'You are down to cook tonight'
+            : joined
+            ? 'Table is set for you'
+            : 'Want in? Open the plan to join'}
+        </span>
+        <Link
+          href={`/plan#day-${meal.day}`}
+          className="text-xs font-bold text-primary hover:underline flex items-center gap-0.5 btn-tactile"
+        >
+          <span>{isCook ? 'Cook mode' : joined ? 'Manage sitting' : 'Join sitting'}</span>
+          <Icon name="arrow_forward" className="text-sm" />
+        </Link>
+      </div>
+    </Card>
+  );
+}

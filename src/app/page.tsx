@@ -11,6 +11,7 @@ import { PageShell } from '@/components/ui/PageShell';
 import { FirstRunTip } from '@/components/ui/FirstRunTip';
 import { NextActionCard } from '@/components/feed/NextActionCard';
 import { RunningLowStapleCard } from '@/components/feed/RunningLowStapleCard';
+import { TonightDinnerCard } from '@/components/feed/TonightDinnerCard';
 import { nextAction } from '@/lib/nextAction';
 import { isCutoffPassed } from '@/lib/weeks';
 import {
@@ -95,6 +96,10 @@ export default async function FeedPage() {
     splits,
   });
 
+  const tonightMeal = plan.meals.find(
+    (meal) => meal.day === today && (meal.mealType === 'dinner' || meal.isShared)
+  ) ?? plan.meals.find((meal) => meal.day === today);
+
   return (
     <PageShell wide className="md:grid md:grid-cols-12 md:gap-lg md:items-start">
       <FirstRunTip tab="feed" className="md:col-span-12" />
@@ -111,6 +116,16 @@ export default async function FeedPage() {
             </Card>
           )}
         </div>
+
+        {tonightMeal && (
+          <TonightDinnerCard
+            meal={tonightMeal}
+            recipe={plan.recipes.get(tonightMeal.recipeId)}
+            cook={tonightMeal.cookedByUserId ? byId.get(tonightMeal.cookedByUserId) : undefined}
+            currentUser={currentUser}
+            housemates={housemates}
+          />
+        )}
 
         <RunningLowStapleCard />
 

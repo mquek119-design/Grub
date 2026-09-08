@@ -84,6 +84,15 @@ export function PayPanel({
     }
   }
 
+  const directPayUrl = payment.link
+    ? payment.link.startsWith('http://') || payment.link.startsWith('https://')
+      ? payment.link
+      : `https://${payment.link}`
+    : null;
+
+  const isMonzo = directPayUrl?.toLowerCase().includes('monzo.me');
+  const isRevolut = directPayUrl?.toLowerCase().includes('revolut.me');
+
   return (
     <div className="flex flex-col gap-md">
       <div className="bg-surface-container-lowest rounded-xl border border-surface-container-highest shadow-ambient-card p-lg flex flex-col gap-lg relative overflow-hidden">
@@ -95,6 +104,23 @@ export function PayPanel({
           {deliveryChecked && isPosted ? 'Pay' : 'Payment to'} {collectorName}
           {collectorRoom && <span className="text-on-surface-variant"> (Room {collectorRoom})</span>}
         </h3>
+
+        {directPayUrl && (
+          <a
+            href={directPayUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full h-11 rounded-xl bg-primary text-on-primary font-title-md text-sm font-bold flex items-center justify-center gap-2 shadow-xs hover:shadow-md transition-all btn-tactile"
+          >
+            <Icon
+              name={isMonzo ? 'credit_card' : isRevolut ? 'account_balance_wallet' : 'open_in_new'}
+              className="text-[18px]"
+            />
+            <span>
+              {isMonzo ? 'Pay via Monzo' : isRevolut ? 'Pay via Revolut' : 'Open Payment Link'}
+            </span>
+          </a>
+        )}
 
         {rows.length > 0 ? (
           <div className="bg-surface-bright rounded-lg border border-surface-container-highest divide-y divide-surface-container-highest">

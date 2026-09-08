@@ -332,32 +332,72 @@ export function WeekPlan({
   );
 
   return (
-    // Two abreast once there is room. A single column on a 1400px screen left
-    // two thirds of the page empty and pushed Friday below the fold.
-    <ul className="grid grid-cols-1 lg:grid-cols-2 gap-md items-start">
-      {days.map((day, dayIndex) => {
-        const dayMeals = plan.meals
-          .filter((meal) => meal.day === day)
-          .sort((a, b) => MEAL_TYPES.indexOf(a.mealType) - MEAL_TYPES.indexOf(b.mealType));
-
-        const isToday = day === today;
-        const isPast = todayIndex >= 0 && WEEKDAYS.indexOf(day) < todayIndex;
-        const shared = dayMeals.length === 1 && dayMeals[0].isShared ? dayMeals[0] : null;
-
-        return (
-          <li
-            key={day}
-            // A gentle staggered load-in. Skipped on past days — their whole
-            // point is to recede, so they keep the flat opacity-70 rather than
-            // animating up to full and then dimming, which would fight itself.
-            // No meal figure lives on this card, so this breaks no money rule.
-            className={clsx(
-              'rounded-xl border bg-surface-container-lowest shadow-ambient-card',
-              isToday ? 'border-primary/40' : 'border-surface-container-highest',
-              isPast ? 'opacity-70' : 'animate-fade-in-up'
-            )}
-            style={isPast ? undefined : { animationDelay: `${dayIndex * 60}ms` }}
+    <div className="flex flex-col">
+      {/* Mobile Sticky Weekday Jump Rail (< lg) */}
+      <div className="lg:hidden sticky top-[72px] z-20 -mx-margin-mobile px-margin-mobile py-xs bg-surface/95 backdrop-blur-md border-b border-outline-variant/30 flex items-center gap-xs overflow-x-auto hide-scrollbar mb-sm">
+        {today && (
+          <button
+            type="button"
+            onClick={() => {
+              const el = document.getElementById(`day-${today}`);
+              el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}
+            className="shrink-0 px-sm py-1 rounded-full text-xs font-bold bg-primary text-on-primary shadow-xs btn-tactile flex items-center gap-1"
           >
+            <Icon name="today" className="text-sm" />
+            <span>Today</span>
+          </button>
+        )}
+        {days.map((d) => {
+          const isCurrent = d === today;
+          return (
+            <button
+              key={`nav-${d}`}
+              type="button"
+              onClick={() => {
+                const el = document.getElementById(`day-${d}`);
+                el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              className={clsx(
+                'shrink-0 px-sm py-1 rounded-full text-xs font-semibold border transition-all btn-tactile',
+                isCurrent
+                  ? 'border-primary bg-primary/10 text-primary font-bold'
+                  : 'border-outline-variant/50 bg-surface-container-low text-on-surface hover:bg-surface-container'
+              )}
+            >
+              {WEEKDAY_LABELS[d].slice(0, 3)}
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Two abreast once there is room. A single column on a 1400px screen left
+          two thirds of the page empty and pushed Friday below the fold. */}
+      <ul className="grid grid-cols-1 lg:grid-cols-2 gap-md items-start">
+        {days.map((day, dayIndex) => {
+          const dayMeals = plan.meals
+            .filter((meal) => meal.day === day)
+            .sort((a, b) => MEAL_TYPES.indexOf(a.mealType) - MEAL_TYPES.indexOf(b.mealType));
+
+          const isToday = day === today;
+          const isPast = todayIndex >= 0 && WEEKDAYS.indexOf(day) < todayIndex;
+          const shared = dayMeals.length === 1 && dayMeals[0].isShared ? dayMeals[0] : null;
+
+          return (
+            <li
+              key={day}
+              id={`day-${day}`}
+              // A gentle staggered load-in. Skipped on past days — their whole
+              // point is to recede, so they keep the flat opacity-70 rather than
+              // animating up to full and then dimming, which would fight itself.
+              // No meal figure lives on this card, so this breaks no money rule.
+              className={clsx(
+                'scroll-mt-[124px] rounded-xl border bg-surface-container-lowest shadow-ambient-card',
+                isToday ? 'border-primary/40' : 'border-surface-container-highest',
+                isPast ? 'opacity-70' : 'animate-fade-in-up'
+              )}
+              style={isPast ? undefined : { animationDelay: `${dayIndex * 60}ms` }}
+            >
             <header
               className={clsx(
                 'flex items-center justify-between gap-sm px-md py-sm border-b rounded-t-xl',
@@ -447,6 +487,7 @@ export function WeekPlan({
           </li>
         );
       })}
-    </ul>
+      </ul>
+    </div>
   );
 }

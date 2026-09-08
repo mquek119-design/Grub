@@ -25,6 +25,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: 'Grub',
   description: 'Plan meals together, buy one shop, split it fairly.',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Grub',
+  },
 };
 
 export const viewport: Viewport = {
