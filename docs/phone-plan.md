@@ -21,18 +21,16 @@ Grub is built around a clear operational split:
 
 ## 2. Current Implementation Audit (Shipped vs Outstanding)
 
-| Surface / Feature | Current Implementation State | Remaining Mobile Enhancements |
+| Surface / Feature | Implementation State | Shipped Deliverables |
 | :--- | :--- | :--- |
-| **Global Navigation** | ✅ `BottomNav.tsx` active below `md` with `pb-safe`, tab badges, and `AppChrome.tsx` 96px bottom offset. | Add subtle active-tab haptic styling (`active:scale-95`). |
-| **Feed Screen** | ✅ Role-aware Action Cards, cutoff alerts, next meal preview, deep links. | Add sticky 1-tap "Am I in on Dinner tonight?" card. |
-| **Week Plan** | ✅ Responsive single-column day cards below `lg`, sitting badges, `JoinToggle`, `MealOptionsSheet`. | Add sticky horizontal day picker rail (`Mon · Tue · Wed...`) to eliminate endless vertical scrolling. |
-| **Recipe Browser** | ✅ Search filter, dietary badges, 16:9 photo cards, client-side photo compression. | Sheet-based recipe quick view; swipeable recipe card gestures. |
-| **Cook Mode** | 🟡 Functional instructions list. | **Cook Mode Counter Experience**: Screen Wake Lock API (`navigator.wakeLock`), 22px step typography, and ingredient checklist. |
-| **Basket Screen** | ✅ Collapsible categories, real-time item search, 2-column Brand Swap modal, floating mobile checkout bar. | Smooth keyboard avoidance on add-item input. |
-| **Split & Settle Up** | ✅ Per-person total, itemised workings, copyable sort code & account number, "I've Paid" toggle. | **1-Tap Banking Links**: Direct Monzo (`monzo.me`) and Revolut (`revolut.me`) payment triggers. |
-| **Leftovers Board** | ✅ Leftovers list, portion counter, "Claim portion" action. | Edit leftover description and portion count. |
-| **Auth & Onboarding** | ✅ Mobile-responsive signup/login, magic links + 6-digit OTP code fallback for mobile email apps. | Add iOS Safari auto-zoom prevention (`text-base` on all inputs). |
-| **PWA & Standalone** | ⬜ Standard browser tab mode. | Add `manifest.json` (`display: standalone`), `apple-touch-icon`, and home screen install banner. |
+| **Global Navigation** | ✅ **Shipped** | `BottomNav.tsx` active below `md` with `pb-safe`, tab badges, tactile micro-animations (`active:scale-95`), and 96px chrome offset. |
+| **Feed Screen** | ✅ **Shipped** | Pinned **Tonight's Dinner** card on mobile feed; directly launches full-screen Cook Mode with portion scaling when user cooks tonight. |
+| **Week Plan** | ✅ **Shipped** | Sticky weekday jump rail (`lg:hidden sticky top-[72px]`) with smooth scroll to day cards (`[Today]`, `Mon`, `Tue`...). |
+| **Cook Mode** | ✅ **Shipped** | **Kitchen Counter Experience**: Screen Wake Lock API (`navigator.wakeLock`), bold step typography, knuckle-tap checklist, and leftover logger. |
+| **Split & Settle Up** | ✅ **Shipped** | **1-Tap Banking Links**: Direct Monzo (`monzo.me`) and Revolut (`revolut.me`) payment triggers; copyable bank details with instant feedback. |
+| **Auth & 6-Digit OTP** | ✅ **Shipped** | Mobile-responsive login with 6-digit numeric OTP inputs + magic link; iOS Safari auto-zoom prevention (`text-base` enforced). |
+| **PWA & Standalone** | ✅ **Shipped** | Next.js manifest (`display: standalone`), SVG branded icons, and service worker push notification support. |
+| **Calendar Sync** | ✅ **Shipped** | Live RFC 5545 Webcal / iCal subscription feed (`/api/calendar/[houseId]`) with native alarms for Apple/Google calendars. |
 
 ---
 

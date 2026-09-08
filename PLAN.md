@@ -1,12 +1,23 @@
 # Grub — Master Plan & Launch Gate
 
-_Last updated: 2026-09-08. This is the single consolidated view of what is left, serving as the master backlog and launch checklist. Read `CLAUDE.md` for architecture and product rules; read `VOICE.md` for copy guidelines._
+_Last updated: 2026-09-08. Master backlog and launch checklist. Read `CLAUDE.md` for architecture and product rules; read `VOICE.md` for copy guidelines._
 
 ## True Current State
 
 - **Deployed** to Vercel at `grub-lime.vercel.app`; auto-deploys on push to `main`.
 - **Function region** pinned to `sin1` via `vercel.json` to match the Singapore Supabase project (see T0.2 for planned migration).
-- **Test suite**: `npm run verify` is clean; Jest **18/18 suites, 174/174 tests** passing.
+- **Test suite**: `npm run verify` is clean; Jest **20/20 suites, 187/187 tests** passing.
+- **Authentication**: 6-digit numeric email OTP codes + magic link fallback active on `/login` and `/onboarding/signup` (bypassing university spam crawlers).
+- **Calendar & Notifications**:
+  - Live RFC 5545 Webcal / iCal subscription feed (`/api/calendar/[houseId]`) for Google Calendar, Apple Calendar, and Outlook with native 1-hour alarms.
+  - Native Web Push lock-screen notifications with Service Worker (`/sw.js`) and unified Settings panel controls.
+- **Mobile & PWA**:
+  - PWA standalone manifest with branded icons (`/manifest.webmanifest`).
+  - Screen Wake Lock API in kitchen Cook Mode.
+  - Sticky weekday jump rail on Plan.
+  - 1-tap Monzo (`monzo.me`) and Revolut (`revolut.me`) payment links.
+  - Mobile feed directly opens Cook Mode when user is cooking tonight.
+  - iOS Safari auto-zoom prevention enforced via 16px inputs.
 - **Recipe photo uploads & image compression**: Client-side downscaling and compression active (`src/lib/imageCompression.ts`).
 - **Brand & Aesthetics**: Custom favicon (`icon.svg`), OpenGraph preview card, and tactile design system.
 - **Analytics & Consent**: Opt-in Vercel Analytics with privacy controls and cookie banner (`src/components/privacy/AnalyticsConsent.tsx`).
@@ -29,8 +40,8 @@ _Last updated: 2026-09-08. This is the single consolidated view of what is left,
 
 ## Tier 1 — Codebase Tasks & Audits
 
-### T1.1 — Push Notifications: REMOVED (Clean MVP)
-**Status: Complete.** Removed half-built push notification code and service worker to keep MVP lean and focused on core web flows.
+### T1.1 — Web Push & Calendar Notifications
+**Status: Complete.** Live Webcal/iCal `.ics` feed active at `/api/calendar/[houseId]` with native alarms; W3C Web Push Service Worker active with user toggles and test notification triggers in Settings.
 
 ### T1.2 — Authenticated Route Accessibility Harness
 **Status: Ready to run.** Playwright spec (`src/__tests__/e2e/a11y-authenticated.spec.ts`) covers Plan/Recipes/Basket/Split with axe. Run `npm run e2e:auth` once to save a session, then run `npm run e2e:a11y`.
@@ -48,7 +59,10 @@ _Last updated: 2026-09-08. This is the single consolidated view of what is left,
 **Status: Complete.** Copy aligned with `VOICE.md` (70/30 dry British split, zero exclamation marks, strictly factual financial screens).
 
 ### T1.7 — Mobile & Phone Web Experience
-**Status: Spec & Plan Complete (`docs/phone-plan.md`).** Implementation roadmap covering thumb-zone ergonomics, virtual keyboard avoidance, kitchen Cook Mode wake-lock, 1-tap Monzo/Revolut links, and PWA standalone manifest.
+**Status: Complete (`docs/phone-plan.md`).** All core mobile tenets shipped: bottom navigation, sticky rail, 1-tap commute card, Cook Mode wake lock, banking deep-links, PWA manifest, and auto-zoom prevention.
+
+### T1.8 — Onboarding & Visual Guide Redesign
+**Status: In Progress.** 2-track onboarding (House Leader vs Housemate), personal weekly budget slider, dietary safety tags (Halal, Veg, Vegan, Pescatarian, Gluten-Free, Dairy-Free, Nut Allergy), meal vibes, interactive kitchen appliance studio (Air Fryer, 2-Hob/4-Hob, Oven, Microwave), and 5-slide visual walkthrough covering Tesco automation and Cookie-Editor session export.
 
 ---
 
@@ -88,4 +102,4 @@ Legend: ✅ Done · 🟡 Partial / Verify at Deploy · 🏠 Handled by Host (Ver
 ---
 
 ## Out of Scope (Deliberate MVP Boundaries)
-Multi-supermarket price comparison, native iOS/Android apps, AI recipe generation, and open-banking bank scraping.
+Multi-supermarket live price scraping, native iOS/Android App Store builds, and open-banking direct debit pulls.

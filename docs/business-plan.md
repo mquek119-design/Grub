@@ -102,3 +102,15 @@ In `Settings -> Notifications & Integrations`, each student can customize their 
 | **Calendar Sync (Webcal)** | On demand | [Subscribe to Calendar] link |
 | **WhatsApp Nudge** | Enabled | 1-Tap share button visible to all housemates |
 | **Email Digest** | On | Sunday 4:00 PM summary / Opt-out |
+
+---
+
+## 6. Brand Identity & Mascot Strategy (Future Roadmap)
+
+### 6.1 The Brand Character: "Potto" / The Simmering Cast-Iron Companion
+- **Character Concept**: A charming anthropomorphic cast-iron dutch oven / pot with expressive animated eyes, gentle steam puffs, and fresh vegetable companions (carrot, spring onion, mushroom).
+- **Brand Purpose**:
+  1. **Transforms Boring Utility into Warmth**: Student flat apps often feel cold, clinical, or bureaucratic. A warm, humorous culinary mascot builds emotional connection and brand memorability.
+  2. **Delightful Loading & Feedback Moments**: Replaces generic spinning progress bars during onboarding setup, Tesco cart synchronization, and delivery morning reconciliation with lively micro-animations (e.g. Potto happily tossing veggies or holding a Tesco receipt).
+  3. **Campus Word of Mouth**: High viral sticker appeal for student laptops, water bottles, and kitchen fridge magnets across Warwick halls and Leamington flatshares.
+- **Rollout Timeline**: Currently on hold for the initial onboarding release; scheduled for Phase 2 brand animation and onboarding celebration polish.
