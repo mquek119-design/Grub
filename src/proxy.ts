@@ -19,6 +19,14 @@ function isPublic(pathname: string): boolean {
   );
 }
 
+function redirectWithCookies(target: URL, sourceResponse: NextResponse): NextResponse {
+  const redirectResponse = NextResponse.redirect(target);
+  sourceResponse.cookies.getAll().forEach((cookie) => {
+    redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+  });
+  return redirectResponse;
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -84,14 +92,14 @@ export async function proxy(request: NextRequest) {
       target.pathname = '/login';
       target.searchParams.set('next', pathname);
     }
-    return NextResponse.redirect(target);
+    return redirectWithCookies(target, response);
   }
 
   if (user && (pathname === '/login' || pathname === '/welcome')) {
     const target = request.nextUrl.clone();
     target.pathname = '/';
     target.search = '';
-    return NextResponse.redirect(target);
+    return redirectWithCookies(target, response);
   }
 
   // A signed-in user with no house is redirected to onboarding by the pages
