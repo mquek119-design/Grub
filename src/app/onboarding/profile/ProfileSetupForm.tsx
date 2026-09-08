@@ -40,10 +40,32 @@ const ACCENTS: { id: User['accent']; label: string; bg: string }[] = [
 ];
 
 function getBudgetTier(budget: number) {
-  if (budget <= 25) return { mood: 'smug' as const, label: 'Frugal tier' };
-  if (budget <= 45) return { mood: 'neutral' as const, label: 'Average tier' };
-  if (budget <= 80) return { mood: 'cooking' as const, label: 'Gym / High protein' };
-  return { mood: 'cooking' as const, label: 'Premium tier' };
+  if (budget <= 25) {
+    return {
+      tier: 'frugal' as const,
+      mood: 'smug' as const,
+      label: 'Frugal Tier',
+    };
+  }
+  if (budget <= 45) {
+    return {
+      tier: 'student' as const,
+      mood: 'neutral' as const,
+      label: 'Student Tier',
+    };
+  }
+  if (budget <= 70) {
+    return {
+      tier: 'gym' as const,
+      mood: 'cooking' as const,
+      label: 'Gym / High Protein',
+    };
+  }
+  return {
+    tier: 'rich' as const,
+    mood: 'cooking' as const,
+    label: 'Premium Tier',
+  };
 }
 
 export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string }) {
@@ -203,7 +225,8 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
           <div className="flex items-center gap-2.5 shrink-0">
             <Stocky
               mood={tier.mood}
-              size="sm"
+              tier={tier.tier}
+              size="md"
             />
             <div className="flex flex-col items-end">
               <span className="font-numeric-data text-title-md font-extrabold text-primary leading-tight">
@@ -220,7 +243,7 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
           type="range"
           name="budget"
           min={10}
-          max={200}
+          max={100}
           step={5}
           value={budget}
           onChange={(e) => setBudget(Number(e.target.value))}
@@ -229,10 +252,10 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
 
         <div className="flex justify-between text-[11px] text-on-surface-variant/70 font-numeric-data font-semibold">
           <span>£10</span>
-          <span>£35</span>
-          <span>£60</span>
+          <span>£25</span>
+          <span>£50</span>
+          <span>£75</span>
           <span>£100</span>
-          <span>£200</span>
         </div>
       </div>
 

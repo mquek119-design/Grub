@@ -2,10 +2,12 @@ import React from 'react';
 import { clsx } from '@/lib/clsx';
 
 export type StockyMood = 'neutral' | 'smug' | 'stressed' | 'asleep' | 'cooking' | 'split';
+export type BudgetTierType = 'frugal' | 'student' | 'gym' | 'rich';
 export type StockySize = 'sm' | 'md' | 'lg' | 'xl';
 
 interface StockyProps {
   mood?: StockyMood;
+  tier?: BudgetTierType;
   size?: StockySize;
   caption?: string;
   captionPosition?: 'top' | 'right' | 'bottom';
@@ -29,6 +31,7 @@ const SIZE_MAP: Record<StockySize, string> = {
  */
 export function Stocky({
   mood = 'neutral',
+  tier,
   size = 'md',
   caption,
   captionPosition = 'right',
@@ -213,6 +216,76 @@ export function Stocky({
               stroke="#1B4332"
               strokeWidth="1.2"
             />
+          )}
+
+          {/* PROGRESSIVE BUDGET TIER ACCESSORIES */}
+
+          {/* 1. Frugal Tier: Neat stack of shiny pound coins on the floor (savvy smart saver, not poor) */}
+          {tier === 'frugal' && (
+            <g>
+              {/* Stack of pound coins */}
+              <ellipse cx="14" cy="85" rx="7" ry="2.6" fill="#E5A93C" stroke="#1B4332" strokeWidth="1.2" />
+              <ellipse cx="14" cy="82" rx="7" ry="2.6" fill="#F4E285" stroke="#1B4332" strokeWidth="1.2" />
+              <ellipse cx="14" cy="79" rx="7" ry="2.6" fill="#E5A93C" stroke="#1B4332" strokeWidth="1.2" />
+              <ellipse cx="14" cy="76" rx="7" ry="2.6" fill="#F4E285" stroke="#1B4332" strokeWidth="1.2" />
+              {/* Upright leaning coin */}
+              <ellipse cx="19" cy="80" rx="3.5" ry="6.5" transform="rotate(22 19 80)" fill="#E5A93C" stroke="#1B4332" strokeWidth="1.2" />
+              <text x="19" y="82" textAnchor="middle" fontSize="5.5" fontWeight="bold" fill="#1B4332" transform="rotate(22 19 80)">£</text>
+              {/* Tiny savings sparkle */}
+              <path d="M8 72 Q10 72 10 70 Q10 72 12 72 Q10 72 10 74 Q10 72 8 72 Z" fill="#F4E285" stroke="#1B4332" strokeWidth="0.6" />
+            </g>
+          )}
+
+          {/* 2. Student Tier: Wireframe study glasses on Stocky's deadpan cube eyes */}
+          {tier === 'student' && (
+            <g>
+              {/* Left eye wireframe rim */}
+              <circle cx="36" cy="51" r="5" fill="rgba(255,255,255,0.2)" stroke="#1B4332" strokeWidth="1.4" />
+              {/* Right eye wireframe rim */}
+              <circle cx="47" cy="56" r="5" fill="rgba(255,255,255,0.2)" stroke="#1B4332" strokeWidth="1.4" />
+              {/* Wire bridge */}
+              <path d="M41 51.5 Q43 50 42 54" fill="none" stroke="#1B4332" strokeWidth="1.3" strokeLinecap="round" />
+              {/* Temple pieces */}
+              <line x1="31" y1="51" x2="25" y2="47" stroke="#1B4332" strokeWidth="1.3" strokeLinecap="round" />
+              <line x1="52" y1="56" x2="56" y2="54" stroke="#1B4332" strokeWidth="1.3" strokeLinecap="round" />
+            </g>
+          )}
+
+          {/* 3. Gym Tier: Hexagonal cast-iron dumbbell on floor + sporty sweatband on cube */}
+          {tier === 'gym' && (
+            <g>
+              {/* Sporty sweatband wrapped around top edge */}
+              <polygon points="24,38 56,54 56,48 24,32" fill="#E53935" stroke="#1B4332" strokeWidth="1.2" strokeLinejoin="round" />
+              <line x1="24" y1="35" x2="56" y2="51" stroke="#FFFFFF" strokeWidth="1.4" />
+
+              {/* Cast-iron dumbbell on floor */}
+              <polygon points="8,76 14,71 18,76 16,84 10,88 6,83" fill="#37474F" stroke="#1B4332" strokeWidth="1.2" />
+              <polygon points="17,69 23,64 27,69 25,77 19,81 15,76" fill="#263238" stroke="#1B4332" strokeWidth="1.2" />
+              <line x1="12" y1="78" x2="21" y2="71" stroke="#CFD8DC" strokeWidth="2.4" strokeLinecap="round" />
+
+              {/* Determined focused brows */}
+              <line x1="33" y1="46" x2="39" y2="48" stroke="#1B4332" strokeWidth="1.8" strokeLinecap="round" />
+              <line x1="44" y1="52" x2="50" y2="50" stroke="#1B4332" strokeWidth="1.8" strokeLinecap="round" />
+            </g>
+          )}
+
+          {/* 4. Rich / Premium Tier: Golden monocle with chain + dapper bow tie + sparkle */}
+          {tier === 'rich' && (
+            <g>
+              {/* Golden monocle over right eye */}
+              <circle cx="47" cy="56" r="6" fill="rgba(255, 255, 255, 0.3)" stroke="#D4AF37" strokeWidth="1.8" />
+              <line x1="47" y1="50" x2="47" y2="48" stroke="#D4AF37" strokeWidth="1.4" strokeLinecap="round" />
+              {/* Draped golden chain */}
+              <path d="M47 62 Q52 70 50 78 Q48 83 51 88" fill="none" stroke="#D4AF37" strokeWidth="1.2" strokeDasharray="1.5 1" strokeLinecap="round" />
+
+              {/* Dapper bowtie under front corner */}
+              <polygon points="38,71 31,67 31,75" fill="#1B4332" stroke="#1B4332" strokeWidth="1" />
+              <polygon points="38,71 45,67 45,75" fill="#1B4332" stroke="#1B4332" strokeWidth="1" />
+              <circle cx="38" cy="71" r="1.6" fill="#F4E285" stroke="#1B4332" strokeWidth="0.8" />
+
+              {/* Foil diamond sparkle on gold wrapper */}
+              <path d="M72 26 Q74 26 74 23 Q74 26 76 26 Q74 26 74 29 Q74 26 72 26 Z" fill="#FFFFFF" stroke="#D4AF37" strokeWidth="0.8" />
+            </g>
           )}
 
           {/* FACIAL EXPRESSIONS ON FRONT OCHRE FACE */}
