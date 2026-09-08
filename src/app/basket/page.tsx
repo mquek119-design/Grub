@@ -23,6 +23,7 @@ import {
 } from '@/lib/queries';
 
 import { DesktopCheckoutCard } from '@/components/basket/DesktopCheckoutCard';
+import { checkTescoSession } from './tescoActions';
 
 export const metadata = { title: 'Basket · Grub', description: 'Review the combined house basket before ordering.' };
 export const dynamic = 'force-dynamic';
@@ -31,14 +32,16 @@ export default async function BasketPage() {
   const currentUser = await getCurrentUser();
   if (!currentUser.houseId) redirect('/onboarding');
 
-  const [items, housemates, collector, plan, house] = await Promise.all([
+  const [items, housemates, collector, plan, house, tescoSession] = await Promise.all([
     getBasketItems(),
     getHousemates(),
     getCollector(),
     getWeeklyPlan(),
     getHouse(),
+    checkTescoSession(),
   ]);
 
+  const hasCookies = Boolean(tescoSession?.authenticated);
   const mealCount = plan?.meals.length ?? 0;
   const unpriced = items.filter((item) => item.needsPackData);
 
@@ -114,6 +117,7 @@ export default async function BasketPage() {
                 collectorName={collector?.name ?? 'The collector'}
                 planId={plan?.id}
                 orderingEnabled={tescoOrderingEnabled}
+                hasCookies={hasCookies}
               />
             </div>
           )}
@@ -127,6 +131,7 @@ export default async function BasketPage() {
             collectorName={collector?.name ?? 'The collector'}
             planId={plan?.id}
             orderingEnabled={tescoOrderingEnabled}
+            hasCookies={hasCookies}
           />
 
           <BuildBasketPanel

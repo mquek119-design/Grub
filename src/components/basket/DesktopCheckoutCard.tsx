@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { useState, useTransition, useEffect } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Icon } from '@/components/media/Icon';
@@ -15,6 +16,7 @@ interface DesktopCheckoutCardProps {
   collectorName: string;
   planId?: string;
   orderingEnabled: boolean;
+  hasCookies?: boolean;
 }
 
 export function DesktopCheckoutCard({
@@ -23,28 +25,28 @@ export function DesktopCheckoutCard({
   collectorName,
   planId,
   orderingEnabled,
+  hasCookies: initialHasCookies = false,
 }: DesktopCheckoutCardProps) {
   const [isSyncing, setIsSyncing] = useState(false);
-  const [sessionAuth, setSessionAuth] = useState(false);
+  const [sessionAuth, setSessionAuth] = useState(initialHasCookies);
   const [syncStatusMsg, setSyncStatusMsg] = useState<string | null>(null);
   const [actualTotalCost, setActualTotalCost] = useState<number | null>(null);
 
   useEffect(() => {
-    if (!orderingEnabled) return;
     checkTescoSession()
       .then((res) => setSessionAuth(Boolean(res.authenticated)))
       .catch((err) => console.error('Tesco session check failed:', err));
-  }, [orderingEnabled]);
+  }, []);
 
   const total = basketTotal(items.filter((item) => !item.needsPackData));
 
   async function handleCheckoutClick() {
-    if (!orderingEnabled) {
-      setSyncStatusMsg(TESCO_ORDERING_UNAVAILABLE_MESSAGE);
+    if (!sessionAuth) {
+      setSyncStatusMsg('Tesco session cookies required. Please import them in House Settings.');
       return;
     }
-    if (!sessionAuth) {
-      setSyncStatusMsg('Tesco session required. Please set up your Tesco session cookies in House Settings.');
+    if (!orderingEnabled) {
+      setSyncStatusMsg(TESCO_ORDERING_UNAVAILABLE_MESSAGE);
       return;
     }
     if (!planId) {
@@ -96,6 +98,22 @@ export function DesktopCheckoutCard({
         </span>
       </div>
 
+      {/* Reminder when Tesco session cookies are not in */}
+      {!sessionAuth && (
+        <div className="p-sm rounded-xl bg-amber-500/10 border border-amber-500/25 flex flex-col gap-1 text-xs animate-fade-in">
+          <div className="flex items-center gap-1.5 font-bold text-on-surface">
+            <Icon name="cookie" className="text-sm text-amber-700" />
+            <span>Tesco cookies needed</span>
+          </div>
+          <p className="text-on-surface-variant text-[11px] leading-relaxed">
+            Import your Tesco session cookies to enable automatic trolley syncing and checkout handoff.
+          </p>
+          <Link href="/settings" className="font-bold text-primary hover:underline text-[11px] mt-0.5">
+            Import cookies in Settings &rarr;
+          </Link>
+        </div>
+      )}
+
       {syncStatusMsg && (
         <p className="font-body-sm text-xs font-semibold text-primary flex items-center gap-xs">
           <Icon name="info" className="text-sm" />
@@ -105,10 +123,12 @@ export function DesktopCheckoutCard({
 
       <button
         type="button"
-        disabled={!orderingEnabled || !isCollector || items.length === 0 || isSyncing}
+        disabled={!sessionAuth || !orderingEnabled || !isCollector || items.length === 0 || isSyncing}
         onClick={handleCheckoutClick}
         title={
-          !orderingEnabled
+          !sessionAuth
+            ? 'Import Tesco session cookies in House Settings to enable checkout.'
+            : !orderingEnabled
             ? TESCO_ORDERING_UNAVAILABLE_MESSAGE
             : isCollector
             ? undefined
@@ -116,7 +136,9 @@ export function DesktopCheckoutCard({
         }
         className="w-full bg-secondary text-on-secondary-container font-title-md text-title-md py-md rounded-2xl btn-tactile shadow-md hover:shadow-lg transition-all text-center font-bold disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {!orderingEnabled
+        {!sessionAuth
+          ? 'Cookies required to checkout'
+          : !orderingEnabled
           ? 'Open locally to checkout'
           : isSyncing
           ? 'Syncing to Tesco...'

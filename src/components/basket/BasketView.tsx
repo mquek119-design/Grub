@@ -43,6 +43,7 @@ interface BasketViewProps {
   collectorName: string;
   planId?: string;
   orderingEnabled: boolean;
+  hasCookies?: boolean;
 }
 
 export function BasketView({
@@ -52,6 +53,7 @@ export function BasketView({
   collectorName,
   planId,
   orderingEnabled,
+  hasCookies: initialHasCookies = false,
 }: BasketViewProps) {
   const [quantities, setQuantities] = useState<Record<string, number>>(
     () => Object.fromEntries(items.map((item) => [item.id, item.quantity]))
@@ -73,20 +75,18 @@ export function BasketView({
   // flag is not needed.
   const [, startTransition] = useTransition();
   const [isSyncing, setIsSyncing] = useState(false);
-  const [sessionAuth, setSessionAuth] = useState(false);
+  const [sessionAuth, setSessionAuth] = useState(initialHasCookies);
   const [sessionExpiry, setSessionExpiry] = useState<string | undefined>();
   const [syncStatusMsg, setSyncStatusMsg] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!orderingEnabled) return;
-
     checkTescoSession()
       .then((res) => {
         setSessionAuth(Boolean(res.authenticated));
         setSessionExpiry(res.expiresAt);
       })
       .catch((err) => console.error('Tesco session check failed:', err));
-  }, [orderingEnabled]);
+  }, []);
 
   // Memoize housemates lookup Map to avoid recreation on every render
   const byId = useMemo(() => new Map(housemates.map((user) => [user.id, user])), [housemates]);
@@ -195,6 +195,8 @@ export function BasketView({
         isCollector={isCollector}
         collectorName={collectorName}
         itemCount={liveItems.length}
+        hasCookies={sessionAuth}
+        sessionDaysLeft={sessionDaysLeft}
       />
 
     {selectedSwapItem && (

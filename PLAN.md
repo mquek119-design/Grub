@@ -29,7 +29,7 @@ These need dashboard access or a real-world action. Nothing in code blocks them.
 
 | # | Task | Why it matters | Notes |
 |---|------|----------------|-------|
-| T0.1 | **Finish Supabase custom SMTP** (Resend) | Magic-link sign-in currently errors / hits the shared rate limit | Host must be `smtp.resend.com` (was typo'd `stmp`). Sender `@grubhouse.uk`. Then send a test link. |
+| T0.1 | **Finish Supabase custom SMTP** (Resend) | Magic-link sign-in currently errors / hits the shared rate limit | Host must be `smtp.resend.com` (was typo'd `stmp`). Sender `@grubhouse.uk`. Then send a test link. Full custom email architecture plan documented in `docs/email-system-plan.md`. |
 | T0.2 | **Migrate Supabase to a UK/EU region** | Biggest real-world speed lever. Project is in Singapore; Grub is for UK students. Every navigation pays a Singapore round trip. | New project in London/Ireland, migrate schema + data, then change `vercel.json` `regions` to match in the same commit. LAUNCH_CHECKLIST #21. |
 | T0.3 | **Supabase redirect-URL allow-list** | The "requested path is invalid" magic-link error | Add `https://grub-lime.vercel.app/**` (and the `grubhouse.uk` equivalent once that's the live host) under Authentication → URL Configuration. |
 | T0.4 | **Run migrations `0024` + `0025` on prod** | `0025` (recipe-images bucket + RLS) must run or uploads fail; `0024` (canonical unique index) only after the merge tool is clean — see T1.3 | `0025` can run now; `0024` is data-gated. |
