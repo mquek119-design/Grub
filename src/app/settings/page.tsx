@@ -12,6 +12,7 @@ import { SlotPreferencePanel } from '@/components/settings/SlotPreferencePanel';
 import { RoutinePanel } from '@/components/settings/RoutinePanel';
 import { StaplesPanel } from '@/components/settings/StaplesPanel';
 import { SharedStaplesToggle } from '@/components/settings/SharedStaplesToggle';
+import { NotificationsCalendarPanel } from '@/components/settings/NotificationsCalendarPanel';
 import { ManagePrivacyButton } from '@/components/privacy/ManagePrivacyButton';
 
 export const metadata = { title: 'House Settings · Grub', description: 'Manage housemates, shared staples, and the weekly rotation.' };
@@ -97,6 +98,14 @@ export default async function SettingsPage() {
               <FulfillmentSettingsPanel house={house} />
               <SlotPreferencePanel house={house} />
             </div>
+          </section>
+
+          <section className="flex flex-col gap-sm">
+            <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs font-bold">
+              <Icon name="event" className="text-primary text-lg" />
+              Calendar Sync &amp; Alerts
+            </h2>
+            <NotificationsCalendarPanel houseId={house.id} />
           </section>
 
           <section className="flex flex-col gap-sm">

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/media/Icon';
 import { Button } from '@/components/ui/Button';
 import { SubmitButton } from '@/components/ui/SubmitButton';
-import { sendMagicLink, type LoginState } from './actions';
+import { sendMagicLink, verifyEmailOtp, type LoginState } from './actions';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { createClient } from '@/lib/supabase/client';
 
@@ -47,6 +47,9 @@ export function LoginForm({ next = '/' }: { next: string }) {
     router.push(destination);
   };
 
+  const [otpState, otpFormAction] = useActionState(verifyEmailOtp, INITIAL);
+  const [otpCode, setOtpCode] = useState('');
+
   if (state.status === 'sent') {
     const isGmail = email.toLowerCase().includes('gmail.com');
     const isOutlook =
@@ -61,28 +64,73 @@ export function LoginForm({ next = '/' }: { next: string }) {
             <Icon name="mark_email_read" filled className="text-[32px]" />
           </span>
           <h2 className="font-title-lg text-title-lg text-primary font-bold">
-            Check your inbox
+            Enter 6-digit code or click link
           </h2>
           <p className="font-body-md text-body-md text-on-surface">
-            We sent a sign-in link to:
+            We sent a code and sign-in link to:
           </p>
           <p className="font-title-sm text-title-sm text-primary font-semibold break-all">
             {email}
           </p>
-          <p className="font-body-sm text-body-sm text-on-surface-variant mt-2 max-w-xs">
-            Click the link in your email to sign in directly to your house.
-          </p>
         </div>
 
-        <div className="flex flex-col gap-sm pt-xs border-t border-surface-container-highest">
+        {/* 6-Digit Numeric OTP Form */}
+        <form action={otpFormAction} className="flex flex-col gap-sm">
+          <input type="hidden" name="email" value={email} />
+          <input type="hidden" name="next" value={destination} />
+
+          <label className="flex flex-col gap-xs text-center">
+            <span className="font-body-sm text-xs font-semibold text-on-surface-variant uppercase tracking-wider">
+              Enter 6-digit code
+            </span>
+            <input
+              type="text"
+              name="token"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              autoComplete="one-time-code"
+              maxLength={6}
+              value={otpCode}
+              onChange={(e) => {
+                const cleaned = e.target.value.replace(/\D/g, '').slice(0, 6);
+                setOtpCode(cleaned);
+              }}
+              placeholder="123456"
+              autoFocus
+              className="h-14 text-center tracking-[0.35em] font-mono text-2xl font-bold rounded-xl bg-surface-container-low border border-outline-variant focus:ring-2 focus:ring-primary focus:border-primary text-on-surface"
+            />
+          </label>
+
+          {otpState.status === 'error' && (
+            <p role="alert" className="font-body-sm text-xs text-error text-center">
+              {otpState.message}
+            </p>
+          )}
+
+          <SubmitButton
+            variant="primary"
+            size="lg"
+            fullWidth
+            icon="key"
+            pendingLabel="Verifying code…"
+          >
+            Verify code & sign in
+          </SubmitButton>
+        </form>
+
+        <div className="flex flex-col gap-sm pt-xs border-t border-surface-container-highest text-center">
+          <p className="font-body-xs text-xs text-on-surface-variant">
+            Or click the magic link sent directly to your inbox:
+          </p>
+
           {isGmail ? (
             <a
               href="https://mail.google.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="h-11 rounded-lg bg-primary text-on-primary hover:bg-primary/90 text-body-md font-semibold flex items-center justify-center gap-xs transition-colors shadow-sm"
+              className="h-10 rounded-lg bg-surface-container hover:bg-surface-container-high text-body-sm font-semibold flex items-center justify-center gap-xs transition-colors border border-outline-variant/40"
             >
-              <Icon name="open_in_new" className="text-[18px]" />
+              <Icon name="open_in_new" className="text-[16px]" />
               Open Gmail
             </a>
           ) : isOutlook ? (
@@ -90,21 +138,21 @@ export function LoginForm({ next = '/' }: { next: string }) {
               href="https://outlook.live.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="h-11 rounded-lg bg-primary text-on-primary hover:bg-primary/90 text-body-md font-semibold flex items-center justify-center gap-xs transition-colors shadow-sm"
+              className="h-10 rounded-lg bg-surface-container hover:bg-surface-container-high text-body-sm font-semibold flex items-center justify-center gap-xs transition-colors border border-outline-variant/40"
             >
-              <Icon name="open_in_new" className="text-[18px]" />
+              <Icon name="open_in_new" className="text-[16px]" />
               Open Outlook
             </a>
           ) : null}
 
           <Button
             onClick={handleManualContinue}
-            variant={isGmail || isOutlook ? 'secondary' : 'primary'}
-            size="lg"
+            variant="ghost"
+            size="md"
             fullWidth
             pending={redirecting}
           >
-            I&apos;ve signed in
+            I clicked the email link
           </Button>
 
           <button
@@ -112,7 +160,7 @@ export function LoginForm({ next = '/' }: { next: string }) {
             onClick={() => window.location.reload()}
             className="text-center font-body-xs text-body-xs text-on-surface-variant hover:text-primary transition-colors py-1"
           >
-            Entered the wrong email? Click here to re-enter
+            Entered wrong email? Re-enter
           </button>
         </div>
       </div>
