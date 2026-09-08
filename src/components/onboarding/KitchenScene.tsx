@@ -90,34 +90,6 @@ export function KitchenScene({ selected, onChange }: KitchenSceneProps) {
 
   return (
     <div className="flex flex-col gap-sm">
-      {/* Header bar with live counter badge */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="font-title-md text-sm font-bold text-on-surface">
-            Interactive Flat Kitchen
-          </h3>
-          <p className="font-body-xs text-[11px] text-on-surface-variant">
-            Tap the appliances directly in the kitchen to select what your flat has.
-          </p>
-        </div>
-        <div
-          className={clsx(
-            'flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold transition-all',
-            selected.length > 0
-              ? 'bg-primary/10 border border-primary/30 text-primary'
-              : 'bg-surface-container text-on-surface-variant'
-          )}
-        >
-          <span
-            className={clsx(
-              'w-2 h-2 rounded-full transition-colors',
-              selected.length > 0 ? 'bg-primary animate-pulse' : 'bg-on-surface-variant/40'
-            )}
-          />
-          <span className="font-numeric-data">{selected.length} Selected</span>
-        </div>
-      </div>
-
       {/* Illustrated Kitchen Scene Container */}
       <div className="relative w-full rounded-2xl overflow-hidden border border-outline-variant/50 shadow-inner bg-[#FAF7F2]">
         <svg
@@ -925,9 +897,13 @@ export function KitchenScene({ selected, onChange }: KitchenSceneProps) {
 
       {/* Quick Interactive Pills Tray below kitchen */}
       <div className="flex flex-col gap-xs pt-1">
-        <span className="font-body-xs text-[10px] text-on-surface-variant font-medium text-center">
-          Tap above or toggle appliances below:
-        </span>
+        <p className="font-body-xs text-[11px] text-on-surface-variant font-medium text-center">
+          <span className="font-bold text-primary">
+            {selected.length} {selected.length === 1 ? 'appliance' : 'appliances'} selected
+          </span>
+          <span className="mx-1.5 text-outline-variant/60">·</span>
+          <span>Tap above or toggle appliances below:</span>
+        </p>
         <div className="flex flex-wrap items-center justify-center gap-1.5">
           {KITCHEN_APPLIANCES.map((app) => {
             const active = isSelected(app.id);

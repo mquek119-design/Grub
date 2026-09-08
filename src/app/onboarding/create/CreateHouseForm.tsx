@@ -466,7 +466,7 @@ export function CreateHouseForm() {
             className="flex-1 sm:flex-initial"
             pendingLabel="Setting up flat…"
           >
-            Create House ({appliances.length} {appliances.length === 1 ? 'appliance' : 'appliances'})
+            Create House
           </SubmitButton>
         )}
       </div>
