@@ -58,14 +58,24 @@ export function TopAppBar({ currentUser, basketNeedsAttention = false }: TopAppB
         <Link
           href="/dev"
           aria-label="Testing and development"
-          className="w-11 h-11 rounded-full flex items-center justify-center text-[#A3C4A8] hover:text-secondary hover:bg-white/5 transition-colors active:scale-95"
+          className={clsx(
+            'w-11 h-11 rounded-full flex items-center justify-center transition-colors active:scale-95',
+            pathname.startsWith('/dev')
+              ? 'text-secondary bg-white/10 ring-2 ring-secondary/40 font-bold'
+              : 'text-[#A3C4A8] hover:text-secondary hover:bg-white/5'
+          )}
         >
           <Icon name="science" />
         </Link>
         <Link
           href="/settings"
           aria-label="House settings"
-          className="w-11 h-11 rounded-full flex items-center justify-center text-[#A3C4A8] hover:text-secondary hover:bg-white/5 transition-colors active:scale-95"
+          className={clsx(
+            'w-11 h-11 rounded-full flex items-center justify-center transition-colors active:scale-95',
+            pathname.startsWith('/settings')
+              ? 'text-secondary bg-white/10 ring-2 ring-secondary/40 font-bold'
+              : 'text-[#A3C4A8] hover:text-secondary hover:bg-white/5'
+          )}
         >
           <Icon name="settings" />
         </Link>

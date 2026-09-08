@@ -46,7 +46,7 @@ export const TABS: Tab[] = [
   },
 ];
 
-export function activeTabHref(pathname: string): string {
+export function activeTabHref(pathname: string): string | null {
   // Longest prefix wins so /plan does not swallow a future /planning route.
   let best: { href: string; length: number } | null = null;
 
@@ -59,5 +59,5 @@ export function activeTabHref(pathname: string): string {
       }
     }
   }
-  return best?.href ?? '/';
+  return best?.href ?? null;
 }
