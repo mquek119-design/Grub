@@ -81,7 +81,7 @@ export default async function WelcomePage() {
         href="/onboarding"
         className="inline-flex items-center justify-center gap-xs h-12 px-xl rounded-full bg-secondary text-on-secondary font-title-md text-title-md hover:opacity-95 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-0"
       >
-        Finish setup
+        Set up house
         <Icon name="arrow_forward" className="text-[20px]" />
       </Link>
     )
@@ -118,7 +118,7 @@ export default async function WelcomePage() {
         href="/onboarding"
         className="inline-flex items-center justify-center gap-xs h-12 px-xl rounded-full bg-secondary text-on-secondary font-title-md text-title-md hover:opacity-95 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary focus-visible:ring-offset-2 focus-visible:ring-offset-primary"
       >
-        Finish setup
+        Set up house
         <Icon name="arrow_forward" className="text-[20px]" />
       </Link>
     )
@@ -146,13 +146,14 @@ export default async function WelcomePage() {
 
         <div className="px-margin-mobile md:px-margin-desktop mx-auto pt-[2.5rem] md:pt-[3.5rem] max-w-3xl">
           <h1 className="font-georgia text-[2.75rem] leading-[1.05] md:text-[4.5rem] md:leading-[1.02] font-bold text-primary animate-fade-in-up">
-            Automated Tesco shops for your flat.
+            Stop buying four bags of pasta.
           </h1>
           <p
             className="mt-md md:mt-lg font-body-lg text-body-lg md:text-[1.35rem] md:leading-relaxed text-on-surface-variant max-w-xl animate-fade-in-up"
             style={{ animationDelay: '120ms' }}
           >
-            Not just another manual list app. Grub turns your house meal plan into an automated Tesco trolley, hits the minimum order limit effortlessly, and splits the bill item by item.
+            One house, one shop, split fair. Plan meals together, buy a single
+            order that actually clears the minimum, and pay for what you ate.
           </p>
 
           <div

@@ -6,7 +6,7 @@ import { Card } from '@/components/ui/Card';
 import { Notice } from '@/components/ui/Notice';
 import { MealStatusControls } from '@/components/plan/MealStatusControls';
 import { perishablesAmong, suggestFromIngredients } from '@/lib/suggestions';
-import type { PlannedMeal, Recipe, User, WeeklyPlan } from '@/lib/types';
+import type { PlannedMeal, Recipe, User, WeeklyPlan, Weekday } from '@/lib/types';
 import { MEAL_TYPES, MEAL_TYPE_ICONS, MEAL_TYPE_LABELS, WEEKDAYS, WEEKDAY_LABELS } from '@/lib/types';
 
 /**
@@ -21,6 +21,13 @@ import { MEAL_TYPES, MEAL_TYPE_ICONS, MEAL_TYPE_LABELS, WEEKDAYS, WEEKDAY_LABELS
  * Skipping, bailing and cooking something else are all free. The split was
  * settled when the order went in.
  */
+
+function dayDate(weekStartDate: string, day: Weekday): string {
+  const index = WEEKDAYS.indexOf(day);
+  const date = new Date(`${weekStartDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + index);
+  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+}
 
 function suggestionsFor(meal: PlannedMeal, recipes: Recipe[]) {
   const recipe = recipes.find((entry) => entry.id === meal.recipeId);
@@ -109,7 +116,7 @@ export function KitchenPanel({
                   <div className="flex items-center gap-xs flex-wrap">
                     <span className="font-label-caps text-label-caps uppercase text-on-surface-variant flex items-center gap-xs">
                       <Icon name={MEAL_TYPE_ICONS[meal.mealType]} className="text-xs" />
-                      {WEEKDAY_LABELS[meal.day]} · {MEAL_TYPE_LABELS[meal.mealType]}
+                      {WEEKDAY_LABELS[meal.day]} {dayDate(plan.weekStartDate, meal.day)} · {MEAL_TYPE_LABELS[meal.mealType]}
                     </span>
                     {meal.status === 'cooked' ? (
                       <Badge tone="solid-primary">COOKED</Badge>

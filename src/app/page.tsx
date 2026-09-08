@@ -38,6 +38,13 @@ const DAY_SHORT: Record<Weekday, string> = {
   sun: 'SUN',
 };
 
+function dayDate(weekStartDate: string, day: Weekday): string {
+  const index = WEEKDAYS.indexOf(day);
+  const date = new Date(`${weekStartDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + index);
+  return `${date.getUTCDate()} ${date.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' })}`;
+}
+
 export default async function FeedPage() {
   const currentUser = await getCurrentUser();
   if (!currentUser.houseId) redirect('/onboarding');
@@ -146,8 +153,11 @@ export default async function FeedPage() {
                         hasHint ? 'bg-secondary-fixed/30 border border-secondary-container/30' : ''
                       }`}
                     >
-                      <span className="font-label-caps text-label-caps text-on-surface-variant">
-                        {DAY_SHORT[day]}
+                      <span className="font-label-caps text-label-caps text-on-surface-variant flex flex-col items-center leading-tight">
+                        <span>{DAY_SHORT[day]}</span>
+                        <span className="font-numeric-data text-[10px] text-on-surface-variant/70 font-semibold">
+                          {dayDate(plan.weekStartDate, day)}
+                        </span>
                       </span>
                       {diners.length > 0 ? (
                         <AvatarStack users={diners.slice(0, 3)} />

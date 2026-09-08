@@ -239,27 +239,35 @@ export function MealStatusControls({
   return (
     <div className="flex flex-col gap-xs">
       <div className="flex flex-wrap gap-xs items-center">
+        <span className="font-label-caps text-[11px] text-on-surface-variant font-semibold uppercase mr-1">
+          Meal:
+        </span>
         {OPTIONS.map((option) => (
           <form key={option.status} action={statusAction}>
             <input type="hidden" name="mealId" value={mealId} />
             <StatusButton option={option} active={status === option.status} />
           </form>
         ))}
+      </div>
 
+      <div className="flex flex-wrap gap-xs items-center pt-1">
+        <span className="font-label-caps text-[11px] text-on-surface-variant font-semibold uppercase mr-1">
+          You:
+        </span>
         <form action={bailAction}>
           <input type="hidden" name="mealId" value={mealId} />
           <input type="hidden" name="undo" value={bailed ? 'true' : 'false'} />
           <BailButton bailed={bailed} />
         </form>
 
-        {(status === 'cooked' || status === 'skipped' || status === 'swapped' || bailed) && (
+        {status !== 'skipped' && (status === 'cooked' || bailed || otherDinersBailed.length > 0) && (
           <button
             type="button"
             onClick={() => setShowLeftoverForm((prev) => !prev)}
             className="flex items-center gap-xs px-md py-2 rounded-full border border-primary/40 bg-primary/5 text-primary text-[13px] font-semibold hover:bg-primary/10 transition-colors"
           >
             <Icon name="soup_kitchen" className="text-[16px]" />
-            + Put in Leftovers
+            + Put cooked portions in Leftovers
           </button>
         )}
       </div>

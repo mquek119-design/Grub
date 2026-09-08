@@ -24,13 +24,7 @@ export const TABS: Tab[] = [
     href: '/plan',
     label: 'Plan',
     icon: 'ti-calendar',
-    owns: ['/plan'],
-  },
-  {
-    href: '/recipes',
-    label: 'Recipes',
-    icon: 'ti-book',
-    owns: ['/recipes', '/pantry'],
+    owns: ['/plan', '/recipes', '/pantry'],
   },
   {
     href: '/basket',

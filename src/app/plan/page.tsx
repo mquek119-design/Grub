@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { KitchenPanel } from '@/components/plan/KitchenPanel';
 import { OverlapHints } from '@/components/plan/OverlapHints';
@@ -64,12 +65,25 @@ export default async function PlanPage({
     />
   );
 
+  const recipeBookButton = (
+    <Link
+      href="/recipes"
+      className="inline-flex items-center gap-xs px-md py-2 rounded-full border border-primary/30 text-primary hover:bg-primary/5 text-sm font-semibold transition-colors"
+    >
+      <Icon name="menu_book" className="text-base" />
+      Recipe Book
+    </Link>
+  );
+
   if (showKitchen) {
     return (
       <PageShell wide>
         <div className="flex items-center justify-between gap-md flex-wrap">
           <PageHeader title="Your Week" subtitle="Shop's in. This is what you're working with." />
-          <CopyRosterButton plan={thisWeek} />
+          <div className="flex items-center gap-xs flex-wrap">
+            {recipeBookButton}
+            <CopyRosterButton plan={thisWeek} />
+          </div>
         </div>
         <FirstRunTip tab="plan" />
         {switcher}
@@ -90,7 +104,10 @@ export default async function PlanPage({
               : `Say what you fancy before ${cutoff}. After that it's whatever everyone else wanted.`
           }
         />
-        <CopyRosterButton plan={plan} />
+        <div className="flex items-center gap-xs flex-wrap">
+          {recipeBookButton}
+          <CopyRosterButton plan={plan} />
+        </div>
       </div>
 
       <FirstRunTip tab="plan" />
