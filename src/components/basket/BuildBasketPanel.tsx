@@ -7,6 +7,8 @@ import { Stocky } from '@/components/mascot/Stocky';
 import { formatPence } from '@/lib/money';
 import { buildBasket, type BasketActionState } from '@/app/basket/actions';
 
+import { clsx } from '@/lib/clsx';
+
 /**
  * Rebuilds the basket from the plan.
  *
@@ -18,10 +20,12 @@ export function BuildBasketPanel({
   hasBasket,
   mealCount,
   overlapSavings,
+  variant = 'banner',
 }: {
   hasBasket: boolean;
   mealCount: number;
   overlapSavings: number;
+  variant?: 'banner' | 'card';
 }) {
   const [state, setState] = useState<BasketActionState>({ status: 'idle', message: '' });
   const [confirming, setConfirming] = useState(false);
@@ -30,6 +34,81 @@ export function BuildBasketPanel({
   function run() {
     setConfirming(false);
     startTransition(async () => setState(await buildBasket()));
+  }
+
+  if (variant === 'banner' && hasBasket) {
+    return (
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-sm p-3.5 sm:px-4 sm:py-2.5 rounded-2xl bg-surface-container-lowest border border-outline-variant/40 shadow-xs">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="size-9 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 border border-primary/20">
+            <Stocky mood="smug" size="sm" />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="font-title-md text-[13.5px] font-bold text-on-surface">Plan Synced</span>
+              {mealCount > 0 && (
+                <span className="font-body-sm text-[11px] text-on-surface-variant font-medium">
+                  ({mealCount} meals)
+                </span>
+              )}
+            </div>
+            <p className="font-body-sm text-[11.5px] text-on-surface-variant truncate">
+              Shared ingredients pooled automatically across housemates.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 shrink-0 sm:ml-auto">
+          {overlapSavings > 0 && (
+            <div className="bg-primary/10 text-primary border border-primary/20 rounded-xl px-2.5 py-1 flex items-center gap-1.5 shrink-0">
+              <span className="font-label-caps text-[9px] uppercase font-bold tracking-wider">Pooled Savings</span>
+              <span className="font-numeric-data text-xs font-bold">{formatPence(overlapSavings)}</span>
+            </div>
+          )}
+
+          {confirming ? (
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={run}
+                disabled={pending}
+                className="px-2.5 py-1 rounded-lg bg-error text-on-error text-[11px] font-semibold hover:opacity-90 transition-opacity"
+              >
+                {pending ? 'Re-syncing…' : 'Confirm'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setConfirming(false)}
+                className="px-2 py-1 rounded-lg border border-outline-variant/60 text-on-surface-variant text-[11px] font-semibold hover:bg-surface-container"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              disabled={pending || mealCount === 0}
+              onClick={() => setConfirming(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-outline-variant/60 bg-surface-container-low hover:bg-surface-container text-on-surface text-[12px] font-semibold transition-all shadow-xs active:scale-95 disabled:opacity-50"
+            >
+              <Icon name={pending ? 'progress_activity' : 'sync'} className={clsx('text-[14px]', pending && 'animate-spin')} />
+              <span>{pending ? 'Syncing…' : 'Re-sync plan'}</span>
+            </button>
+          )}
+        </div>
+
+        {state.message && (
+          <p
+            role="status"
+            className={`font-body-sm text-xs w-full mt-1 ${
+              state.status === 'error' ? 'text-error' : 'text-primary'
+            }`}
+          >
+            {state.message}
+          </p>
+        )}
+      </div>
+    );
   }
 
   return (
@@ -97,7 +176,6 @@ export function BuildBasketPanel({
           {pending ? 'Optimising…' : hasBasket ? 'Re-sync basket from plan' : 'Build basket from plan'}
         </button>
       )}
-
 
       {state.message && (
         <p

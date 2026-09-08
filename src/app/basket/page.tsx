@@ -45,7 +45,6 @@ export default async function BasketPage() {
   const mealCount = plan?.meals.length ?? 0;
   const unpriced = items.filter((item) => item.needsPackData);
 
-
   // Unpriced lines cannot count toward a spend threshold — including them would
   // claim the minimum was met on the strength of items worth an unknown amount.
   const pricedTotal = basketTotal(items.filter((item) => !item.needsPackData));
@@ -65,9 +64,17 @@ export default async function BasketPage() {
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg items-start">
-        {/* Left Column: Items, Add Item Panel, Pack Data Forms */}
-        <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-lg min-w-0">
+        {/* Left Column: Plan Sync Banner, Items, Add Item Panel, Pack Data Forms */}
+        <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-md min-w-0">
           <FirstRunTip tab="basket" />
+
+          {/* Plan Sync & Pooling Banner right above the grocery items */}
+          <BuildBasketPanel
+            hasBasket={items.length > 0}
+            mealCount={mealCount}
+            overlapSavings={plan?.sharedSavings ?? 0}
+            variant="banner"
+          />
 
           {/* Pack size and price normally come from Tesco search. This only appears
               for the leftovers — an ingredient with no sensible product match. */}
@@ -123,8 +130,8 @@ export default async function BasketPage() {
           )}
         </div>
 
-        {/* Right Column: Checkout Summary, Minimum Status, Slot Picker & Plan Sync */}
-        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-md min-w-0">
+        {/* Right Column: Sticky Integrated Order Hub */}
+        <aside className="lg:col-span-5 xl:col-span-4 lg:sticky lg:top-[84px] flex flex-col gap-md min-w-0">
           <DesktopCheckoutCard
             items={items}
             isCollector={collector?.id === currentUser.id}
@@ -132,38 +139,32 @@ export default async function BasketPage() {
             planId={plan?.id}
             orderingEnabled={tescoOrderingEnabled}
             hasCookies={hasCookies}
+            minimumOrderBar={
+              items.length > 0 ? (
+                <MinimumOrderBar
+                  total={pricedTotal}
+                  minimum={ORDER_MINIMUMS[method]}
+                  method={method}
+                />
+              ) : undefined
+            }
+            slotPicker={
+              plan?.id ? (
+                <SlotPicker
+                  preference={house.slotPreference}
+                  bookedSlot={
+                    plan.slot
+                      ? { startsAt: plan.slot.startsAt, charge: plan.slot.charge, method: plan.slot.method }
+                      : null
+                  }
+                  isCollector={collector?.id === currentUser.id}
+                  orderingEnabled={tescoOrderingEnabled}
+                  compact
+                />
+              ) : undefined
+            }
           />
-
-          {items.length > 0 && (
-            <MinimumOrderBar
-              total={pricedTotal}
-              minimum={ORDER_MINIMUMS[method]}
-              method={method}
-            />
-          )}
-
-          {/* Deliberately not gated on the basket having items: Tesco lets you hold
-              a slot before you have shopped, and slots for a busy weekend go early.
-              Only a plan is required, since the charge is stored against it. */}
-          {plan?.id && (
-            <SlotPicker
-              preference={house.slotPreference}
-              bookedSlot={
-                plan.slot
-                  ? { startsAt: plan.slot.startsAt, charge: plan.slot.charge, method: plan.slot.method }
-                  : null
-              }
-              isCollector={collector?.id === currentUser.id}
-              orderingEnabled={tescoOrderingEnabled}
-            />
-          )}
-
-          <BuildBasketPanel
-            hasBasket={items.length > 0}
-            mealCount={mealCount}
-            overlapSavings={plan?.sharedSavings ?? 0}
-          />
-        </div>
+        </aside>
       </div>
     </PageShell>
   );

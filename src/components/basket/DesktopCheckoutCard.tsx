@@ -18,6 +18,8 @@ interface DesktopCheckoutCardProps {
   planId?: string;
   orderingEnabled: boolean;
   hasCookies?: boolean;
+  minimumOrderBar?: React.ReactNode;
+  slotPicker?: React.ReactNode;
 }
 
 export function DesktopCheckoutCard({
@@ -27,6 +29,8 @@ export function DesktopCheckoutCard({
   planId,
   orderingEnabled,
   hasCookies: initialHasCookies = false,
+  minimumOrderBar,
+  slotPicker,
 }: DesktopCheckoutCardProps) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [sessionAuth, setSessionAuth] = useState(initialHasCookies);
@@ -104,13 +108,13 @@ export function DesktopCheckoutCard({
   }
 
   return (
-    <Card className="hidden lg:flex flex-col gap-md border border-primary/30 bg-gradient-to-br from-surface-container-lowest to-surface-container-low shadow-sm">
+    <Card className="hidden lg:flex flex-col gap-3.5 border border-primary/30 bg-gradient-to-br from-surface-container-lowest to-surface-container-low shadow-sm">
       <div className="flex items-start justify-between gap-sm">
         <div className="flex flex-col gap-xs">
-          <span className="font-label-caps text-label-caps text-on-surface-variant font-semibold uppercase tracking-wider">
+          <span className="font-label-caps text-[11px] text-on-surface-variant font-semibold uppercase tracking-wider">
             {actualTotalCost !== null ? 'Tesco Actual Total' : 'Estimated Total'}
           </span>
-          <span className="font-numeric-data text-headline-lg font-bold text-primary">
+          <span className="font-numeric-data text-headline-lg font-bold text-primary leading-tight">
             {actualTotalCost !== null ? formatPence(actualTotalCost) : formatPence(total)}
           </span>
           {unpricedCount > 0 && (
@@ -120,16 +124,26 @@ export function DesktopCheckoutCard({
           )}
         </div>
         {savings > 0 && (
-          <div className="bg-primary/10 text-primary border border-primary/20 rounded-xl px-sm py-xs flex flex-col items-end shrink-0">
-            <span className="font-label-caps text-[10px] uppercase font-bold tracking-wider">Saved</span>
-            <span className="font-numeric-data text-sm font-bold">{formatPence(savings)}</span>
+          <div className="bg-primary/10 text-primary border border-primary/20 rounded-xl px-2.5 py-1 flex flex-col items-end shrink-0">
+            <span className="font-label-caps text-[9px] uppercase font-bold tracking-wider">Saved</span>
+            <span className="font-numeric-data text-xs font-bold">{formatPence(savings)}</span>
           </div>
         )}
       </div>
 
+      {/* Embedded Minimum Order status */}
+      {minimumOrderBar && <div className="w-full">{minimumOrderBar}</div>}
+
+      {/* Embedded Delivery Slot picker / summary */}
+      {slotPicker && (
+        <div className="w-full pt-2.5 border-t border-outline-variant/30">
+          {slotPicker}
+        </div>
+      )}
+
       {/* Reminder when Tesco session cookies are not in */}
       {!sessionAuth && (
-        <div className="p-sm rounded-xl bg-amber-500/10 border border-amber-500/25 flex flex-col gap-1 text-xs animate-fade-in">
+        <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/25 flex flex-col gap-1 text-xs animate-fade-in">
           <div className="flex items-center gap-1.5 font-bold text-on-surface">
             <Icon name="cookie" className="text-sm text-amber-700" />
             <span>Tesco cookies needed</span>
@@ -163,7 +177,7 @@ export function DesktopCheckoutCard({
             ? undefined
             : `Only ${collectorName} can place this week's order from their Tesco account.`
         }
-        className="w-full bg-secondary text-on-secondary-container font-title-md text-title-md py-md rounded-2xl btn-tactile shadow-md hover:shadow-lg transition-all text-center font-bold disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full bg-secondary text-on-secondary-container font-title-md text-title-md py-3 rounded-2xl btn-tactile shadow-md hover:shadow-lg transition-all text-center font-bold disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {!sessionAuth
           ? 'Cookies required to checkout'
@@ -178,7 +192,7 @@ export function DesktopCheckoutCard({
 
       {/* Secondary desktop handoff actions */}
       {sessionAuth && (
-        <div className="flex items-center justify-between gap-sm pt-xs border-t border-outline/20">
+        <div className="flex items-center justify-between gap-sm pt-2 border-t border-outline/20">
           <a
             href="https://www.tesco.com/groceries/en-GB/trolley"
             target="_blank"
