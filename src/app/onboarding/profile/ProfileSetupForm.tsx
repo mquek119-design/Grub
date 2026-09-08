@@ -190,25 +190,31 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
 
       {/* 2. Personal Weekly Budget Slider */}
       <div className="flex flex-col gap-sm p-lg rounded-2xl bg-surface-container-low border border-outline-variant/40">
-        <div className="flex items-center justify-between gap-2">
-          <span className="font-label-caps text-label-caps uppercase tracking-wider text-primary font-bold">
-            2. Personal Weekly Food Target
-          </span>
-          <div className="flex items-center gap-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            <span className="font-label-caps text-label-caps uppercase tracking-wider text-primary font-bold block">
+              2. Personal Weekly Food Target
+            </span>
+            <p className="font-body-sm text-xs text-on-surface-variant mt-0.5">
+              Grub tracks your individual total in Split so you can see if you&apos;re staying on budget.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2.5 shrink-0">
             <Stocky
               mood={tier.mood}
               size="sm"
-              caption={tier.label}
             />
-            <span className="font-numeric-data text-title-md font-extrabold text-primary">
-              £{budget}/week
-            </span>
+            <div className="flex flex-col items-end">
+              <span className="font-numeric-data text-title-md font-extrabold text-primary leading-tight">
+                £{budget}/week
+              </span>
+              <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/80">
+                {tier.label}
+              </span>
+            </div>
           </div>
         </div>
-
-        <p className="font-body-sm text-xs text-on-surface-variant">
-          Grub tracks your individual total in Split so you can see if you&apos;re staying on budget.
-        </p>
 
         <input
           type="range"
