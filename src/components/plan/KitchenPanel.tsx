@@ -41,11 +41,15 @@ export function KitchenPanel({
   plan,
   recipes,
   currentUser,
+  housemates = [],
 }: {
   plan: WeeklyPlan;
   recipes: Recipe[];
   currentUser: User;
+  housemates?: User[];
 }) {
+  const housemateMap = new Map(housemates.map((h) => [h.id, h.name]));
+
   const myMeals = plan.meals
     .filter((meal) => meal.participants.some((p) => p.userId === currentUser.id))
     .sort((a, b) => {
@@ -67,7 +71,7 @@ export function KitchenPanel({
 
   return (
     <div className="flex flex-col gap-md">
-      <Notice tone="good" title="The shop's been placed">
+      <Notice tone="good" title="The shop's been placed" id="kitchen-panel-shop-placed">
         Everything below is bought and paid for, so change your mind as much as you like — none of
         it moves anyone&apos;s money.
       </Notice>
@@ -77,6 +81,14 @@ export function KitchenPanel({
           const mine = meal.participants.find((p) => p.userId === currentUser.id);
           const { recipe, suggestions, perishables } = suggestionsFor(meal, recipes);
           const skipped = meal.status === 'skipped';
+
+          const otherDinersBailed = meal.participants
+            .filter((p) => p.userId !== currentUser.id && p.bailed)
+            .map((p) => ({ userId: p.userId, name: housemateMap.get(p.userId) ?? 'A housemate' }));
+
+          const cookParticipant = meal.participants.find((p) => p.userId === meal.cookedByUserId);
+          const cookBailed = Boolean(cookParticipant?.bailed);
+          const isCook = meal.cookedByUserId === currentUser.id;
 
           return (
             <Card key={meal.id} className="flex flex-col gap-md border border-surface-container-highest shadow-sm">
@@ -123,10 +135,14 @@ export function KitchenPanel({
 
               <MealStatusControls
                 mealId={meal.id}
+                recipeTitle={recipe?.title ?? meal.recipeTitle}
                 status={meal.status}
                 bailed={Boolean(mine?.bailed)}
                 day={meal.day}
                 weekStartDate={plan.weekStartDate}
+                isCook={isCook}
+                otherDinersBailed={otherDinersBailed}
+                cookBailed={cookBailed}
               />
 
               {skipped && recipe && (

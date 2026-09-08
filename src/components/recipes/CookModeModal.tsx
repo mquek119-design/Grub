@@ -1,9 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useActionState } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '@/components/media/Icon';
+import { clsx } from '@/lib/clsx';
 import type { Recipe } from '@/lib/types';
+import { addLeftover, type LeftoverActionState } from '@/app/leftovers/actions';
+import { useSubmitState } from '@/components/ui/SubmitButton';
 
 interface CookModeModalProps {
   recipe: Recipe;
@@ -11,19 +14,27 @@ interface CookModeModalProps {
   onClose: () => void;
 }
 
+const LEFTOVER_INITIAL: LeftoverActionState = { status: 'idle', message: '' };
+
 export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps) {
   const [mounted, setMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
-  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
+  const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set([0]));
+  const [finished, setFinished] = useState(false);
+  const [showLeftoverForm, setShowLeftoverForm] = useState(false);
+  const [leftoverState, leftoverAction] = useActionState(addLeftover, LEFTOVER_INITIAL);
+  const { pending } = useSubmitState();
 
   useEffect(() => {
     setMounted(true);
-    // Request Wake Lock if available
     let wakeLock: any = null;
     if ('wakeLock' in navigator) {
-      (navigator as any).wakeLock.request('screen').then((lock: any) => {
-        wakeLock = lock;
-      }).catch((err: any) => console.log('Wake Lock error:', err));
+      (navigator as any).wakeLock
+        .request('screen')
+        .then((lock: any) => {
+          wakeLock = lock;
+        })
+        .catch((err: any) => console.log('Wake Lock error:', err));
     }
     return () => {
       if (wakeLock) wakeLock.release();
@@ -42,6 +53,25 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
       else next.add(idx);
       return next;
     });
+  }
+
+  function handleSelectStep(idx: number) {
+    setCurrentStep(idx);
+    setCompletedSteps((prev) => new Set(prev).add(idx));
+  }
+
+  function handleNextStep() {
+    setCompletedSteps((prev) => new Set(prev).add(currentStep));
+
+    if (currentStep < totalSteps - 1) {
+      const nextIdx = currentStep + 1;
+      setCurrentStep(nextIdx);
+      setCompletedSteps((prev) => new Set(prev).add(nextIdx));
+    } else {
+      // All steps completed!
+      setCompletedSteps(new Set(Array.from({ length: totalSteps }, (_, i) => i)));
+      setFinished(true);
+    }
   }
 
   return createPortal(
@@ -67,7 +97,9 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
         </div>
 
         <div className="flex items-center gap-xs text-xs font-bold text-on-surface-variant shrink-0">
-          <span>{completedSteps.size} / {totalSteps} Steps Done</span>
+          <span className="bg-primary/10 text-primary px-3 py-1 rounded-full border border-primary/20 font-numeric-data">
+            {completedSteps.size} / {totalSteps} Steps Done
+          </span>
         </div>
       </header>
 
@@ -87,7 +119,9 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                 <li key={ing.ingredientId} className="flex items-center gap-xs text-body-lg text-on-surface">
                   <Icon name="check_circle" className="text-primary text-base" />
                   <span className="font-semibold">{ing.name}:</span>
-                  <span className="text-on-surface-variant font-numeric-data">{display} {ing.unit}</span>
+                  <span className="text-on-surface-variant font-numeric-data">
+                    {display} {ing.unit}
+                  </span>
                 </li>
               );
             })}
@@ -103,12 +137,12 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
             return (
               <div
                 key={idx}
-                onClick={() => setCurrentStep(idx)}
+                onClick={() => handleSelectStep(idx)}
                 className={`p-lg rounded-2xl border transition-all cursor-pointer ${
                   isCurrent
-                    ? 'border-primary bg-primary-container/10 shadow-ambient-card'
+                    ? 'border-primary bg-primary-container/10 shadow-ambient-card ring-2 ring-primary/30'
                     : isDone
-                    ? 'border-surface-container-highest bg-surface-container-lowest opacity-60'
+                    ? 'border-surface-container-highest bg-surface-container-lowest opacity-75'
                     : 'border-surface-container-highest bg-surface-container-lowest'
                 }`}
               >
@@ -126,7 +160,11 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                     >
                       {isDone ? <Icon name="check" className="text-xl" /> : idx + 1}
                     </button>
-                    <p className={`font-body-lg text-[20px] leading-relaxed text-on-surface ${isDone ? 'line-through opacity-70' : ''}`}>
+                    <p
+                      className={`font-body-lg text-[20px] leading-relaxed text-on-surface ${
+                        isDone ? 'line-through opacity-70' : ''
+                      }`}
+                    >
                       {stepText}
                     </p>
                   </div>
@@ -152,13 +190,97 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
         </span>
         <button
           type="button"
-          disabled={currentStep === totalSteps - 1}
-          onClick={() => setCurrentStep((prev) => Math.min(totalSteps - 1, prev + 1))}
-          className="px-lg py-sm rounded-xl bg-primary text-on-primary font-bold hover:opacity-90 disabled:opacity-40"
+          onClick={handleNextStep}
+          className={clsx(
+            'px-lg py-sm rounded-xl font-bold transition-all flex items-center gap-xs',
+            currentStep === totalSteps - 1 || completedSteps.size === totalSteps
+              ? 'bg-secondary text-on-secondary-container shadow-md hover:shadow-lg text-title-md'
+              : 'bg-primary text-on-primary hover:opacity-90'
+          )}
         >
-          Next Step
+          {currentStep === totalSteps - 1 || completedSteps.size === totalSteps ? (
+            <>
+              <Icon name="verified" className="text-xl" />
+              Finish Cooking 🎉
+            </>
+          ) : (
+            'Next Step'
+          )}
         </button>
       </footer>
+
+      {/* Completion Modal */}
+      {finished && (
+        <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-center justify-center p-md animate-fade-in">
+          <div className="bg-surface-container-lowest border border-outline-variant/40 rounded-3xl p-lg max-w-md w-full shadow-ambient-modal flex flex-col items-center text-center gap-md">
+            <div className="w-16 h-16 rounded-full bg-secondary-fixed/50 flex items-center justify-center text-secondary">
+              <Icon name="verified" filled className="text-[36px]" />
+            </div>
+
+            <h3 className="font-title-md text-headline-sm font-bold text-on-surface">
+              Bon Appétit! 🎉
+            </h3>
+            <p className="font-body-sm text-body-md text-on-surface-variant">
+              You finished cooking <strong className="text-on-surface">{recipe.title}</strong>.
+            </p>
+
+            {showLeftoverForm ? (
+              <form action={leftoverAction} className="w-full flex flex-col gap-sm p-md rounded-xl bg-surface-container-low border border-primary/20 text-left">
+                <span className="font-title-md text-sm font-bold text-on-surface">
+                  Put Spare Portions on Leftovers Board
+                </span>
+                <input
+                  type="text"
+                  name="description"
+                  defaultValue={recipe.title}
+                  required
+                  maxLength={80}
+                  className="px-sm py-1.5 rounded-lg border border-outline-variant text-sm bg-surface-container-lowest"
+                />
+                <div className="flex items-center justify-between gap-sm">
+                  <label className="text-xs font-semibold text-on-surface-variant">Portions</label>
+                  <input
+                    type="number"
+                    name="portions"
+                    defaultValue={2}
+                    min={1}
+                    max={10}
+                    className="w-16 px-sm py-1 rounded border text-center font-bold text-sm"
+                  />
+                </div>
+                {leftoverState.message && (
+                  <p className="text-xs font-bold text-primary">{leftoverState.message}</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={pending}
+                  className="w-full py-2 bg-primary text-on-primary rounded-lg font-bold text-xs"
+                >
+                  {pending ? 'Saving...' : 'Post to Leftovers Board'}
+                </button>
+              </form>
+            ) : (
+              <div className="flex flex-col gap-sm w-full">
+                <button
+                  type="button"
+                  onClick={() => setShowLeftoverForm(true)}
+                  className="w-full py-md rounded-2xl bg-secondary text-on-secondary-container font-title-md text-title-md font-bold btn-tactile flex items-center justify-center gap-xs shadow-md"
+                >
+                  <Icon name="soup_kitchen" className="text-xl" />
+                  + Put Extra Portions in Leftovers
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full py-md rounded-2xl bg-surface-container-high text-on-surface font-title-md text-title-md font-semibold hover:bg-surface-container-highest transition-colors"
+                >
+                  Done
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>,
     document.body
   );

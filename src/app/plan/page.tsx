@@ -74,7 +74,7 @@ export default async function PlanPage({
         <FirstRunTip tab="plan" />
         {switcher}
         <ReopenPlanningBanner status={thisWeek.status} />
-        <KitchenPanel plan={thisWeek} recipes={recipes} currentUser={currentUser} />
+        <KitchenPanel plan={thisWeek} recipes={recipes} currentUser={currentUser} housemates={housemates} />
       </PageShell>
     );
   }
@@ -100,12 +100,21 @@ export default async function PlanPage({
       {week === 'this' && <ReopenPlanningBanner status={thisWeek.status} />}
 
       {week === 'this' && plan.sharedSavings > 0 && (
-        <div className="flex items-center justify-between gap-md px-md py-3 rounded-xl bg-primary text-on-primary shadow-ambient-card">
-          <span className="flex items-center gap-sm font-label-caps text-label-caps uppercase tracking-wider">
-            <Icon name="savings" filled />
-            Shared savings
-          </span>
-          <span className="font-numeric-data text-title-md font-bold">
+        <div className="flex items-center justify-between gap-md px-lg py-md rounded-2xl bg-gradient-to-r from-primary via-primary-container to-primary text-on-primary shadow-md border border-primary-fixed/30 interactive-card">
+          <div className="flex items-center gap-sm">
+            <div className="w-9 h-9 rounded-xl bg-on-primary/10 flex items-center justify-center shrink-0">
+              <Icon name="savings" filled className="text-secondary" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-label-caps text-[11px] uppercase tracking-widest opacity-90 font-semibold">
+                Overlap Optimiser Active
+              </span>
+              <span className="font-title-md text-body-lg font-bold">
+                House Shared Savings
+              </span>
+            </div>
+          </div>
+          <span className="font-numeric-data text-headline-lg-mobile font-bold text-secondary">
             {formatPence(plan.sharedSavings)}
           </span>
         </div>

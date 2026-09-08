@@ -610,6 +610,34 @@ export async function standDownAsCook(
   return OK;
 }
 
+/** Take over cooking duty for a meal after the shop is placed. */
+export async function takeOverCooking(
+  _prev: PlanActionState,
+  formData: FormData
+): Promise<PlanActionState> {
+  const me = await getCurrentUser();
+  const mealId = String(formData.get('mealId') ?? '');
+  if (!mealId) return fail('Missing meal.');
+
+  const context = await getMealContext(mealId);
+  if (!context) return fail('That meal is not in your house.');
+
+  const isDiner = context.meal.participants.some((p) => p.userId === me.id);
+  if (!isDiner) return fail('Only somebody eating the meal can cook it.');
+
+  const supabase = await createClient();
+  const updated = await supabase
+    .from('planned_meals')
+    .update({ cooked_by_user_id: me.id, cook_offer_to: null })
+    .eq('id', mealId);
+
+  if (updated.error) return fail(updated.error.message);
+
+  revalidatePath('/plan');
+  revalidatePath('/');
+  return OK;
+}
+
 /**
  * How many mouths a meal is cooked for.
  *

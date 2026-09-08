@@ -24,8 +24,13 @@ export const TABS: Tab[] = [
     href: '/plan',
     label: 'Plan',
     icon: 'ti-calendar',
-    // Recipes and the pantry are entered from the planning flow.
-    owns: ['/plan', '/recipes', '/pantry'],
+    owns: ['/plan'],
+  },
+  {
+    href: '/recipes',
+    label: 'Recipes',
+    icon: 'ti-book',
+    owns: ['/recipes', '/pantry'],
   },
   {
     href: '/basket',
@@ -42,9 +47,6 @@ export const TABS: Tab[] = [
   {
     href: '/leftovers',
     label: 'Leftovers',
-    // Tabler, to match the other four tabs (ti-*); a lone Material Symbol here
-    // rendered in a different weight and family. ti-soup is already used on the
-    // Plan empty state, so it's known to load.
     icon: 'ti-soup',
     owns: ['/leftovers'],
   },

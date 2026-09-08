@@ -83,23 +83,23 @@ export default async function SplitPage() {
 
   return (
     <>
-      <div className="bg-surface-container-lowest border border-surface-container-highest rounded-2xl p-lg md:p-xl shadow-ambient-card flex flex-col items-center justify-center text-center relative overflow-hidden my-sm">
-        <div className="flex items-center gap-xs px-sm py-1 rounded-full bg-primary-container/30 text-primary font-label-caps text-[11px] uppercase tracking-wider font-bold mb-xs">
+      <div className="bg-gradient-to-b from-surface-container-low to-surface-container-lowest border border-primary/20 rounded-3xl p-lg md:p-xl shadow-ambient-card flex flex-col items-center justify-center text-center relative overflow-hidden my-sm">
+        <div className="flex items-center gap-xs px-md py-1 rounded-full bg-primary/10 text-primary font-label-caps text-[11px] uppercase tracking-wider font-bold mb-xs border border-primary/20">
           <Icon name={!split.isPosted ? 'schedule' : plan?.status === 'delivered' ? 'verified' : 'local_shipping'} className="text-sm" />
           {!split.isPosted ? 'Live Basket Estimate' : plan?.status === 'delivered' ? 'Delivery Verified' : 'Order Placed'}
         </div>
-        <p className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider mb-xs">
+        <p className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest mb-xs font-semibold">
           Week {plan?.weekNumber ?? ''} Settlement
         </p>
-        <h1 className="font-title-md md:font-headline-md text-title-md text-on-surface font-semibold mb-xs">
+        <h1 className="font-title-md md:font-headline-md text-title-md text-on-surface font-bold mb-xs">
           {!split.isPosted || plan?.status !== 'delivered' ? 'Your Estimated Share' : isCollector ? 'Total Owed to You' : 'Total You Owe'}
         </h1>
-        <div className="font-numeric-data text-[52px] sm:text-[64px] leading-tight font-bold text-primary mb-sm tabular-nums">
+        <div className="font-numeric-data text-[56px] sm:text-[68px] leading-none font-bold text-primary mb-sm tabular-nums tracking-tight">
           {formatPence(split.amount)}
         </div>
         <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto flex items-center justify-center gap-xs">
           <span>Collector:</span>
-          <span className="font-bold text-on-surface">{collector.name}</span>
+          <span className="font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded-md">{collector.name}</span>
         </p>
       </div>
 

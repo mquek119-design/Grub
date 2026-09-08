@@ -31,16 +31,20 @@ export function CopyRosterButton({ plan }: { plan: WeeklyPlan }) {
       <button
         type="button"
         onClick={handleCopy}
-        className="inline-flex items-center gap-xs px-md py-xs rounded-lg border border-outline-variant text-on-surface-variant font-semibold text-xs hover:bg-surface-container transition-colors"
+        className={`inline-flex items-center gap-xs px-md py-xs rounded-xl border text-xs font-semibold btn-tactile shadow-sm transition-all ${
+          copied
+            ? 'bg-primary text-on-primary border-primary shadow-md'
+            : 'border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:border-primary/40 hover:bg-surface-container-low'
+        }`}
       >
-        <Icon name={copied ? 'check' : 'content_copy'} className="text-xs text-primary" />
+        <Icon name={copied ? 'check' : 'content_copy'} className={`text-xs ${copied ? 'text-on-primary' : 'text-primary'}`} />
         {copied ? 'Copied to Clipboard!' : 'Copy Roster Text'}
       </button>
 
       <button
         type="button"
         onClick={handlePrint}
-        className="inline-flex items-center gap-xs px-md py-xs rounded-lg border border-outline-variant text-on-surface-variant font-semibold text-xs hover:bg-surface-container transition-colors"
+        className="inline-flex items-center gap-xs px-md py-xs rounded-xl border border-outline-variant bg-surface-container-lowest text-on-surface-variant font-semibold text-xs btn-tactile shadow-sm hover:border-primary/40 hover:bg-surface-container-low transition-all"
       >
         <Icon name="print" className="text-xs text-primary" />
         Print Roster

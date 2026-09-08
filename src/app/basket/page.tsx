@@ -22,6 +22,8 @@ import {
   getWeeklyPlan,
 } from '@/lib/queries';
 
+import { DesktopCheckoutCard } from '@/components/basket/DesktopCheckoutCard';
+
 export const metadata = { title: 'Basket · Grub', description: 'Review the combined house basket before ordering.' };
 export const dynamic = 'force-dynamic';
 
@@ -49,7 +51,7 @@ export default async function BasketPage() {
 
   return (
     // Extra bottom padding clears the fixed total/checkout bar on mobile.
-    <PageShell wide className="pb-[140px] md:pb-xl">
+    <PageShell wide className="pb-[200px] lg:pb-xl">
       <PageHeader
         title="The Basket"
         subtitle={
@@ -118,7 +120,15 @@ export default async function BasketPage() {
         </div>
 
         {/* Right Column: Controls, Optimiser, Thresholds & Slot Picker */}
-        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-lg pb-[160px] lg:pb-lg lg:sticky lg:top-[90px]">
+        <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-lg min-w-0">
+          <DesktopCheckoutCard
+            items={items}
+            isCollector={collector?.id === currentUser.id}
+            collectorName={collector?.name ?? 'The collector'}
+            planId={plan?.id}
+            orderingEnabled={tescoOrderingEnabled}
+          />
+
           <BuildBasketPanel
             hasBasket={items.length > 0}
             mealCount={mealCount}

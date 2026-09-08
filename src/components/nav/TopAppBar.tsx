@@ -24,7 +24,7 @@ export function TopAppBar({ currentUser, basketNeedsAttention = false }: TopAppB
         <Logo tone="onDark" markClassName="h-8 w-auto" wordmarkClassName="text-[22px]" />
       </Link>
 
-      {/* Desktop mirrors the same five tabs — no bottom bar above md. */}
+      {/* Desktop navigation tabs */}
       <nav aria-label="Primary" className="hidden md:flex items-center gap-lg h-full">
         {TABS.map((tab) => {
           const isActive = active === tab.href;
@@ -51,6 +51,15 @@ export function TopAppBar({ currentUser, basketNeedsAttention = false }: TopAppB
       </nav>
 
       <div className="flex items-center gap-sm shrink-0">
+        <Link
+          href="/recipes/new"
+          aria-label="Add or import recipe"
+          title="Import or add recipe"
+          className="h-9 px-3 rounded-full bg-secondary/20 text-secondary hover:bg-secondary/30 transition-colors flex items-center gap-xs font-body-sm text-xs font-bold"
+        >
+          <Icon name="add_link" className="text-sm" />
+          <span className="hidden sm:inline">Import Recipe</span>
+        </Link>
         <Link
           href="/dev"
           aria-label="Testing and development"

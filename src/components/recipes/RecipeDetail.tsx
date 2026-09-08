@@ -64,7 +64,7 @@ export function RecipeDetail({
         <button
           type="button"
           onClick={() => setCookModeModalOpen(true)}
-          className="inline-flex items-center gap-xs px-lg py-sm rounded-xl bg-primary text-on-primary font-bold text-sm hover:opacity-90 transition-opacity shadow-sm"
+          className="inline-flex items-center gap-xs px-xl py-sm rounded-2xl bg-secondary text-on-secondary-container font-bold text-sm btn-tactile shadow-md hover:shadow-lg transition-all"
         >
           <Icon name="skillet" className="text-lg" />
           Start Cook Mode

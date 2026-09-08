@@ -328,7 +328,7 @@ export function BasketView({
               />
             </button>
 
-            <ul className={clsx('flex flex-col gap-xs', isCollapsed && 'hidden')}>
+            <ul className={clsx('flex flex-col gap-sm', isCollapsed && 'hidden')}>
               {categoryItems.map((item) => {
                 const original = item.originalUnitPrice;
                 const swapped = original !== null && original > item.unitPrice;
@@ -339,60 +339,56 @@ export function BasketView({
                 return (
                   <li
                     key={item.id}
-                    className="bg-surface-container-lowest rounded-lg border border-surface-container-highest px-sm py-xs flex items-center gap-sm"
+                    className="bg-surface-container-lowest rounded-2xl border border-outline-variant/40 p-md flex flex-col sm:flex-row sm:items-center justify-between gap-md shadow-xs hover:border-primary/30 transition-all"
                   >
-                    <FoodImage
-                      src={item.imageUrl}
-                      seed={item.tescoProductId}
-                      alt={item.name}
-                      icon="grocery"
-                      className="w-12 h-12 rounded-lg shrink-0 text-[22px] object-contain"
-                    />
+                    <div className="flex items-start gap-md min-w-0 flex-1">
+                      <FoodImage
+                        src={item.imageUrl}
+                        seed={item.tescoProductId}
+                        alt={item.name}
+                        icon="grocery"
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl p-1.5 bg-surface-container-low border border-outline-variant/30 shrink-0 object-contain shadow-2xs"
+                      />
 
-                    <div className="flex-1 flex flex-col min-w-0">
-                      <span className="font-body-lg text-body-lg font-semibold leading-tight truncate">
-                        {item.name}
-                      </span>
-                      {/* An assumed quantity is stated, not hidden. The
-                          collector is the only person who can say whether one
-                          bunch of spring onions covers four. */}
-                      {item.quantityAssumed && (
-                        <span className="mt-xs flex items-center gap-xs w-fit px-2 py-0.5 rounded-full bg-secondary-fixed/50 border border-secondary-container/40">
-                          <Icon name="help" className="text-secondary text-[14px]" />
-                          <span className="font-label-caps text-label-caps uppercase text-secondary">
-                            1 pack assumed — check
-                          </span>
+                      <div className="flex-1 flex flex-col min-w-0 justify-center">
+                        <span className="font-title-md text-title-md font-bold text-on-surface leading-tight truncate">
+                          {item.name}
                         </span>
-                      )}
 
-                      <div className="flex items-center gap-xs flex-wrap">
-                        <span className="font-body-sm text-[12px] text-on-surface-variant">
-                          {item.subtitle}
-                        </span>
-                        <span aria-hidden="true" className="text-on-surface-variant/40">
-                          ·
-                        </span>
-                        {allocatedUsers.length === 0 ? (
-                          <span className="bg-surface-container-highest text-on-surface-variant text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                            Shared
+                        <div className="flex items-center gap-xs flex-wrap mt-1.5">
+                          {item.quantityAssumed && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-800 text-[10px] font-bold uppercase tracking-wider">
+                              <Icon name="help" className="text-amber-600 text-[12px]" />
+                              1 pack assumed — check
+                            </span>
+                          )}
+                          <span className="font-body-sm text-xs text-on-surface-variant font-medium">
+                            {item.subtitle}
                           </span>
-                        ) : (
-                          // Names cost a line at five housemates; the faces do
-                          // the job and the title carries the names.
-                          <span
-                            className="flex items-center -space-x-1.5"
-                            title={allocatedUsers.map((user) => user.name).join(', ')}
-                          >
-                            {allocatedUsers.map((user) => (
-                              <Avatar
-                                key={user.id}
-                                user={user}
-                                size="xs"
-                                className="ring-2 ring-surface-container-lowest"
-                              />
-                            ))}
+                          <span aria-hidden="true" className="text-on-surface-variant/40">
+                            ·
                           </span>
-                        )}
+                          {allocatedUsers.length === 0 ? (
+                            <span className="bg-surface-container-high text-on-surface-variant text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
+                              Shared
+                            </span>
+                          ) : (
+                            <span
+                              className="flex items-center -space-x-1.5"
+                              title={allocatedUsers.map((user) => user.name).join(', ')}
+                            >
+                              {allocatedUsers.map((user) => (
+                                <Avatar
+                                  key={user.id}
+                                  user={user}
+                                  size="xs"
+                                  className="ring-2 ring-surface-container-lowest"
+                                />
+                              ))}
+                            </span>
+                          )}
+                        </div>
+
                         {isCollector && (
                           <button
                             type="button"
@@ -404,57 +400,55 @@ export function BasketView({
                               });
                               setIsSwapModalOpen(true);
                             }}
-                            className="text-primary hover:underline text-[10px] font-bold uppercase tracking-wider ml-sm flex items-center gap-xs"
+                            className="mt-2 text-primary hover:text-primary-container text-[11px] font-bold uppercase tracking-wider flex items-center gap-xs btn-tactile self-start"
                           >
-                            <Icon name="swap_horiz" className="text-xs" />
+                            <Icon name="swap_horiz" className="text-sm" />
                             Swap Brand
                           </button>
                         )}
                       </div>
                     </div>
 
-                    <div className="flex flex-col items-end gap-sm shrink-0">
-                      <span className="flex flex-col items-end">
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-sm shrink-0 pt-sm sm:pt-0 border-t sm:border-t-0 border-outline-variant/20">
+                      <div className="flex flex-col items-start sm:items-end">
                         {swapped && (
-                          <span className="font-numeric-data text-[11px] line-through text-on-surface-variant">
+                          <span className="font-numeric-data text-xs line-through text-on-surface-variant">
                             {formatPence(original! * item.quantity)}
                           </span>
                         )}
                         {item.needsPackData ? (
-                          // Never render an unpriced line as £0.00 — it would
-                          // read as free and quietly understate the split.
-                          <span className="font-label-caps text-label-caps text-secondary">
+                          <span className="font-label-caps text-label-caps text-secondary font-bold">
                             No price
                           </span>
                         ) : (
                           <span
                             className={clsx(
-                              'font-numeric-data text-numeric-data',
-                              swapped && 'text-primary'
+                              'font-numeric-data text-title-md font-bold',
+                              swapped ? 'text-primary' : 'text-on-surface'
                             )}
                           >
                             {formatPence(basketLineTotal(item))}
                           </span>
                         )}
-                      </span>
+                      </div>
 
-                      <div className="flex items-center gap-2 bg-surface-container rounded-lg p-1">
+                      <div className="flex items-center border border-outline-variant/60 rounded-full bg-surface-container-low p-1 shadow-xs">
                         <button
                           type="button"
                           aria-label={`Decrease ${item.name}`}
                           onClick={() => setQuantity(item.id, item.quantity - 1)}
-                          className="w-11 h-11 flex items-center justify-center text-on-surface-variant hover:bg-surface-container-highest rounded focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors focus-visible:ring-2 focus-visible:ring-primary"
                         >
                           <Icon name={item.quantity === 1 ? 'delete' : 'remove'} className="text-[16px]" />
                         </button>
-                        <span className="font-numeric-data text-numeric-data w-4 text-center tabular-nums">
+                        <span className="font-numeric-data text-sm font-bold w-7 text-center tabular-nums text-on-surface">
                           {item.quantity}
                         </span>
                         <button
                           type="button"
                           aria-label={`Increase ${item.name}`}
                           onClick={() => setQuantity(item.id, item.quantity + 1)}
-                          className="w-11 h-11 flex items-center justify-center text-primary hover:bg-primary-container hover:text-on-primary-container rounded focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-primary hover:bg-primary/10 transition-colors focus-visible:ring-2 focus-visible:ring-primary"
                         >
                           <Icon name="add" className="text-[16px]" />
                         </button>
@@ -468,7 +462,7 @@ export function BasketView({
         );
       })}
 
-      {/* Persistent action bar — sits above the bottom nav on mobile. */}
+      {/* Persistent action bar — sits above the bottom nav on mobile only (lg:hidden). */}
       {!orderingEnabled && (
         <Notice tone="info" icon="computer" title="Checkout runs on the collector's desktop">
           {TESCO_ORDERING_UNAVAILABLE_MESSAGE}
@@ -489,13 +483,14 @@ export function BasketView({
         </div>
       )}
 
-      <div className="fixed bottom-[76px] lg:bottom-6 left-0 lg:left-1/2 lg:-translate-x-1/2 w-full lg:w-[calc(100%-3rem)] lg:max-w-7xl bg-surface-container-lowest/95 backdrop-blur border-t lg:border border-surface-container-highest p-md lg:rounded-2xl shadow-[0_-4px_20px_rgba(0,0,0,0.08)] lg:shadow-elevated-card z-40 transition-all">
-        <div className="max-w-7xl mx-auto flex items-center justify-between gap-md px-margin-mobile md:px-margin-desktop">
+      {/* Floating Checkout Bar for Mobile & Tablet Devices (< lg). Hidden on Desktop to avoid obscuring Delivery Slot picker */}
+      <div className="lg:hidden fixed bottom-[76px] md:bottom-0 left-0 w-full glass-panel p-md shadow-ambient-modal z-40 transition-all border-t border-outline-variant/30">
+        <div className="max-w-7xl mx-auto flex items-center justify-between gap-md px-margin-mobile">
           <div className="flex flex-col">
-            <span className="font-label-caps text-label-caps text-on-surface-variant">
+            <span className="font-label-caps text-label-caps text-on-surface-variant font-semibold">
               {actualTotalCost !== null ? 'Tesco Actual Total' : 'Estimated Total'}
             </span>
-            <span className="font-numeric-data text-headline-lg-mobile text-on-surface">
+            <span className="font-numeric-data text-headline-lg-mobile text-primary font-bold">
               {actualTotalCost !== null ? formatPence(actualTotalCost) : formatPence(total)}
             </span>
           </div>
@@ -510,12 +505,12 @@ export function BasketView({
                 ? undefined
                 : `Only ${collectorName} can place this week's order from their Tesco account.`
             }
-            className="bg-primary hover:bg-primary/90 text-on-primary font-title-md text-title-md px-lg py-sm rounded-xl transition-all shadow-sm flex-1 sm:flex-none text-center disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-secondary text-on-secondary-container font-title-md text-title-md px-lg py-md rounded-2xl btn-tactile shadow-md hover:shadow-lg transition-all flex-1 text-center font-bold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {!orderingEnabled
               ? 'Open locally to checkout'
               : isSyncing
-              ? 'Syncing to Tesco...'
+              ? 'Syncing...'
               : isCollector
                 ? 'Proceed to Checkout'
                 : `${collectorName} checks out`}

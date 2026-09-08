@@ -1,54 +1,40 @@
-import type { ReactNode } from 'react';
+'use client';
+
+import { useState, useEffect, type ReactNode } from 'react';
 import { Icon } from '@/components/media/Icon';
 import { clsx } from '@/lib/clsx';
-
-/**
- * The app talking to you: an explanation, a suggestion, a caveat.
- *
- * There were eight hand-built versions of this panel by the time it was worth
- * naming — some tan, some grey, some a bare paragraph floating on the page
- * background between two cards — and the tone carried no meaning because it was
- * whatever got typed that day. Now the tone is the message:
- *
- *   `info`    — how something works. Neutral, quiet, no action implied.
- *   `suggest` — an offer you may ignore. Warm tan, never red.
- *   `check`   — something to look at before it costs money. Tan, stronger.
- *   `good`    — a state that is fine and worth confirming.
- *   `danger`  — reserved for destructive actions. Nothing else earns red.
- *
- * A plan that differs from someone else's is never `danger`, and a suggestion
- * is never styled as a warning. See `overlaps.ts` for why that matters.
- */
 
 type Tone = 'info' | 'suggest' | 'check' | 'good' | 'danger';
 
 const TONES: Record<Tone, { box: string; icon: string; defaultIcon: string }> = {
   info: {
-    box: 'bg-surface-container-low border-surface-container-highest',
-    icon: 'text-on-surface-variant',
+    box: 'bg-surface-container-lowest border-l-4 border-l-secondary border border-outline-variant/30 shadow-2xs',
+    icon: 'text-secondary',
     defaultIcon: 'info',
   },
   suggest: {
-    box: 'bg-secondary-fixed/40 border-secondary-container/40',
-    icon: 'text-secondary',
+    box: 'bg-amber-500/10 border-l-4 border-l-amber-500 border border-amber-500/20 shadow-2xs',
+    icon: 'text-amber-700',
     defaultIcon: 'lightbulb',
   },
   check: {
-    box: 'bg-secondary-fixed/60 border-secondary-container/50',
-    icon: 'text-secondary',
+    box: 'bg-amber-500/15 border-l-4 border-l-amber-600 border border-amber-500/30 shadow-2xs',
+    icon: 'text-amber-800',
     defaultIcon: 'help',
   },
   good: {
-    box: 'bg-primary/5 border-primary/20',
+    box: 'bg-primary/5 border-l-4 border-l-primary border border-primary/20 shadow-2xs',
     icon: 'text-primary',
     defaultIcon: 'check_circle',
   },
   danger: {
-    box: 'bg-error-container/30 border-error/40',
+    box: 'bg-error-container/20 border-l-4 border-l-error border border-error/30 shadow-2xs',
     icon: 'text-error',
     defaultIcon: 'warning',
   },
 };
+
+const NOTICE_STORAGE_PREFIX = 'grub:notice-dismissed:';
 
 export function Notice({
   tone = 'info',
@@ -57,6 +43,8 @@ export function Notice({
   children,
   className,
   role,
+  id,
+  dismissible = true,
 }: {
   tone?: Tone;
   icon?: string;
@@ -64,23 +52,68 @@ export function Notice({
   children: ReactNode;
   className?: string;
   role?: 'status' | 'alert';
+  id?: string;
+  dismissible?: boolean;
 }) {
+  const [dismissed, setDismissed] = useState(false);
   const style = TONES[tone];
+  const storageKey = id ? `${NOTICE_STORAGE_PREFIX}${id}` : null;
+
+  useEffect(() => {
+    if (!storageKey) return;
+    try {
+      if (window.localStorage.getItem(storageKey) === 'true') {
+        setDismissed(true);
+      }
+    } catch {
+      // Storage unavailable
+    }
+  }, [storageKey]);
+
+  function handleDismiss() {
+    setDismissed(true);
+    if (storageKey) {
+      try {
+        window.localStorage.setItem(storageKey, 'true');
+      } catch {
+        // Storage unavailable
+      }
+    }
+  }
+
+  if (dismissed) return null;
 
   return (
     <div
       role={role}
-      className={clsx('flex items-start gap-sm p-md rounded-lg border', style.box, className)}
+      className={clsx(
+        'flex items-start justify-between gap-md p-md rounded-xl transition-all',
+        style.box,
+        className
+      )}
     >
-      <Icon
-        name={icon ?? style.defaultIcon}
-        filled
-        className={clsx('mt-0.5 shrink-0 text-[18px]', style.icon)}
-      />
-      <div className="min-w-0 flex flex-col gap-xs">
-        {title && <p className="font-title-md text-title-md text-on-surface">{title}</p>}
-        <div className="font-body-sm text-body-sm text-on-surface-variant">{children}</div>
+      <div className="flex items-start gap-sm min-w-0 flex-1">
+        <Icon
+          name={icon ?? style.defaultIcon}
+          filled
+          className={clsx('mt-0.5 shrink-0 text-[18px]', style.icon)}
+        />
+        <div className="min-w-0 flex flex-col gap-xs">
+          {title && <p className="font-title-md text-title-md font-bold text-on-surface">{title}</p>}
+          <div className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">{children}</div>
+        </div>
       </div>
+
+      {dismissible && (
+        <button
+          type="button"
+          onClick={handleDismiss}
+          aria-label="Dismiss notice"
+          className="text-on-surface-variant hover:text-on-surface p-1 rounded-lg hover:bg-surface-container-high transition-colors shrink-0 -mr-1 -mt-1"
+        >
+          <Icon name="close" className="text-base" />
+        </button>
+      )}
     </div>
   );
 }

@@ -10,6 +10,38 @@
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
   }
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(229, 224, 219, 0.8);
+  }
+  .glass-dark {
+    background: rgba(27, 67, 50, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  .interactive-card {
+    transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .interactive-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0px 8px 24px rgba(27, 67, 50, 0.08);
+  }
+  .interactive-card:active {
+    transform: translateY(0px) scale(0.99);
+  }
+  .btn-tactile {
+    transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), filter 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .btn-tactile:hover {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+  }
+  .btn-tactile:active {
+    transform: translateY(0.5px) scale(0.98);
+  }
 }
 
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
