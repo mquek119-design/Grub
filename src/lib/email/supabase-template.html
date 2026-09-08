@@ -174,19 +174,12 @@
                 </div>
               {{ end }}
 
-              <!-- 6-digit Code Alternative -->
-              {{ if .Token }}
-              <div class="otp-box">
-                <div class="otp-label">Or enter this 6-digit code</div>
-                <div class="otp-code">{{ .Token }}</div>
-              </div>
-              {{ end }}
-
               <!-- Raw Link Fallback -->
               <div class="fallback">
                 Button not opening? Copy and paste this link into your browser:<br>
                 <a href="{{ .ConfirmationURL }}">{{ .ConfirmationURL }}</a>
               </div>
+
             </div>
           </div>
 

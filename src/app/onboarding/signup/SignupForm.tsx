@@ -1,32 +1,25 @@
 'use client';
 
-import { useActionState, useEffect, useState, useTransition } from 'react';
+import { useActionState, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/media/Icon';
 import { Button } from '@/components/ui/Button';
 import { SubmitButton } from '@/components/ui/SubmitButton';
-import { sendSignupLink, verifySignupOtp, type SignupState } from './actions';
+import { sendSignupLink, type SignupState } from './actions';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { createClient } from '@/lib/supabase/client';
 
 const INITIAL: SignupState = { status: 'idle', message: '' };
 
 /**
- * Sign up form with magic link and optional 6-digit OTP verification code.
- *
- * Provides two frictionless paths:
- * 1. Click the magic link in email (which redirects back to /auth/callback)
- * 2. Type the 6-digit verification code directly into this screen
+ * Sign up form with magic-link email verification.
  *
  * Listens for auth state changes so if the user clicks the email link in
- * another tab, this tab automatically advances to `next`.
+ * another tab or window, this tab automatically advances to `next`.
  */
 export function SignupForm({ next = '/onboarding/instructions' }: { next?: string }) {
   const [state, formAction] = useActionState(sendSignupLink, INITIAL);
   const [email, setEmail] = useState('');
-  const [otpCode, setOtpCode] = useState('');
-  const [otpError, setOtpError] = useState<string | null>(null);
-  const [isVerifyingOtp, startOtpTransition] = useTransition();
   const [redirecting, setRedirecting] = useState(false);
   const router = useRouter();
 
@@ -53,22 +46,6 @@ export function SignupForm({ next = '/onboarding/instructions' }: { next?: strin
     }
   }, [state.status, router, next]);
 
-  const handleVerifyOtp = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!otpCode.trim()) return;
-
-    setOtpError(null);
-    startOtpTransition(async () => {
-      const result = await verifySignupOtp(email, otpCode, next);
-      if (result.success) {
-        setRedirecting(true);
-        router.push(next);
-      } else {
-        setOtpError(result.message || 'Invalid or expired code. Please try again.');
-      }
-    });
-  };
-
   const handleManualContinue = () => {
     setRedirecting(true);
     router.push(next);
@@ -91,61 +68,24 @@ export function SignupForm({ next = '/onboarding/instructions' }: { next?: strin
             Check your inbox
           </h2>
           <p className="font-body-md text-body-md text-on-surface">
-            We sent a verification link and code to:
+            We sent a sign-up link to:
           </p>
           <p className="font-title-sm text-title-sm text-primary font-semibold break-all">
             {email}
           </p>
-          <p className="font-body-xs text-body-xs text-on-surface-variant mt-1">
-            Click the link in the email, or enter your 6-digit code below:
+          <p className="font-body-sm text-body-sm text-on-surface-variant mt-2 max-w-xs">
+            Click the link in your email to confirm your account and continue.
           </p>
         </div>
 
-        {/* 6-digit OTP code entry */}
-        <form onSubmit={handleVerifyOtp} className="flex flex-col gap-sm">
-          <label className="flex flex-col gap-xs text-center">
-            <span className="font-label-md text-label-md font-medium text-on-surface-variant">
-              Enter 6-digit verification code
-            </span>
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              maxLength={8}
-              autoComplete="one-time-code"
-              value={otpCode}
-              onChange={(e) => setOtpCode(e.target.value.replace(/\s+/g, ''))}
-              placeholder="123456"
-              className="h-12 text-center tracking-widest font-mono text-title-lg rounded-lg bg-surface-container-lowest border border-surface-container-highest focus:ring-2 focus:ring-primary focus:border-primary"
-            />
-          </label>
-
-          {otpError && (
-            <p role="alert" className="font-body-xs text-body-xs text-error text-center">
-              {otpError}
-            </p>
-          )}
-
-          <Button
-            type="submit"
-            variant="secondary"
-            size="md"
-            fullWidth
-            disabled={!otpCode.trim() || isVerifyingOtp || redirecting}
-            pending={isVerifyingOtp || redirecting}
-          >
-            Confirm code & continue
-          </Button>
-        </form>
-
-        {/* Inbox quick links */}
-        <div className="flex flex-col gap-xs pt-xs border-t border-surface-container-highest">
+        {/* Action buttons */}
+        <div className="flex flex-col gap-sm pt-xs border-t border-surface-container-highest">
           {isGmail ? (
             <a
               href="https://mail.google.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="h-10 rounded-lg border border-surface-container-highest hover:bg-surface-container text-body-sm font-semibold flex items-center justify-center gap-xs transition-colors text-on-surface"
+              className="h-11 rounded-lg bg-primary text-on-primary hover:bg-primary/90 text-body-md font-semibold flex items-center justify-center gap-xs transition-colors shadow-sm"
             >
               <Icon name="open_in_new" className="text-[18px]" />
               Open Gmail
@@ -155,7 +95,7 @@ export function SignupForm({ next = '/onboarding/instructions' }: { next?: strin
               href="https://outlook.live.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="h-10 rounded-lg border border-surface-container-highest hover:bg-surface-container text-body-sm font-semibold flex items-center justify-center gap-xs transition-colors text-on-surface"
+              className="h-11 rounded-lg bg-primary text-on-primary hover:bg-primary/90 text-body-md font-semibold flex items-center justify-center gap-xs transition-colors shadow-sm"
             >
               <Icon name="open_in_new" className="text-[18px]" />
               Open Outlook
@@ -164,13 +104,12 @@ export function SignupForm({ next = '/onboarding/instructions' }: { next?: strin
 
           <Button
             onClick={handleManualContinue}
-            variant="ghost"
-            size="sm"
+            variant={isGmail || isOutlook ? 'secondary' : 'primary'}
+            size="lg"
             fullWidth
             pending={redirecting}
-            className="text-on-surface-variant hover:text-on-surface"
           >
-            I&apos;ve already verified in another tab
+            I&apos;ve verified my email
           </Button>
 
           <button
@@ -178,12 +117,13 @@ export function SignupForm({ next = '/onboarding/instructions' }: { next?: strin
             onClick={() => window.location.reload()}
             className="text-center font-body-xs text-body-xs text-on-surface-variant hover:text-primary transition-colors py-1"
           >
-            Wrong email? Try again
+            Entered the wrong email? Click here to re-enter
           </button>
         </div>
       </div>
     );
   }
+
 
   return (
     <form action={formAction} className="flex flex-col gap-md">
