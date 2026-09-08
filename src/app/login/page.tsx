@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { LoginForm } from './LoginForm';
 import { LogoMark } from '@/components/brand/Logo';
+import { Stocky } from '@/components/mascot/Stocky';
 
 export const metadata = { title: 'Sign in · Grub', description: 'Sign in to your Grub account.' };
 
@@ -36,12 +37,15 @@ export default async function LoginPage({
         <Link href="/welcome" aria-label="Grub home" className="inline-block lg:hidden hover:opacity-90 transition-opacity">
           <LogoMark className="h-16 w-auto" />
         </Link>
-        <h1
-          className="font-headline-lg text-headline-lg text-primary"
-          style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
-        >
-          Grub
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1
+            className="font-headline-lg text-headline-lg text-primary"
+            style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
+          >
+            Grub
+          </h1>
+          <Stocky mood="neutral" size="sm" caption="Welcome" />
+        </div>
         <p className="font-body-lg text-body-lg text-on-surface-variant">
           Sign in with your email. We&apos;ll send you a link — no password to remember.
         </p>

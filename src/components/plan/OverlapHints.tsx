@@ -3,6 +3,7 @@
 import { useActionState } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/components/media/Icon';
+import { Stocky } from '@/components/mascot/Stocky';
 import { formatPence } from '@/lib/money';
 import { switchMeal, type PlanActionState } from '@/app/plan/actions';
 import type { PlanOverlap, PlannedMeal } from '@/lib/types';
@@ -90,7 +91,7 @@ export function OverlapHints({
             className="flex flex-col gap-sm p-md rounded-lg bg-secondary-fixed/40 border border-secondary-container/40"
           >
             <div className="flex items-start gap-sm">
-              <Icon name="lightbulb" filled className="text-secondary mt-0.5 text-[18px] shrink-0" />
+              <Stocky mood="cooking" size="sm" className="shrink-0 mt-0.5" />
               <p className="font-body-sm text-body-sm text-on-surface-variant">
                 <strong className="font-semibold text-on-surface">
                   {WEEKDAY_LABELS[overlap.day]} {MEAL_TYPE_LABELS[overlap.mealType].toLowerCase()}:

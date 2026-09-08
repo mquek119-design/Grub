@@ -6,6 +6,7 @@ import { CollectorPanel } from '@/components/split/CollectorPanel';
 import { Notice } from '@/components/ui/Notice';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { formatPence } from '@/lib/money';
+import { Stocky } from '@/components/mascot/Stocky';
 import {
   getBasketItems,
   getCollector,
@@ -84,6 +85,9 @@ export default async function SplitPage() {
   return (
     <div className="flex flex-col gap-lg">
       <div className="bg-gradient-to-b from-surface-container-low via-surface-container-lowest to-surface-container-low border border-primary/25 rounded-3xl p-lg md:p-xl shadow-ambient-card flex flex-col items-center justify-center text-center relative overflow-hidden my-sm interactive-card card-glow">
+        <div className="absolute top-4 right-4 hidden sm:flex items-center gap-1.5 opacity-90 hover:opacity-100 transition-opacity">
+          <Stocky mood="split" size="sm" caption="Itemised" />
+        </div>
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary font-label-caps text-[11px] uppercase tracking-wider font-bold mb-xs border border-primary/20 shadow-xs">
           <Icon name={!split.isPosted ? 'schedule' : plan?.status === 'delivered' ? 'verified' : 'local_shipping'} className="text-sm" />
           <span>{!split.isPosted ? 'Live Basket Estimate' : plan?.status === 'delivered' ? 'Delivery Verified' : 'Order Placed'}</span>
@@ -117,7 +121,13 @@ export default async function SplitPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl items-start">
         <div className="lg:col-span-7 flex flex-col gap-md">
-          <h2 className="font-title-md text-title-md text-on-background">Cost Breakdown</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="font-title-md text-title-md text-on-background">Cost Breakdown</h2>
+            <div className="flex items-center gap-1.5 text-xs text-on-surface-variant font-mono">
+              <Stocky mood="split" size="sm" />
+              <span>Zero guesswork</span>
+            </div>
+          </div>
 
           {split.lines.map((line) => (
             <div

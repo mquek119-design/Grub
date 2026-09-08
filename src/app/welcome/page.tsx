@@ -4,6 +4,7 @@ import { LogoMark } from '@/components/brand/Logo';
 import { Icon } from '@/components/media/Icon';
 import { Reveal } from '@/components/motion/Reveal';
 import { Marquee } from '@/components/motion/Marquee';
+import { Stocky, type StockyMood } from '@/components/mascot/Stocky';
 import { getCurrentUserOrNull } from '@/lib/queries';
 
 export const metadata = {
@@ -24,19 +25,19 @@ const STRIP = [
   'Pay for what you ate',
 ];
 
-const BENEFITS = [
+const BENEFITS: { mood: StockyMood; title: string; body: string }[] = [
   {
-    icon: 'shopping_basket',
+    mood: 'cooking',
     title: 'Automated Tesco trolley building',
     body: 'Not just a manual tracking list. Grub automatically translates your house meal plan into exact ingredients and builds your Tesco online basket in 1 click.',
   },
   {
-    icon: 'savings',
+    mood: 'smug',
     title: 'Overlap cuts the bill',
     body: 'Two meals that share an onion buy one bag, not two. The optimiser reuses ingredients across the week so less is wasted and less is bought.',
   },
   {
-    icon: 'receipt_long',
+    mood: 'split',
     title: 'Split per item, not evenly',
     body: "You pay for what you ate — not a flat quarter of someone else's protein powder. Every line shows its own transparent arithmetic.",
   },
@@ -147,7 +148,11 @@ export default async function WelcomePage() {
           {headerLink}
         </div>
 
-        <div className="px-6 md:px-margin-desktop mx-auto pt-[2.5rem] md:pt-[3.5rem] max-w-3xl">
+        <div className="px-6 md:px-margin-desktop mx-auto pt-[2rem] md:pt-[3rem] max-w-3xl">
+          <div className="flex items-center gap-2 mb-3">
+            <Stocky mood="smug" size="sm" caption="The honest bouillon cube" />
+          </div>
+
           <h1 className="font-georgia text-[2.75rem] leading-[1.05] md:text-[4.5rem] md:leading-[1.02] font-bold text-primary animate-fade-in-up">
             Stop buying four bags of pasta.
           </h1>
@@ -168,9 +173,12 @@ export default async function WelcomePage() {
           </div>
         </div>
 
-        <span aria-hidden="true" className="hidden lg:block absolute right-8 top-[7rem] opacity-15 animate-float">
-          <LogoMark className="h-40 w-auto" />
-        </span>
+        <div className="hidden lg:flex flex-col items-center gap-2 absolute right-12 top-[6.5rem] bg-surface-container-lowest/90 backdrop-blur-md border border-primary/20 rounded-2xl p-4 shadow-ambient-card animate-float">
+          <Stocky mood="smug" size="xl" />
+          <span className="font-mono text-[10px] uppercase font-bold text-primary tracking-wider">
+            Stocky · Resident Mascot
+          </span>
+        </div>
       </section>
 
       {/* ---- Marquee ------------------------------------------------------- */}
@@ -184,7 +192,7 @@ export default async function WelcomePage() {
       </Marquee>
 
       {/* ---- Why Grub ------------------------------------------------------ */}
-      <section className="w-full px-6 md:px-margin-desktop py-[4rem]">
+      <section className="w-full px-6 md:px-margin-desktop py-[3.5rem]">
         <div className="mx-auto max-w-5xl">
           <Reveal as="h2" className="font-georgia text-headline-lg-mobile md:text-headline-lg text-primary mb-lg">
             Why Grub
@@ -197,8 +205,28 @@ export default async function WelcomePage() {
         </div>
       </section>
 
+      {/* ---- Meet Stocky Feature Section ----------------------------------- */}
+      <section className="w-full px-6 md:px-margin-desktop py-[1.5rem]">
+        <div className="mx-auto max-w-5xl rounded-3xl bg-gradient-to-br from-surface-container-low via-surface-container-lowest to-surface-container-low border border-primary/20 p-lg md:p-xl flex flex-col md:flex-row items-center gap-lg shadow-ambient-card">
+          <div className="shrink-0 p-3 bg-primary/8 rounded-2xl border border-primary/15 shadow-xs">
+            <Stocky mood="cooking" size="xl" />
+          </div>
+          <div className="flex flex-col gap-xs text-center md:text-left">
+            <span className="font-label-caps text-[11px] uppercase tracking-wider text-secondary font-bold">
+              Meet Stocky · Flat Companion
+            </span>
+            <h3 className="font-georgia text-title-md md:text-headline-sm font-bold text-primary">
+              He hates buying four bags of pasta.
+            </h3>
+            <p className="font-body-sm text-body-sm text-on-surface-variant max-w-xl leading-relaxed">
+              Stocky is Grub&apos;s dry, honest bouillon cube. He lives in your flat&apos;s pantry, keeps an eye on the weekly order cutoff, catches duplicate ingredient packs across housemates, and makes sure nobody gets billed for someone else&apos;s oat milk.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* ---- Benefits ------------------------------------------------------ */}
-      <section className="w-full px-6 md:px-margin-desktop py-[4rem]">
+      <section className="w-full px-6 md:px-margin-desktop py-[3.5rem]">
         <div className="mx-auto max-w-5xl">
           <Reveal as="h2" className="font-georgia text-headline-lg-mobile md:text-headline-lg text-primary max-w-2xl">
             The buying unit is the household, not the individual.
@@ -208,11 +236,11 @@ export default async function WelcomePage() {
               <Reveal
                 key={benefit.title}
                 delay={i * 90}
-                className="flex flex-col gap-sm p-lg rounded-xl bg-surface-container-lowest border border-surface-container-highest shadow-ambient-card"
+                className="flex flex-col gap-sm p-lg rounded-2xl bg-surface-container-lowest border border-surface-container-highest shadow-ambient-card hover:border-primary/30 transition-colors"
               >
-                <span className="w-11 h-11 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center">
-                  <Icon name={benefit.icon} />
-                </span>
+                <div className="w-12 h-12 flex items-center justify-center shrink-0">
+                  <Stocky mood={benefit.mood} size="md" />
+                </div>
                 <h3 className="font-title-md text-title-md text-on-surface font-bold">{benefit.title}</h3>
                 <p className="font-body-sm text-body-sm text-on-surface-variant">{benefit.body}</p>
               </Reveal>
@@ -242,11 +270,19 @@ export default async function WelcomePage() {
       {/* ---- Closing CTA --------------------------------------------------- */}
       <section className="w-full px-6 md:px-margin-desktop pb-[4rem]">
         <div className="mx-auto max-w-5xl">
-          <Reveal className="rounded-xl bg-primary text-on-primary p-xl md:p-[3rem] flex flex-col items-start gap-md">
-            <h2 className="font-georgia text-headline-lg-mobile md:text-headline-lg text-secondary max-w-2xl">
-              Automate your flat&apos;s groceries and start pooling your shop today.
-            </h2>
-            {closingCta}
+          <Reveal className="rounded-3xl bg-primary text-on-primary p-xl md:p-[3rem] flex flex-col md:flex-row items-start md:items-center justify-between gap-xl shadow-ambient-card">
+            <div className="flex flex-col gap-md max-w-xl">
+              <h2 className="font-georgia text-headline-lg-mobile md:text-headline-lg text-secondary">
+                Automate your flat&apos;s groceries and start pooling your shop today.
+              </h2>
+              {closingCta}
+            </div>
+            <div className="shrink-0 self-center md:self-auto p-4 bg-on-primary/10 rounded-3xl border border-on-primary/15 flex flex-col items-center gap-2">
+              <Stocky mood="smug" size="xl" />
+              <span className="font-mono text-[10px] uppercase font-bold tracking-wider text-secondary">
+                Zero Waste · Fair Splits
+              </span>
+            </div>
           </Reveal>
 
           <p className="mt-xl text-center font-body-sm text-body-sm text-on-surface-variant flex flex-col items-center gap-2">

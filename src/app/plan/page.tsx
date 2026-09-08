@@ -6,6 +6,7 @@ import { WeekSwitcher } from '@/components/plan/WeekSwitcher';
 import { ReopenPlanningBanner } from '@/components/plan/ReopenPlanningBanner';
 import { FirstMealModal } from '@/components/plan/FirstMealModal';
 import { Icon } from '@/components/media/Icon';
+import { Stocky } from '@/components/mascot/Stocky';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Notice } from '@/components/ui/Notice';
 import { PageHeader } from '@/components/ui/PageHeader';
@@ -102,8 +103,8 @@ export default async function PlanPage({
       {week === 'this' && plan.sharedSavings > 0 && (
         <div className="flex items-center justify-between gap-md px-lg py-md rounded-2xl bg-gradient-to-r from-primary via-primary-container to-primary text-on-primary shadow-md border border-primary-fixed/30 interactive-card">
           <div className="flex items-center gap-sm">
-            <div className="w-9 h-9 rounded-xl bg-on-primary/10 flex items-center justify-center shrink-0">
-              <Icon name="savings" filled className="text-secondary" />
+            <div className="p-1 rounded-xl bg-on-primary/10 flex items-center justify-center shrink-0">
+              <Stocky mood="smug" size="sm" />
             </div>
             <div className="flex flex-col">
               <span className="font-label-caps text-[11px] uppercase tracking-widest opacity-90 font-semibold">

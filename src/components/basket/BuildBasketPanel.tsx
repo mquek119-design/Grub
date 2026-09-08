@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react';
 import { Icon } from '@/components/media/Icon';
 import { Card } from '@/components/ui/Card';
+import { Stocky } from '@/components/mascot/Stocky';
 import { formatPence } from '@/lib/money';
 import { buildBasket, type BasketActionState } from '@/app/basket/actions';
 
@@ -45,14 +46,17 @@ export function BuildBasketPanel({
           </p>
         </div>
         {overlapSavings > 0 && (
-          <span className="shrink-0 text-right bg-primary/10 px-sm py-xs rounded-xl border border-primary/20">
-            <span className="block font-label-caps text-[10px] uppercase font-bold text-primary tracking-wider">
-              Saved pooling
-            </span>
-            <span className="block font-numeric-data text-body-lg font-bold text-primary">
-              {formatPence(overlapSavings)}
-            </span>
-          </span>
+          <div className="flex items-center gap-2 shrink-0 bg-primary/10 px-sm py-xs rounded-xl border border-primary/20">
+            <Stocky mood="smug" size="sm" />
+            <div className="text-right">
+              <span className="block font-label-caps text-[10px] uppercase font-bold text-primary tracking-wider">
+                Saved pooling
+              </span>
+              <span className="block font-numeric-data text-body-lg font-bold text-primary">
+                {formatPence(overlapSavings)}
+              </span>
+            </div>
+          </div>
         )}
       </div>
 
