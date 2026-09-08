@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { LogoMark } from '@/components/brand/Logo';
 import { Icon } from '@/components/media/Icon';
 import { Reveal } from '@/components/motion/Reveal';
@@ -49,7 +50,9 @@ const STEPS = [
 
 export default async function WelcomePage() {
   const currentUser = await getCurrentUserOrNull();
-  const hasHouse = currentUser?.houseId ? true : false;
+  if (currentUser?.houseId) redirect('/');
+  if (currentUser) redirect('/onboarding');
+  const hasHouse = false;
 
   const headerLink = currentUser ? (
     <Link
