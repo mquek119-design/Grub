@@ -102,7 +102,7 @@ function playTimerChime() {
 export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps) {
   const [mounted, setMounted] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
-  const [previewOnDesktop, setPreviewOnDesktop] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Anki Flashcard State
@@ -182,7 +182,6 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
 
   // Screen Wake Lock API for Mobile Cook Mode
   useEffect(() => {
-    if (isDesktop && !previewOnDesktop) return;
     let wakeLock: any = null;
     if ('wakeLock' in navigator) {
       (navigator as any).wakeLock
@@ -195,7 +194,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
     return () => {
       if (wakeLock) wakeLock.release();
     };
-  }, [isDesktop, previewOnDesktop]);
+  }, []);
 
   // Keyboard navigation shortcuts
   useEffect(() => {
@@ -248,84 +247,73 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
     ? `${window.location.origin}/recipes/${recipe.id}?cook=true`
     : `/recipes/${recipe.id}?cook=true`;
 
-  // Desktop Notice: Cook Mode is on phone
-  if (isDesktop && !previewOnDesktop) {
-    return createPortal(
-      <div className="fixed inset-0 z-[120] bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
-        <div className="bg-surface-container-lowest border border-surface-container-highest rounded-2xl p-5 max-w-xs w-full shadow-ambient-modal flex flex-col items-center text-center gap-3 relative animate-pop-in">
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-            className="absolute top-3 right-3 p-1.5 rounded-full text-on-surface-variant hover:bg-surface-container transition-colors"
-          >
-            <Icon name="close" className="text-lg" />
-          </button>
-
-          <div className="w-10 h-10 rounded-xl bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed shadow-xs mt-1">
-            <Icon name="smartphone" filled className="text-[20px]" />
-          </div>
-
-          <div className="flex flex-col gap-0.5">
-            <h2 className="font-title-md text-base font-bold text-on-surface">
-              Cook Mode on your phone
-            </h2>
-            <p className="font-body-sm text-[12px] text-on-surface-variant max-w-[240px]">
-              Scan to cook hands-free by the stove with screen wake-lock & timers.
-            </p>
-          </div>
-
-          <div className="w-full bg-surface-container-low border border-surface-container-highest/60 rounded-xl p-3 flex flex-col items-center gap-1.5">
-            <div className="p-1.5 bg-white rounded-lg shadow-xs border border-outline-variant/30">
-              <img
-                src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(cookUrl)}&color=1B4332&bgcolor=FFFFFF`}
-                alt="Scan to open Cook Mode on your phone"
-                width={110}
-                height={110}
-                className="rounded-md"
-              />
-            </div>
-            <span className="font-label-caps text-[9px] uppercase tracking-wider text-on-surface-variant/80 font-semibold">
-              Point phone camera to start
-            </span>
-          </div>
-
-          <div className="flex flex-col gap-1.5 w-full">
-            <button
-              type="button"
-              onClick={() => {
-                if (navigator.clipboard) {
-                  navigator.clipboard.writeText(cookUrl);
-                  setCopiedLink(true);
-                  setTimeout(() => setCopiedLink(false), 2000);
-                }
-              }}
-              className="w-full h-9 rounded-lg bg-primary text-on-primary font-semibold text-xs flex items-center justify-center gap-1.5 btn-tactile shadow-xs"
-            >
-              <Icon name={copiedLink ? 'check' : 'content_copy'} className="text-[15px]" />
-              <span>{copiedLink ? 'Link Copied!' : 'Copy Mobile Link'}</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setPreviewOnDesktop(true)}
-              className="w-full h-8 rounded-lg text-xs font-medium text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
-            >
-              Preview on desktop
-            </button>
-          </div>
-        </div>
-      </div>,
-      document.body
-    );
-  }
-
   // Format timer minutes/seconds
   const timerMins = timerSecondsLeft !== null ? Math.floor(timerSecondsLeft / 60) : 0;
   const timerSecs = timerSecondsLeft !== null ? timerSecondsLeft % 60 : 0;
 
   return createPortal(
     <div className="fixed inset-0 z-[110] bg-[#121B17] text-white flex flex-col h-screen overflow-hidden select-none">
+      {/* Optional QR Code modal to beam to phone */}
+      {showQrModal && (
+        <div className="fixed inset-0 z-[130] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-surface-container-lowest text-on-surface border border-surface-container-highest rounded-2xl p-5 max-w-xs w-full shadow-ambient-modal flex flex-col items-center text-center gap-3 relative animate-pop-in">
+            <button
+              type="button"
+              onClick={() => setShowQrModal(false)}
+              aria-label="Close"
+              className="absolute top-3 right-3 p-1.5 rounded-full text-on-surface-variant hover:bg-surface-container transition-colors"
+            >
+              <Icon name="close" className="text-lg" />
+            </button>
+
+            <div className="w-10 h-10 rounded-xl bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed shadow-xs mt-1">
+              <Icon name="smartphone" filled className="text-[20px]" />
+            </div>
+
+            <div className="flex flex-col gap-0.5">
+              <h2 className="font-title-md text-base font-bold text-on-surface">
+                Cook on your phone
+              </h2>
+              <p className="font-body-sm text-[12px] text-on-surface-variant max-w-[240px]">
+                Scan to open this recipe hands-free on your phone.
+              </p>
+            </div>
+
+            <div className="w-full bg-surface-container-low border border-surface-container-highest/60 rounded-xl p-3 flex flex-col items-center gap-1.5">
+              <div className="p-1.5 bg-white rounded-lg shadow-xs border border-outline-variant/30">
+                <img
+                  src={`https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(cookUrl)}&color=1B4332&bgcolor=FFFFFF`}
+                  alt="Scan to open Cook Mode on your phone"
+                  width={110}
+                  height={110}
+                  className="rounded-md"
+                />
+              </div>
+              <span className="font-label-caps text-[9px] uppercase tracking-wider text-on-surface-variant/80 font-semibold">
+                Point phone camera to start
+              </span>
+            </div>
+
+            <div className="flex flex-col gap-1.5 w-full">
+              <button
+                type="button"
+                onClick={() => {
+                  if (navigator.clipboard) {
+                    navigator.clipboard.writeText(cookUrl);
+                    setCopiedLink(true);
+                    setTimeout(() => setCopiedLink(false), 2000);
+                  }
+                }}
+                className="w-full h-9 rounded-lg bg-primary text-on-primary font-semibold text-xs flex items-center justify-center gap-1.5 btn-tactile shadow-xs"
+              >
+                <Icon name={copiedLink ? 'check' : 'content_copy'} className="text-[15px]" />
+                <span>{copiedLink ? 'Link Copied!' : 'Copy Mobile Link'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Deck Bar */}
       <header className="px-md py-sm flex flex-col gap-2 shrink-0 bg-[#0E1512] border-b border-white/10">
         <div className="flex items-center justify-between gap-sm">
@@ -347,15 +335,30 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setDeckDrawerOpen(true)}
-            aria-label="Deck overview & ingredients"
-            className="h-9 px-3 rounded-full bg-white/10 hover:bg-white/15 text-white/90 text-xs font-semibold flex items-center gap-1.5 transition-colors"
-          >
-            <Icon name="layers" className="text-[16px]" />
-            <span>Deck</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            {isDesktop && (
+              <button
+                type="button"
+                onClick={() => setShowQrModal(true)}
+                aria-label="Show phone QR code"
+                className="h-9 px-2.5 rounded-full bg-white/10 hover:bg-white/15 text-white/80 hover:text-white text-xs font-semibold flex items-center gap-1 transition-colors"
+                title="Open on phone"
+              >
+                <Icon name="qr_code_2" className="text-[16px]" />
+                <span className="hidden sm:inline">Phone QR</span>
+              </button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => setDeckDrawerOpen(true)}
+              aria-label="Deck overview & ingredients"
+              className="h-9 px-3 rounded-full bg-white/10 hover:bg-white/15 text-white/90 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+            >
+              <Icon name="layers" className="text-[16px]" />
+              <span>Deck</span>
+            </button>
+          </div>
         </div>
 
         {/* Anki Segmented Progress Deck Bar */}

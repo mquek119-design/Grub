@@ -80,14 +80,11 @@ export function RecipeDetail({
             onClick={() => setCookModeModalOpen(true)}
             className="inline-flex items-center gap-xs px-xl py-sm rounded-2xl bg-secondary text-on-secondary-container font-bold text-sm btn-tactile shadow-md hover:shadow-lg transition-all"
           >
-            <Icon name="smartphone" className="text-lg" />
+            <Icon name="skillet" className="text-lg" />
             <span>Start Cook Mode</span>
-            <span className="hidden md:inline-flex text-[11px] font-semibold bg-black/10 px-2 py-0.5 rounded-full ml-1">
-              Phone
-            </span>
           </button>
           <span className="hidden md:inline-block text-[11px] text-on-surface-variant font-medium">
-            Designed for your phone in the kitchen · Click for QR code
+            Hands-free step cards with timers & wake-lock
           </span>
         </div>
       </div>

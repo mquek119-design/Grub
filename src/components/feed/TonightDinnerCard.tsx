@@ -9,6 +9,7 @@ import { AvatarStack } from '@/components/avatars/Avatar';
 import { FoodImage } from '@/components/media/FoodImage';
 import { CookModeModal } from '@/components/recipes/CookModeModal';
 import { NutritionPill } from '@/components/recipes/NutritionPill';
+import { clsx } from '@/lib/clsx';
 import type { PlannedMeal, Recipe, User } from '@/lib/types';
 import { MEAL_TYPE_ICONS, MEAL_TYPE_LABELS } from '@/lib/types';
 
@@ -119,25 +120,15 @@ export function TonightDinnerCard({
           )}
         </div>
 
-        {isCook ? (
-          recipe ? (
-            <button
-              type="button"
-              onClick={() => setCookModeOpen(true)}
-              className="text-left w-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
-              aria-label={`Start cooking ${meal.recipeTitle}`}
-            >
-              {content}
-            </button>
-          ) : (
-            <Link
-              href={`/recipes/${meal.recipeId}?cook=true`}
-              className="text-left w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
-              aria-label={`Start cooking ${meal.recipeTitle}`}
-            >
-              {content}
-            </Link>
-          )
+        {recipe ? (
+          <button
+            type="button"
+            onClick={() => setCookModeOpen(true)}
+            className="text-left w-full cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-xl"
+            aria-label={`Open Cook Mode for ${meal.recipeTitle}`}
+          >
+            {content}
+          </button>
         ) : (
           <Link
             href={`/recipes/${meal.recipeId}`}
@@ -147,7 +138,7 @@ export function TonightDinnerCard({
           </Link>
         )}
 
-        <div className="flex items-center justify-between pt-xs mt-xs border-t border-outline-variant/30">
+        <div className="flex items-center justify-between pt-xs mt-xs border-t border-outline-variant/30 flex-wrap gap-2">
           <span className="font-body-sm text-[11px] text-on-surface-variant">
             {isCook
               ? 'You are down to cook tonight'
@@ -155,40 +146,35 @@ export function TonightDinnerCard({
               ? 'Table is set for you'
               : 'Want in? Open the plan to join'}
           </span>
-          {isCook ? (
-            recipe ? (
+
+          <div className="flex items-center gap-2 shrink-0">
+            {recipe && (
               <button
                 type="button"
                 onClick={() => setCookModeOpen(true)}
-                className="text-xs font-bold text-on-secondary-container px-3.5 py-1.5 rounded-full bg-secondary hover:bg-secondary-container transition-all flex items-center gap-1.5 btn-tactile shadow-xs"
+                className={clsx(
+                  'text-xs font-bold px-3.5 py-1.5 rounded-full transition-all flex items-center gap-1.5 btn-tactile shadow-xs',
+                  isCook
+                    ? 'bg-secondary text-on-secondary-container hover:bg-secondary-container'
+                    : 'bg-secondary/15 text-secondary border border-secondary/30 hover:bg-secondary/25'
+                )}
+                aria-label={`Open Cook Mode for ${meal.recipeTitle}`}
               >
-                <Icon name="smartphone" className="text-base" />
-                <span>Start Cook Mode</span>
-                <span className="hidden md:inline-block text-[10px] font-semibold bg-black/10 px-1.5 py-0.5 rounded-full">
-                  Phone
-                </span>
+                <Icon name="skillet" className="text-sm" />
+                <span>Cook Mode</span>
               </button>
-            ) : (
+            )}
+
+            {!isCook && (
               <Link
-                href={`/recipes/${meal.recipeId}?cook=true`}
-                className="text-xs font-bold text-on-secondary-container px-3.5 py-1.5 rounded-full bg-secondary hover:bg-secondary-container transition-all flex items-center gap-1.5 btn-tactile shadow-xs"
+                href={`/plan#day-${meal.day}`}
+                className="text-xs font-bold text-primary hover:text-primary-container px-3 py-1.5 rounded-full bg-primary/8 hover:bg-primary/15 transition-all flex items-center gap-1 btn-tactile"
               >
-                <Icon name="smartphone" className="text-base" />
-                <span>Start Cook Mode</span>
-                <span className="hidden md:inline-block text-[10px] font-semibold bg-black/10 px-1.5 py-0.5 rounded-full">
-                  Phone
-                </span>
+                <span>{joined ? 'Sitting' : 'Join'}</span>
+                <Icon name="arrow_forward" className="text-sm" />
               </Link>
-            )
-          ) : (
-            <Link
-              href={`/plan#day-${meal.day}`}
-              className="text-xs font-bold text-primary hover:text-primary-container px-3 py-1 rounded-full bg-primary/8 hover:bg-primary/15 transition-all flex items-center gap-1 btn-tactile"
-            >
-              <span>{joined ? 'Manage sitting' : 'Join sitting'}</span>
-              <Icon name="arrow_forward" className="text-sm" />
-            </Link>
-          )}
+            )}
+          </div>
         </div>
       </Card>
     </>
