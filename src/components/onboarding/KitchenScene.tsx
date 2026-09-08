@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { clsx } from '@/lib/clsx';
 import { Icon } from '@/components/media/Icon';
 import { Stocky } from '@/components/mascot/Stocky';
@@ -12,6 +12,22 @@ export const STOCKY_PANTRY_QUOTES = [
   "Psst: Grub v2 is going to optimize your shared spice rack too.",
   "Two housemates bought cumin last week. Tragic. I wept.",
   "Keep this between us, but the collector always deserves the first slice.",
+];
+
+export interface KitchenDrawerNote {
+  tag: string;
+  text: string;
+}
+
+export const KITCHEN_DRAWER_NOTES: KitchenDrawerNote[] = [
+  { tag: 'Cutlery Drawer', text: 'Just spoons & whisks here. Try the pantry on the right ➔' },
+  { tag: 'House Rule #1', text: 'Whoever used the non-stick pan: wooden spoons only.' },
+  { tag: 'Flat Wisdom', text: 'Two meals sharing an onion buy 1 bag, not 2. Check the pantry.' },
+  { tag: 'Kitchen Karma', text: 'Emptying the drying rack wins major flatmate respect.' },
+  { tag: 'Emergency Stash', text: 'Emergency pasta supplies: strictly for deadline nights.' },
+  { tag: 'Flatmate Notice', text: 'The blender blade does not wash itself. We tested it.' },
+  { tag: 'Cutoff Reminder', text: 'Tesco order cutoff is Sunday 8pm. Get your snacks added!' },
+  { tag: 'Sneak Peek Hint', text: 'Stocky lives in the cupboard on the right... tap to peek.' },
 ];
 
 export interface Appliance {
@@ -40,6 +56,27 @@ export function KitchenScene({ selected, onChange }: KitchenSceneProps) {
   const [cabinetOpen, setCabinetOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [stockyQuoteIndex, setStockyQuoteIndex] = useState(0);
+
+  // Left side dynamic sentences: paced calmly (7.5s) to avoid confusion/distraction/headache
+  const [drawerQuoteIndex, setDrawerQuoteIndex] = useState(0);
+  const [isDrawerPaused, setIsDrawerPaused] = useState(false);
+  const [drawerFadeState, setDrawerFadeState] = useState<'in' | 'out'>('in');
+
+  useEffect(() => {
+    if (isDrawerPaused) return;
+    const interval = setInterval(() => {
+      setDrawerFadeState('out');
+      const timeout = setTimeout(() => {
+        setDrawerQuoteIndex((prev) => (prev + 1) % KITCHEN_DRAWER_NOTES.length);
+        setDrawerFadeState('in');
+      }, 400);
+      return () => clearTimeout(timeout);
+    }, 7500);
+
+    return () => clearInterval(interval);
+  }, [isDrawerPaused]);
+
+  const currentDrawerNote = KITCHEN_DRAWER_NOTES[drawerQuoteIndex];
 
   const toggleAppliance = (id: string) => {
     if (selected.includes(id)) {
@@ -163,13 +200,24 @@ export function KitchenScene({ selected, onChange }: KitchenSceneProps) {
           {/* Left cabinets */}
           <rect x="0" y="302" width="300" height="200" fill="#2D6A4F" />
 
-          {/* Left top drawer - Cutlery Drawer */}
+          {/* Left top drawer - Cutlery Drawer with slow dynamic changing sentences */}
           <g
             className="cursor-pointer group select-none"
-            onClick={() => setDrawerOpen((prev) => !prev)}
+            onClick={() => {
+              if (drawerOpen) {
+                // If already open, cycle to next sentence calmly
+                setDrawerFadeState('out');
+                setTimeout(() => {
+                  setDrawerQuoteIndex((prev) => (prev + 1) % KITCHEN_DRAWER_NOTES.length);
+                  setDrawerFadeState('in');
+                }, 250);
+              } else {
+                setDrawerOpen(true);
+              }
+            }}
             role="button"
             tabIndex={0}
-            aria-label="Kitchen cutlery drawer"
+            aria-label={`Kitchen cutlery drawer: ${currentDrawerNote.tag} - ${currentDrawerNote.text}`}
           >
             {drawerOpen ? (
               <g className="animate-fade-in">
@@ -189,11 +237,54 @@ export function KitchenScene({ selected, onChange }: KitchenSceneProps) {
                 <ellipse cx="221.5" cy="342" rx="4" ry="5" fill="none" stroke="#B0BEC5" strokeWidth="1" />
                 {/* Handle */}
                 <rect x="135" y="365" width="30" height="5" rx="2.5" fill="#D4A574" />
+
+                {/* Calm speech balloon above open drawer */}
+                <g transform="translate(25, 238)">
+                  <rect x="0" y="0" width="265" height="66" rx="8" fill="#FAF7F2" stroke="#1B4332" strokeWidth="1.5" />
+                  <polygon points="120,66 128,74 136,66" fill="#FAF7F2" stroke="#1B4332" strokeWidth="1.5" />
+                  <line x1="121" y1="65" x2="135" y2="65" stroke="#FAF7F2" strokeWidth="2.5" />
+                  <text x="12" y="18" fill="#2D6A4F" fontSize="9" fontWeight="bold" fontFamily="sans-serif">
+                    🍴 {currentDrawerNote.tag.toUpperCase()}
+                  </text>
+                  <text
+                    x="12"
+                    y="34"
+                    fill="#1B4332"
+                    fontSize="9.5"
+                    fontWeight="600"
+                    fontFamily="sans-serif"
+                    opacity={drawerFadeState === 'in' ? 1 : 0.25}
+                    className="transition-opacity duration-700 select-none"
+                  >
+                    &ldquo;{currentDrawerNote.text}&rdquo;
+                  </text>
+                  <text x="12" y="50" fill="#6C757D" fontSize="8" fontFamily="sans-serif">
+                    (Changes calmly every 7s · Tap drawer for next)
+                  </text>
+                </g>
               </g>
             ) : (
               <>
                 <rect x="25" y="318" width="250" height="48" rx="4" fill="#245A42" stroke="#1B4332" strokeWidth="1.2" className="group-hover:brightness-105 transition-all" />
                 <rect x="135" y="338" width="30" height="5" rx="2.5" fill="#D4A574" className="group-hover:scale-105 origin-center transition-transform" />
+
+                {/* Subtle calm ambient label on top drawer */}
+                <rect x="35" y="324" width="76" height="12" rx="2" fill="#FAF7F2" fillOpacity="0.88" stroke="#D4A574" strokeWidth="0.6" />
+                <text x="39" y="333" fill="#1B4332" fontSize="7" fontWeight="bold" fontFamily="sans-serif">
+                  📌 {currentDrawerNote.tag}
+                </text>
+                <text
+                  x="35"
+                  y="354"
+                  fill="#E8F5E9"
+                  fontSize="8"
+                  fontWeight="500"
+                  fontFamily="sans-serif"
+                  opacity={drawerFadeState === 'in' ? 0.92 : 0.2}
+                  className="transition-opacity duration-700 select-none"
+                >
+                  {currentDrawerNote.text.length > 38 ? currentDrawerNote.text.slice(0, 36) + '…' : currentDrawerNote.text}
+                </text>
               </>
             )}
           </g>
@@ -758,20 +849,77 @@ export function KitchenScene({ selected, onChange }: KitchenSceneProps) {
         </div>
       )}
 
-      {/* Drawer hint if user opened the cutlery drawer */}
+      {/* Left side dynamic changing sentences card */}
       {drawerOpen && !cabinetOpen && (
-        <div className="p-2.5 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center justify-between text-xs animate-fade-in">
-          <span className="text-on-surface-variant flex items-center gap-2">
-            <span>🍴</span>
-            <span><strong>Cutlery drawer:</strong> Just spoons & whisks here! Try clicking the right cabinet doors ➔</span>
-          </span>
-          <button
-            type="button"
-            onClick={() => setDrawerOpen(false)}
-            className="text-on-surface-variant hover:text-primary font-bold text-xs"
-          >
-            Close
-          </button>
+        <div
+          onMouseEnter={() => setIsDrawerPaused(true)}
+          onMouseLeave={() => setIsDrawerPaused(false)}
+          className="p-3 rounded-2xl bg-surface-container-low border border-outline-variant/40 flex items-center justify-between gap-3 animate-fade-in text-xs"
+        >
+          <div className="flex items-center gap-2.5 min-w-0">
+            <span className="w-8 h-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 text-base">
+              🍴
+            </span>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-label-caps text-[10px] uppercase font-bold tracking-wider text-primary">
+                  {currentDrawerNote.tag}
+                </span>
+                <span className="text-[10px] text-on-surface-variant font-mono">
+                  {drawerQuoteIndex + 1} of {KITCHEN_DRAWER_NOTES.length}
+                </span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-surface-container-high text-on-surface-variant font-medium hidden sm:inline-block">
+                  {isDrawerPaused ? 'Paused' : 'Slow ambient'}
+                </span>
+              </div>
+              <p
+                className={clsx(
+                  'text-xs text-on-surface font-medium transition-opacity duration-700 mt-0.5',
+                  drawerFadeState === 'in' ? 'opacity-100' : 'opacity-25'
+                )}
+              >
+                &ldquo;{currentDrawerNote.text}&rdquo;
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setDrawerFadeState('out');
+                setTimeout(() => {
+                  setDrawerQuoteIndex((prev) => (prev - 1 + KITCHEN_DRAWER_NOTES.length) % KITCHEN_DRAWER_NOTES.length);
+                  setDrawerFadeState('in');
+                }, 200);
+              }}
+              title="Previous note"
+              className="w-7 h-7 rounded-lg border border-outline-variant/50 hover:bg-surface-container text-on-surface-variant flex items-center justify-center text-xs cursor-pointer transition-colors"
+            >
+              ←
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDrawerFadeState('out');
+                setTimeout(() => {
+                  setDrawerQuoteIndex((prev) => (prev + 1) % KITCHEN_DRAWER_NOTES.length);
+                  setDrawerFadeState('in');
+                }, 200);
+              }}
+              title="Next note"
+              className="w-7 h-7 rounded-lg border border-outline-variant/50 hover:bg-surface-container text-on-surface-variant flex items-center justify-center text-xs cursor-pointer transition-colors"
+            >
+              →
+            </button>
+            <button
+              type="button"
+              onClick={() => setDrawerOpen(false)}
+              className="px-2.5 py-1 rounded-lg text-on-surface-variant hover:text-primary font-bold text-xs cursor-pointer transition-colors"
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
 
