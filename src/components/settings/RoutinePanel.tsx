@@ -103,7 +103,7 @@ export function RoutinePanel({
           </Button>
         </div>
         <span className="font-body-sm text-[12px] text-on-surface-variant">
-          Rotates weekly. Only their Tesco account is used — the app never sees card details.
+          Whose Tesco account places the weekly shop and collects payments. Stays with this person unless manually reassigned here.
         </span>
       </form>
 
