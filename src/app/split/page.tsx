@@ -5,7 +5,6 @@ import { ExpensePanel } from '@/components/split/ExpensePanel';
 import { CollectorPanel } from '@/components/split/CollectorPanel';
 import { Notice } from '@/components/ui/Notice';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { PageShell } from '@/components/ui/PageShell';
 import { formatPence } from '@/lib/money';
 import {
   getBasketItems,
@@ -51,15 +50,15 @@ export default async function SplitPage() {
     // and chasing it is the rest of it.
     if (isCollector) {
       return (
-        <PageShell wide>
+        <div className="flex flex-col gap-lg">
           <CollectorPanel splits={postedSplits} basketIsEmpty={basket.length === 0} planStatus={plan?.status ?? 'planning'} />
           {purchases}
-        </PageShell>
+        </div>
       );
     }
 
     return (
-      <PageShell wide>
+      <div className="flex flex-col gap-lg">
         <EmptyState
           icon="receipt_long"
           title={isCollector ? "You're the collector this week" : 'Nothing to settle yet'}
@@ -73,7 +72,7 @@ export default async function SplitPage() {
           }
         />
         {purchases}
-      </PageShell>
+      </div>
     );
   }
 
@@ -83,7 +82,7 @@ export default async function SplitPage() {
   const isCollector = collector?.id === currentUser.id;
 
   return (
-    <PageShell wide>
+    <div className="flex flex-col gap-lg">
       <div className="bg-gradient-to-b from-surface-container-low via-surface-container-lowest to-surface-container-low border border-primary/25 rounded-3xl p-lg md:p-xl shadow-ambient-card flex flex-col items-center justify-center text-center relative overflow-hidden my-sm interactive-card card-glow">
         <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary font-label-caps text-[11px] uppercase tracking-wider font-bold mb-xs border border-primary/20 shadow-xs">
           <Icon name={!split.isPosted ? 'schedule' : plan?.status === 'delivered' ? 'verified' : 'local_shipping'} className="text-sm" />
@@ -204,6 +203,6 @@ export default async function SplitPage() {
           )}
         </div>
       </div>
-    </PageShell>
+    </div>
   );
 }
