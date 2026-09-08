@@ -13,15 +13,17 @@ export function RecipeDetail({
   recipe,
   cookContext = false,
   fixedServings,
+  initialCookMode = false,
 }: {
   recipe: Recipe;
   /** True when the recipe is part of a locked/ordered week — hides editing controls. */
   cookContext?: boolean;
   /** When in cook context, the portion count from the plan (number of participants). */
   fixedServings?: number;
+  initialCookMode?: boolean;
 }) {
   const [servings, setServings] = useState(fixedServings ?? recipe.servings);
-  const [cookModeModalOpen, setCookModeModalOpen] = useState(false);
+  const [cookModeModalOpen, setCookModeModalOpen] = useState(initialCookMode);
   const [done, setDone] = useState<Set<number>>(new Set());
 
   const scale = servings / recipe.servings;

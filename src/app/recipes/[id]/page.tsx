@@ -25,8 +25,20 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-export default async function RecipePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function RecipePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams?: Promise<{ cook?: string }>;
+}) {
   const { id } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const isCookMode =
+    resolvedSearchParams.cook === 'true' ||
+    resolvedSearchParams.cook === '1' ||
+    resolvedSearchParams.cook === 'mode';
+
   const [recipe, plan] = await Promise.all([
     getRecipe(id),
     getWeeklyPlan(),
@@ -102,7 +114,12 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
         )}
       </div>
 
-      <RecipeDetail recipe={recipe} cookContext={isCookContext} fixedServings={cookServings} />
+      <RecipeDetail
+        recipe={recipe}
+        cookContext={isCookContext}
+        fixedServings={cookServings}
+        initialCookMode={isCookMode}
+      />
     </PageShell>
   );
 }

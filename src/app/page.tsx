@@ -210,11 +210,11 @@ export default async function FeedPage() {
                 {mouths === 1 ? ' person' : ' people'}.
               </p>
               <Link
-                href={`/recipes/${cookingTonight[0].recipeId}`}
+                href={`/recipes/${cookingTonight[0].recipeId}?cook=true`}
                 className="inline-flex items-center gap-xs mt-xs text-secondary font-bold text-[14px] hover:underline btn-tactile"
               >
-                Open the recipe
-                <Icon name="chevron_right" className="text-[18px]" />
+                <span>Start Cook Mode</span>
+                <Icon name="skillet" className="text-[18px]" />
               </Link>
             </div>
           </Card>
