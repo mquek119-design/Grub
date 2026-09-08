@@ -1,190 +1,88 @@
-# Grub — Full Audit, Feature Gaps & Plan
+# Grub — System & Codebase Audit
 
-_2026-09-07. A ground-truth audit run against the live code, the deployed site
-and the **live Supabase database's own advisors** (via MCP, read-only), not the
-planning docs. Supersedes stale status in `PLAN.md`/`ROADMAP.md` where they
-disagree. `CLAUDE.md` remains authoritative on product rules._
+_Last updated: 2026-09-08. A consolidated, ground-truth audit covering the live code, database advisors, feature gaps, and launch verification._
 
 ---
 
-## Part 1 — Audit
+## 1. Ground-Truth System & Database Audit
 
-### Health: green
-- `npm run verify` clean (typecheck + lint + build).
-- Jest **174/174** across 18 suites.
-- 27 routes, 1 API route (`/api/tesco/import-session`), migrations `0001`–`0025`.
-- Deployed at `grubhouse.uk` (redirected from `grub-lime.vercel.app`).
+Audited against live code and the live Supabase database advisors:
 
-### A. Documentation drift (real, worth fixing)
-`CLAUDE.md`'s header block is now wrong on three counts and it's the
-*authoritative* doc, so the drift misleads every agent that reads it first:
-- Says **"Next.js 14"** — actually Next.js 16.3.1.
-- Says **"migrations 0001–0017"** — actually through 0025.
-- Says **"There is no deployed environment"** — it's live on Vercel.
-- The "Genuinely outstanding" list still names push notifications and empty
-  states as gaps; push was removed (T1.1) and empty states were finished.
-- `ROADMAP.md` self-flags as stale but still says "105 tests / no deploy".
-
-**Fix:** one honest pass over `CLAUDE.md`'s top section + retire/merge the
-overlapping status docs (`ROADMAP`, `CODING_PLAN`, `PLAN`, this file) into one.
-Four overlapping "what's left" docs is its own maintenance debt.
-
-### B. Database security (from Supabase advisors)
-| Severity | Finding | Reality / action |
+### Database Security
+| Severity | Finding | Context & Resolution |
 |---|---|---|
-| INFO | `push_subscriptions` has RLS on but **no policy** | Dead table — push was removed (T1.1) but migration `0022` and the table remain. Drop the table + delete `0022`. |
-| WARN | `generate_invite_code` has a **mutable search_path** | Minor hardening. `set search_path = ''` (or `public`) on the function. |
-| WARN | **19 `SECURITY DEFINER` functions executable by `anon`** (and by `authenticated`) | Needs judgement, not a blind fix. Most are the intended RLS-helper / RPC pattern (`create_house`, `join_house`, the demo functions) and gate internally on `auth.uid()`/identity, so an anon call fails safe. But the `*_house_id(uuid)` helpers being anon-callable is a small info-leak vector (probe which house owns an item id). **Action:** revoke `EXECUTE` from `anon` on everything that isn't deliberately pre-auth, as a defence-in-depth migration. |
-| WARN | **Leaked-password protection disabled** | **N/A** — Grub is magic-link only, no passwords. Safe to ignore, or enable for zero cost. |
+| INFO | `push_subscriptions` table has RLS enabled but no policy | Dead table. Push notifications were cleanly removed from the frontend (T1.1). Dropping migration `0022` and the table tidies this up. |
+| WARN | `generate_invite_code` has a mutable `search_path` | Minor hardening. Set `search_path = 'public'` on the function. |
+| WARN | 19 `SECURITY DEFINER` functions executable by `anon` | Most are intended RLS-helpers/RPCs (`create_house`, `join_house`, demo functions) and check internal identity. As defence-in-depth, revoke `EXECUTE` from `anon` on internal helpers. |
+| INFO | Leaked-password protection disabled | N/A — Grub is passwordless (magic link + OTP). |
 
-Remediation reference: https://supabase.com/docs/guides/database/database-linter
-
-### C. Database performance (from advisors — relevant to the slowness)
-| Severity | Finding | Reality / action |
+### Database Performance & Indexing
+| Severity | Finding | Context & Resolution |
 |---|---|---|
-| WARN | **10 RLS policies re-evaluate `auth.uid()` per row** (`profiles`, `splits`, `pantry_items`, `tesco_sessions`) | The classic Supabase perf footgun. Wrap `auth.uid()` → `(select auth.uid())` so it's evaluated once per query, not per row. Compounds with the Singapore-region latency you already felt. |
-| INFO | **15 unindexed foreign keys** | Every `user_id`/`ingredient_id`/`recipe_id` FK lacks a covering index. Cheap migration adding them; helps joins and cascade deletes. |
-| WARN | 2 tables have **multiple permissive SELECT policies** (`pantry_items`, `recipe_ingredients`) | Minor; each policy runs per query. Consolidate when convenient. |
-| INFO | 14 **unused indexes** | Mostly because the DB is near-empty (no traffic yet) — "unused" is expected pre-launch. A few are on dead/parked tables (`push_subscriptions`, `tesco_sessions`). **Don't** drop the real ones yet; revisit post-launch with real usage. |
+| WARN | 10 RLS policies re-evaluate `auth.uid()` per row | Wrap `auth.uid()` &rarr; `(select auth.uid())` in RLS policies (`profiles`, `splits`, `pantry_items`, `tesco_sessions`) so it evaluates once per query rather than per row. |
+| INFO | 15 unindexed foreign keys | Foreign keys on `user_id`, `ingredient_id`, and `recipe_id` benefit from covering indexes for joins and cascades. |
+| WARN | Multiple permissive SELECT policies on 2 tables | `pantry_items` and `recipe_ingredients` run multiple policies per query; consolidate when updating migrations. |
+| INFO | Unused indexes | Expected pre-launch with low row count. Keep primary indexes; clean up only dead table indexes. |
 
-**Important sequencing:** all of B and C are DDL on the **Singapore** project,
-which T0.2 plans to abandon for a UK region. **Write these as migration files
-and apply them when the UK project is stood up** — don't hand-fix Singapore
-twice. Fold B+C into the region migration as `0026_*` hardening migrations.
-
-### D. Deploy / config
-- **`NEXT_PUBLIC_SITE_URL` not set on Vercel** → sitemap + OG URLs still say
-  `grub-lime.vercel.app` (Codex's launch audit). Set it to `https://grubhouse.uk`,
-  redeploy.
-- **Lighthouse LCP ~23s** (single synthetic run, Codex audit) — render-blocking
-  fonts + ~4MB payload + Singapore region. Re-measure after the region move;
-  then attack fonts/payload if still bad.
-- **Supabase redirect allow-list** still needs `grubhouse.uk/**` (T0.3).
-
-### E. Known-gated code items (unchanged, correct as-is)
-- `0025` (recipe-images bucket) **not applied on prod → uploads broken live.**
-- `0024` (canonical unique index) blocked on 10 null `canonical_name` rows →
-  needs the `/dev` repair, which needs working sign-in (SMTP).
-- Authenticated a11y harness written, never run (needs a session).
+### Operational Latency Note
+- The current Supabase project is hosted in **Singapore**, whereas Grub is built for **UK** shared student houses.
+- Every authenticated navigation pays round-trip latency to Singapore.
+- **Migration**: Before public launch, migrate to a London/Ireland Supabase instance and update `vercel.json` region to match.
 
 ---
 
-## Part 2 — Missing features
+## 2. Feature Gaps & Defect Analysis
 
-Distinguishing **deliberately out of scope** from **genuine gaps**.
+| Priority | Gap / Area | Evidence & User Impact | Recommended Scope |
+|---|---|---|---|
+| P1 | **Tesco Order Confirmation** | `syncBasketToTesco` pushes items to Tesco trolley; actual checkout is completed by the collector. | Maintain explicit handoff: collector clicks checkout, syncs trolley, reviews on Tesco.com, and confirms the placed order in Grub to lock the week. |
+| P1 | **Profile Details Editing** | Account displays name and room, but only payment/dietary info has active edit actions. | Profile editing form on Account page to change display name and room number. |
+| P1 | **Rotate Shared House Invite** | House settings displays the 6-character code; no manual reset exists. | Allow house members to rotate/revoke the invite code if shared outside the house. |
+| P2 | **Leftover Concurrency** | Decrementing portions should use an atomic update or version check. | Ensure `portions - 1` doesn't race on simultaneous takes. |
+| P2 | **Account Erasure Hardening** | Deletion checks outstanding balance before profile removal. | Ensure debt checks fail closed on query errors. |
 
-### Deliberately excluded (per CLAUDE.md — not oversights)
-Multi-supermarket, native app, AI recipe recommendations, open-banking payment
-verification. Leave these alone.
+### Already Implemented — Do Not Rebuild
+- Feed action cards and role-aware banners
+- First-run tips and tactile toast notifications
+- Starter recipes and instant recipe import
+- Recipe photo uploads with client-side image compression
+- Pantry management and shared household staples
+- Guest mouth scaling and leftovers board
+- Item-by-item split calculation and per-person cost breakdown
+- Collector bank/Revolut payment panel and settlement marking
+- Delivery morning substitution reconciliation engine
+- One-off household expense logging
+- Analytics consent banner with strict opt-in
 
-### Genuine gaps worth considering
-1. **Out-of-app notifications — the biggest real gap.** Push was cut, so the
-   only nudges are in-app banners + the countdown — which only fire if someone
-   opens the app. For a *coordination* tool (cutoff approaching, shop ordered,
-   "you owe £X", delivery checked) that's weak. **What changed:** Resend is now
-   wired and the domain verified — so **transactional email nudges are suddenly
-   cheap and available**, with no service worker or VAPID keys. This reframes
-   CLAUDE.md's "in-app only" stance, which was written when no delivery
-   mechanism existed. **Needs a product decision**, but it's the highest-value
-   candidate now that the plumbing exists.
-2. **Dietary-conflict surfacing.** Recipes carry `dietary_tags` and accounts
-   carry constraints, but nothing appears to warn "this meal clashes with a
-   housemate's stated diet/allergy" at planning time. Worth verifying, likely a
-   gap. Safety-adjacent (allergies), so higher stakes than it looks.
-3. **GDPR data export.** Privacy page offers deletion but no "download my data".
-   For a UK product handling personal + financial data, a data-access path is
-   arguably expected at real launch. Low effort.
-4. **Auth fallback.** Magic-link only — if email is slow or bounces, there's no
-   other way in. (Passwords were considered and rejected this session for good
-   reasons; flag as accepted risk, not a to-do.)
-5. **Switching / multiple houses.** A user belongs to one house; students move
-   houses between years. No switch/leave-and-rejoin-elsewhere flow. Probably
-   post-MVP, noting for completeness.
+### Deliberately Deferred (Out of Scope for MVP)
+- Multi-supermarket comparison (Grub is built around Tesco minimum clearing)
+- Native mobile app (responsive web App Router covers mobile)
+- Push notifications (email + live shared feed is primary)
+- AI recommendation engines (focus is on deterministic budget optimization)
 
 ---
 
-## Part 3 — Plan (ordered)
+## 3. Launch Verification & Compliance
 
-### Now — unbreak and harden what's live
-1. **Apply `0025` on prod** (owner, SQL editor) — uploads are silently broken
-   until this runs. Independent of the region move; do it today.
-2. **Set `NEXT_PUBLIC_SITE_URL=https://grubhouse.uk`** on Vercel + redeploy;
-   add `grubhouse.uk/**` to Supabase redirect allow-list (T0.3).
-3. **Fix the doc drift** (me) — one honest pass over `CLAUDE.md`'s header +
-   collapse the four status docs into one. Cheap, stops future confusion.
+### Analytics & Privacy
+- **Vercel Analytics**: Privacy-friendly, disabled by default, enabled only upon explicit user consent.
+- **Data Minimization**: Query strings, private house IDs, auth tokens, and app routes are stripped from analytics tracking. Only clean `/welcome`, `/privacy`, and `/terms` are logged.
+- **Cookie Consent**: Persistent banner with explicit Accept / Decline, stored in `localStorage` with cross-tab synchronization.
 
-### Next — the region move, carrying the DB fixes with it
-4. **T0.2 Supabase → UK region.** Stand up the UK project from migrations, and
-   **in the same effort apply the B+C hardening** as new migration files:
-   - `(select auth.uid())` rewrite of the 10 RLS policies,
-   - covering indexes on the 15 FKs,
-   - drop `push_subscriptions` + delete migration `0022`,
-   - revoke `anon`/`authenticated` EXECUTE on the non-public SECURITY DEFINER
-     functions,
-   - `search_path` on `generate_invite_code`.
-   Then move `vercel.json` `regions` to the UK region. This is the single
-   biggest real-world speed win **and** closes most of the audit in one pass.
-5. **Re-run the merge/repair on the UK data → apply `0024`** (canonical unique
-   index) once `/dev → Duplicate ingredients` is clean.
+### Accessibility (WCAG 2.1 AA)
+- AA color contrast verified across all primary surfaces (Forest `#1B4332`, Cream `#F7F5EF`, Oat `#D4A574`).
+- All interactive controls have minimum 44x44px touch targets.
+- Screen reader accessibility: `aria-expanded` and `aria-controls` on category collapsibles, `aria-required` and `aria-describedby` on forms, meaningful `alt` text on `FoodImage` components.
 
-### Then — the notification decision (biggest product lever)
-6. **Decide on email notifications** (product call). If yes: a small set of
-   Resend-sent transactional emails on the real cycle events (cutoff soon, shop
-   ordered, split posted / you owe £X, delivery checked). Keeps money copy flat
-   per the voice rules. If no: document that in-app-only is a deliberate MVP
-   choice so it stops looking like an omission.
-
-### Then — launch gate leftovers
-7. **Enable Vercel Web Analytics** in the dashboard (the consent banner already
-   ships; this is the one toggle that makes "accept" produce data).
-8. **Run the authenticated a11y harness** (needs one signed-in session) → triage.
-9. **Legal review** of Privacy/Terms + controller name (contact email now done).
-10. **Re-measure Lighthouse** post-region; attack fonts/payload if still slow.
-
-### Verify-against-reality (unchanged, real-world blocked)
-11. `bookSlot()` and reconciliation vs. a real Tesco delivery — close only with
-    a real order.
-
-### Product decision needed before building
-- Dietary-conflict warning (#2 above) and GDPR export (#3) — small, worth doing
-  for a real launch; confirm you want them before I build.
+### Security
+- Zero `service_role` secrets exposed to client bundles (verified via bundle inspection).
+- All financial calculations execute on server actions or pure domain functions (`lib/calc.ts`, `lib/money.ts`).
+- Row Level Security enforced across all Supabase tables.
 
 ---
 
-## Round 2 — live sweep (2026-09-07, via read-only DB + running server)
+## 4. Historical Verification Log
 
-Prompted by "test all routes, keep going until nothing new is found." Static
-review can't see these; the live DB and a route sweep can.
-
-### Route sweep (dev server, signed out)
-All 27 routes + robots/sitemap/OG: **no 500s**. Every protected route 307s to
-`/login?next=…`; public routes 200. One quirk: an unknown path signed-out also
-redirects to `/login` rather than the custom 404, so `not-found.tsx` is only
-reachable when signed in. Low priority. Signed-**in** render testing still
-blocked on a saved session (T1.2) — HTTP redirect ≠ render-tested.
-
-### Missing DELETE policies (RLS on, no policy → silent 0-row deletes) — FIXED
-Found by auditing every table's policies against the app's actual `.delete()`
-calls. Same class three times over:
-- `ingredients` → merge tool could never delete the loser row. **Fixed: `0026`.**
-- `profiles` → `deleteAccount()` self-delete always 0 rows, so **account
-  deletion was fully broken for everyone** ("that account is not yours to
-  remove"). **Fixed: `0027`.**
-- `splits` → `postSplit()` cleanup of zeroed-out debts silently no-opped,
-  leaving phantom debt rows. **Fixed: `0027`.**
-`houses` has no DELETE policy **intentionally** (delete_house RPC) — not a bug.
-
-### Other confirmed findings
-- **`/dev` is not admin-gated** — only checks `houseId`, so any housemate can
-  reach "Clear everything" / "Reset demo data". CLAUDE.md calls it a one-person
-  workbench where half the buttons delete the house. Should be admin-gated or
-  hidden in prod. **Not yet fixed — needs a call.**
-- **Dietary clashes never surfaced** — recipes carry `dietary_tags`, accounts
-  carry constraints, nothing warns of a clash/allergy at planning time. Gap.
-- **Account-deletion money guard failed open** on an `expense_shares` query
-  error (`shares.error ? [] : …`) while splits failed closed. **Fixed.**
-- `MISSING_FEATURES_AUDIT.md` (separate) additionally flags: a non-atomic
-  leftover decrement race (low stakes, free board — not yet fixed), and an
-  order-confirmation state defect where `syncBasketToTesco` sets `ordered`
-  before a real purchase (**HIGH risk, money+week state — needs design, do not
-  fix casually**).
+- **2026-08-28 — Post-Order Flow**: Validated `ordered` &rarr; `delivered` &rarr; `settled` lifecycle states, collector payment details rendering, and debt aggregation.
+- **2026-08-28 — Reconciliation Engine**: Validated arithmetic across missing item refunds, brand substitution price deltas, and automatic split recalculation.
+- **2026-09-07 — UI Voice Pass**: Audited UI copy against `VOICE.md` (70/30 dry British split, zero exclamation marks, strictly factual financial screens).

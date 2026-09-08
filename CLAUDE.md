@@ -8,37 +8,24 @@ The core insight: the buying unit is the household (3–5 students), not the ind
 
 ## Stack
 
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Language**: TypeScript (strict)
 - **Styling**: Tailwind CSS
-- **Database**: Supabase (Postgres + Auth + Realtime) — live, migrations `0001`–`0017`
-- **Deployment**: Vercel
+- **Database**: Supabase (Postgres + Auth + Realtime) — live, migrations `0001`–`0025`
+- **Deployment**: Vercel — live at `grub-lime.vercel.app`
 - **Tesco integration**: `lib/tesco/` — a vendored private fork of uk-grocery-cli
 
 ## Current State
 
-Working end to end on localhost: auth, onboarding, the two-week plan, the
-overlap optimiser against live Tesco prices, slot selection, the posted split,
-reconciliation, staples, guests, leftovers and one-off purchases. `npm run
-verify` is clean. There is no deployed environment.
+Working end to end: auth, onboarding, two-week plan, overlap optimiser against live Tesco prices, slot selection, posted split, reconciliation, staples, guests, leftovers and one-off purchases. `npm run verify` is clean; Jest 18/18 test suites passing (174 tests). Deployed on Vercel.
 
-**Genuinely outstanding**, and none of it is a UI job:
+**Genuinely outstanding** (see `PLAN.md` for the master backlog and launch gate):
 
-- **`bookSlot()` has never been executed.** Listing and pricing slots is
-  verified against the live API; reserving one is coded and untried.
-- **Reconciliation has never met a real delivery.** The money rules are
-  implemented and exercised by `/dev` → Simulate delivery, but no Tesco van has
-  ever tested them.
-- **Ingredient names still need autocomplete at entry.** `canonicalName()`
-  (`src/lib/ingredients.ts`) now folds case, leading qualifiers and plurals, so
-  "chicken breasts" reuses the "Chicken breast" row. What it cannot catch is a
-  difference in the middle — "Lettuce" vs "Cos lettuce" — which is what the
-  merge tool on `/dev` is for. Suggesting existing names as a recipe is typed
-  would stop those being created at all.
-- **A new house starts empty**, so every screen is an empty state until someone
-  writes a recipe. The weakest ten minutes in the product.
-- **No push notifications.** No service worker, no manifest. `FEATURES.md` has
-  the copy; the delivery mechanism does not exist.
+- **`bookSlot()` has never been executed against live Tesco.** Listing and pricing slots is verified against the live API; reserving one is coded and untried.
+- **Reconciliation has never met a real delivery.** The money rules are implemented and exercised by `/dev` → Simulate delivery, but no physical Tesco van has tested them.
+- **Supabase region migration**: Supabase is hosted in Singapore; migrating to London/Ireland is the primary performance lever before public launch.
+- **Tesco order confirmation**: Formalizing the collector order placement and verification handoff.
+- **Full email integration**: Resend custom SMTP configured; future React Email architecture documented in `docs/email.md`.
 
 ### No figure is ever invented. This is the rule the product rests on.
 
@@ -564,7 +551,7 @@ ring at all. None of that was a decision.
 
 ## Designing new screens
 
-The UI is built by hand, not generated. `mockups/STITCH-PROMPT.md` remains as a
+The UI is built by hand, not generated. `mockups/README.md` remains as a
 written specification of every screen — palette, type, shape and a
 screen-by-screen description — which is useful for briefing a designer or
 checking a screen still matches its intent. Its "what to ignore" list is the

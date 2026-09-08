@@ -1,134 +1,88 @@
-# Grub — Master Plan: everything unfinished
+# Grub — Master Plan & Launch Gate
 
-_Written 2026-09-07. This is the single consolidated view of what is left,
-superseding the scattered "what's next" in `ROADMAP.md`, `CODING_PLAN.md` and
-`LAUNCH_CHECKLIST.md` where they disagree with it (those three are now partly
-stale — e.g. ROADMAP still says "no deployed environment" and "105 tests"; the
-app is deployed at `grub-lime.vercel.app` and the suite is 169 tests). Read
-`CLAUDE.md` first; it remains authoritative on product rules._
+_Last updated: 2026-09-08. This is the single consolidated view of what is left, serving as the master backlog and launch checklist. Read `CLAUDE.md` for architecture and product rules; read `VOICE.md` for copy guidelines._
 
-## True current state (verified 2026-09-07)
+## True Current State
 
-- **Deployed** to Vercel at `grub-lime.vercel.app`; auto-deploys on push to
-  `main`. Function region pinned to `sin1` via `vercel.json` to match the
-  Supabase project (which is in Singapore — see T0.2).
-- `npm run verify` clean; Jest **169/169** passing.
-- CODING_PLAN items 1–8 all shipped, including recipe photo uploads (#7) and
-  the written-but-unapplied `canonical_name` unique index (#5).
-- The UI-inspiration pass (Mob / OffLimits / Fly By Jing / Magic Spoon) shipped:
-  recipe-card photo badges, Forest colour blocks on onboarding chrome, a marquee
-  on the empty recipe book.
-- Custom domain `grubhouse.uk` registered (Cloudflare), pointed at Vercel; Resend
-  email domain verified; Supabase custom SMTP being wired.
+- **Deployed** to Vercel at `grub-lime.vercel.app`; auto-deploys on push to `main`.
+- **Function region** pinned to `sin1` via `vercel.json` to match the Singapore Supabase project (see T0.2 for planned migration).
+- **Test suite**: `npm run verify` is clean; Jest **18/18 suites, 174/174 tests** passing.
+- **Recipe photo uploads & image compression**: Client-side downscaling and compression active (`src/lib/imageCompression.ts`).
+- **Brand & Aesthetics**: Custom favicon (`icon.svg`), OpenGraph preview card, and tactile design system.
+- **Analytics & Consent**: Opt-in Vercel Analytics with privacy controls and cookie banner (`src/components/privacy/AnalyticsConsent.tsx`).
+- **Custom Domain & Email**: `grubhouse.uk` registered on Cloudflare; Resend domain verified; full email roadmap in `docs/email.md`.
+- **Basket & Flow Overhaul**: Collapsible categories, instant search filter, 2-column brand swaps, and streamlined right-hand summary.
 
 ---
 
-## Tier 0 — Owner-only / operational (I cannot do these; they gate launch)
+## Tier 0 — Operational & Configuration (Requires Owner / Dashboard)
 
-These need dashboard access or a real-world action. Nothing in code blocks them.
-
-| # | Task | Why it matters | Notes |
-|---|------|----------------|-------|
-| T0.1 | **Finish Supabase custom SMTP** (Resend) | Magic-link sign-in currently errors / hits the shared rate limit | Host must be `smtp.resend.com` (was typo'd `stmp`). Sender `@grubhouse.uk`. Then send a test link. Full custom email architecture plan documented in `docs/email-system-plan.md`. |
-| T0.2 | **Migrate Supabase to a UK/EU region** | Biggest real-world speed lever. Project is in Singapore; Grub is for UK students. Every navigation pays a Singapore round trip. | New project in London/Ireland, migrate schema + data, then change `vercel.json` `regions` to match in the same commit. LAUNCH_CHECKLIST #21. |
-| T0.3 | **Supabase redirect-URL allow-list** | The "requested path is invalid" magic-link error | Add `https://grub-lime.vercel.app/**` (and the `grubhouse.uk` equivalent once that's the live host) under Authentication → URL Configuration. |
-| T0.4 | **Run migrations `0024` + `0025` on prod** | `0025` (recipe-images bucket + RLS) must run or uploads fail; `0024` (canonical unique index) only after the merge tool is clean — see T1.3 | `0025` can run now; `0024` is data-gated. |
-| T0.5 | **Point `grubhouse.uk` at the app (optional)** | Nicer than `grub-lime.vercel.app` for real users | Vercel → Domains; Cloudflare DNS record must be "DNS only" (grey cloud), not proxied, or Vercel's SSL breaks. |
-| T0.6 | **Authorise the Claude GitHub App (optional)** | The scheduled cloud routine does work but can't push | `github.com/apps/claude/installations/select_target`. Only needed if you want the cloud agent to commit on its own. |
+| # | Task | Why it matters | Action Required |
+|---|---|---|---|
+| T0.1 | **Supabase Custom SMTP** | Eliminates shared 30/hr rate limit and ensures reliable sign-in delivery | Host: `smtp.resend.com`, sender `@grubhouse.uk`. Refer to `docs/email.md`. |
+| T0.2 | **Migrate Supabase to UK/EU Region** | Biggest real-world performance lever (current project is in Singapore) | Create project in London/Ireland, migrate schema + data, update `vercel.json` `regions` to match. |
+| T0.3 | **Supabase Redirect URLs** | Prevents "requested path is invalid" errors | Add `https://grub-lime.vercel.app/**` and `https://grubhouse.uk/**` in Supabase Auth settings. |
+| T0.4 | **Run Migrations 0024 + 0025 on Prod** | Storage bucket for photos (`0025`) and canonical name uniqueness (`0024`) | Apply `0025` now; apply `0024` after running the ingredient merge tool clean on `/dev`. |
+| T0.5 | **Point `grubhouse.uk` at Vercel** | Production custom domain for users | Vercel &rarr; Domains. Set Cloudflare DNS record to "DNS only" (grey cloud). |
 
 ---
 
-## Tier 1 — Genuinely unfinished in the codebase (I can do these)
+## Tier 1 — Codebase Tasks & Audits
 
-### T1.1 — Push notifications: DONE (Option a)
-**State:** RESOLVED. Removed half-built push notification code (`PushNotificationSetup.tsx`, `service-worker.js`, `src/app/api/push/subscribe/route.ts`, `src/lib/pushNotifications.ts`) and removed the component from `src/app/layout.tsx`. Scope is now clean and fully aligned with `CLAUDE.md` MVP rules.
+### T1.1 — Push Notifications: REMOVED (Clean MVP)
+**Status: Complete.** Removed half-built push notification code and service worker to keep MVP lean and focused on core web flows.
 
-### T1.2 — Authenticated-route a11y harness: RUN IT
-**State:** the Playwright spec exists (`src/__tests__/e2e/a11y-authenticated.spec.ts`,
-axe + skip-link over Plan/Recipes/Basket/Split) but self-skips with no saved
-session. **Blocked only on a one-time human step:** run `npm run e2e:auth`,
-finish the magic-link sign-in in the opened browser, then `npm run e2e:a11y`.
-Once a session exists I can act on whatever it flags. ~0 build effort; it's a
-"press go" task, then triage.
+### T1.2 — Authenticated Route Accessibility Harness
+**Status: Ready to run.** Playwright spec (`src/__tests__/e2e/a11y-authenticated.spec.ts`) covers Plan/Recipes/Basket/Split with axe. Run `npm run e2e:auth` once to save a session, then run `npm run e2e:a11y`.
 
-### T1.3 — `canonical_name` unique index: apply the gate
-**State:** migration `0024` written but deliberately unapplied. The `/dev →
-Duplicate ingredients` tool now reports both duplicate clusters and stale
-stored keys. **Task:** run the merge tool against prod until it reports clean,
-then apply `0024` (T0.4). Data-gated, owner-run, but I can help verify the tool
-output. ~0 code.
+### T1.3 — Canonical Name Unique Index Gate
+**Status: Migration 0024 prepared.** Run the `/dev` &rarr; Duplicate ingredients tool against production data until clean, then apply migration 0024.
 
-### T1.4 — Image compression on upload: DONE
-**State:** RESOLVED. Created client-side image compression utility (`src/lib/imageCompression.ts`) that downscales photo uploads to max 1600px and re-encodes as JPEG/WebP (~0.8 quality). Integrated into `RecipeForm.tsx` before form submission.
+### T1.4 — Client-Side Image Compression
+**Status: Complete.** Photos downscaled to max 1600px and re-encoded before upload in `RecipeForm.tsx`.
 
-### T1.5 — Uploaded-photo alt text audit: DONE
-**State:** RESOLVED. Audited all `FoodImage` call sites (`RecipeBrowser`, `WeekPlan`, `FirstMealModal`, `RecipeForm`, `BasketView`, `BrandSwapModal`, `AddItemPanel`) to ensure `src` properties are correctly passed and alt text is meaningful and screen-reader accessible.
+### T1.5 — Food Image Alt Text Audit
+**Status: Complete.** Meaningful alt text and decorative attributes audited across all `FoodImage` call sites.
 
-### T1.6 — UI Copy Audit & Voice Adoption (`voice.md`): DONE
-**State:** RESOLVED. Audited and updated UI copy across components (`FirstMealModal`, `RecipeForm`, empty balance states, pantry, and recipes) to strictly conform to `voice.md` guidelines (70/30 British voice split, zero exclamation marks, deadpan empty state copy, and zero jokes on money screens).
+### T1.6 — Voice & Tone Audit
+**Status: Complete.** Copy aligned with `VOICE.md` (70/30 dry British split, zero exclamation marks, strictly factual financial screens).
 
 ---
 
-## Tier 2 — Launch gate (LAUNCH_CHECKLIST; mix of build + owner)
+## Tier 2 — Pre-Launch Checklist
 
-**7 September update:** analytics/consent and public form-error associations
-are implemented locally; the live public-route, link, metadata, bundle-signature
-and Lighthouse audits have run. See `TIER2_AUDIT.md` for evidence and limitations.
-Legal review/contact details, Vercel Analytics activation, deployment verification,
-canonical-domain configuration and authenticated form testing remain open.
+Legend: ✅ Done · 🟡 Partial / Verify at Deploy · 🏠 Handled by Host (Vercel)
 
-- **Legal review of Privacy + Terms (#1, #2)** — drafts exist and are flagged
-  "pending legal review"; needs a real controller/contact and a human legal
-  pass. Owner. Blocking a *public* launch, not a private test.
-- **Cookie consent banner (#5)** + **analytics (#19)** — none yet. Do as a pair.
-  Vercel Analytics is ~one line and privacy-friendly; consent banner ties to the
-  Privacy page. I can build both. ~half a day.
-- **Deploy-time audits (#3, #6, #7, #9, #12, #16, #17)** — cheap, need the live
-  URL: grep the client bundle for secrets, verify OG image renders, verify
-  robots/sitemap return 200 signed-out with production URLs, run Lighthouse
-  against the deployed site, sweep for broken links, check form-validation
-  parity. Mostly me + a live URL. ~half a day total.
-
----
-
-## Tier 3 — Blocked on the real world (cannot be closed by code)
-
-- **`bookSlot()`** — reserving a Tesco slot is coded but never executed against
-  the live API. Needs a real collector session + UK address.
-- **Reconciliation vs. a real delivery** — money rules are unit-tested and
-  exercised via `/dev → Simulate delivery`, but have never met an actual Tesco
-  van. Closes only with a real order and a real delivery.
-- **Tesco session storage (migration 0023)** — DB-backed session storage exists;
-  its real exercise is the same blocked real-order path.
-
-These are verification-against-reality, not building. Don't treat them as code
-tasks.
+| # | Item | Status | Notes |
+|---|---|---|---|
+| 1 | Privacy policy page | 🟡 | Live at `/privacy`; needs final controller contact info before public launch. |
+| 2 | Terms & conditions page | 🟡 | Live at `/terms`; legal review before public launch. |
+| 3 | Secrets off the frontend | ✅ | Verified: no `service_role` in `NEXT_PUBLIC_`; Tesco code is server-only. |
+| 4 | Force HTTPS | 🏠 | Handled automatically by Vercel + HSTS. |
+| 5 | Cookie consent banner | ✅ | Implemented in `src/components/privacy/AnalyticsConsent.tsx` with persistent opt-in. |
+| 6 | Meta titles + descriptions | ✅ | Static pages and dynamic recipe metadata configured. |
+| 7 | Social preview image | ✅ | Branded OpenGraph card implemented in `src/app/opengraph-image.tsx`. |
+| 8 | Favicon | ✅ | SVG favicon at `src/app/icon.svg`. |
+| 9 | Sitemap & robots.txt | ✅ | Generated dynamically, excluding authenticated routes. |
+| 10 | Alt text on images | ✅ | Audited across all food cards, avatars, and icons. |
+| 11 | Image compression | ✅ | Client-side compression active on uploads (`src/lib/imageCompression.ts`). |
+| 12 | Performance (Lighthouse) | 🟡 | ~100 locally; re-verify against production domain once UK region is live. |
+| 13 | Color contrast (WCAG AA) | ✅ | Verified on all primary Forest Green and Cream surfaces. |
+| 14 | Mobile friendly | ✅ | Mobile-first (375px) responsive layouts with tactile touch targets. |
+| 15 | Custom 404 page | ✅ | Live at `src/app/not-found.tsx`. |
+| 16 | Form validation | ✅ | Real-time validation, required attributes, and accessible error states. |
+| 17 | Analytics | ✅ | Privacy-friendly Vercel Analytics with strict user opt-in. |
+| 18 | Call to action | ✅ | Clear Sign up / Sign in CTAs on `/welcome`. |
 
 ---
 
-## Explicitly out of scope (per CLAUDE.md — not oversights)
+## Tier 3 — Real-World Verification (Requires Live Order)
 
-Multi-supermarket, native mobile app, AI recipe recommendations, open-banking
-payment verification. And **push notifications** unless T1.1 decides otherwise.
+- **`bookSlot()`**: Reserving a Tesco slot is implemented; verify against live Tesco API with a real address during the first actual shop.
+- **Delivery Morning Reconciliation**: Reconciliation engine is unit-tested and simulated in `/dev`; closes with the first physical Tesco delivery.
+- **Tesco Session Storage**: DB-backed session persistence (migration `0023`) exercises alongside the first live order.
 
 ---
 
-## Recommended order
-
-1. **Unblock sign-in** (T0.1 SMTP, T0.3 redirect URLs) — nothing can be tested
-   with real accounts until magic links work.
-2. **T1.1 decision** on push — resolve the scope contradiction before it rots
-   further (I recommend rip-out or document-as-parked).
-3. **T1.4 + T1.5** (image compression + alt audit) — small, mine, close out the
-   loose ends the uploads feature left.
-4. **T1.2** a11y harness run (needs your one-time session) → I triage findings.
-5. **Tier 2** launch gate: analytics/consent + deploy-time audits.
-6. **T0.2** the Supabase UK-region migration — before announcing publicly; it's
-   the difference between fast and broken for the actual audience.
-7. **Legal review** (#1/#2) — the last gate before a truly public launch.
-8. **Tier 3** closes itself the first time a real house runs a real shop.
-
-## The rule that governs all of it
-
-No figure is ever invented. Every screen reads a real row or shows an honest
-empty state. Keep it that way.
+## Out of Scope (Deliberate MVP Boundaries)
+Multi-supermarket price comparison, native iOS/Android apps, AI recipe generation, and open-banking bank scraping.

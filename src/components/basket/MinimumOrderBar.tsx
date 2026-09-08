@@ -1,6 +1,5 @@
 import { Icon } from '@/components/media/Icon';
 import { Card } from '@/components/ui/Card';
-import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
 import type { Pence } from '@/lib/types';
 

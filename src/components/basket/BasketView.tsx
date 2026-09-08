@@ -5,7 +5,6 @@ import { Avatar } from '@/components/avatars/Avatar';
 import { FoodImage } from '@/components/media/FoodImage';
 import { Icon } from '@/components/media/Icon';
 import { Card } from '@/components/ui/Card';
-import { Notice } from '@/components/ui/Notice';
 import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
 import { basketLineTotal, basketSavings, basketTotal } from '@/lib/calc';
