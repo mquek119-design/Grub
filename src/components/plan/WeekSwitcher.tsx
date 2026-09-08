@@ -58,7 +58,7 @@ export function WeekSwitcher({
     <div
       role="tablist"
       aria-label="Which week"
-      className="grid grid-cols-2 gap-xs p-1 rounded-xl bg-surface-container-low border border-surface-container-highest"
+      className="grid grid-cols-2 gap-1.5 p-1.5 rounded-2xl bg-surface-container-low border border-surface-container-highest shadow-xs"
     >
       {options.map((option) => {
         const active = option.key === week;
@@ -69,25 +69,25 @@ export function WeekSwitcher({
             role="tab"
             aria-selected={active}
             className={clsx(
-              'flex flex-col gap-0.5 px-md py-sm rounded-lg transition-colors',
+              'flex flex-col gap-0.5 px-md py-sm rounded-xl transition-all duration-200 btn-tactile',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               active
-                ? 'bg-surface-container-lowest shadow-ambient-card'
-                : 'hover:bg-surface-container'
+                ? 'bg-surface-container-lowest shadow-ambient-card border border-primary/25 font-semibold'
+                : 'hover:bg-surface-container/70 opacity-75 hover:opacity-100'
             )}
           >
             <span className="flex items-center gap-xs min-w-0">
               <Icon
                 name={option.icon}
                 className={clsx(
-                  'text-[16px] shrink-0',
+                  'text-[17px] shrink-0',
                   active ? 'text-primary' : 'text-on-surface-variant'
                 )}
               />
               <span
                 className={clsx(
                   'font-title-md text-title-md truncate',
-                  active ? 'text-on-surface' : 'text-on-surface-variant'
+                  active ? 'text-on-surface font-bold' : 'text-on-surface-variant'
                 )}
               >
                 {option.label}

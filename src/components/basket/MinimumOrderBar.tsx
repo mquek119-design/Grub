@@ -27,37 +27,43 @@ export function MinimumOrderBar({
   const fraction = minimum > 0 ? Math.min(1, total / minimum) : 1;
   const label = method === 'collect' ? 'Click & Collect' : 'Delivery';
 
-  // When minimum is comfortably met, keep it compact and quiet
+  // When minimum is comfortably met, keep it compact and celebratory
   if (met) {
     return (
-      <div className="flex items-center justify-between px-md py-sm rounded-xl bg-surface-container-low border border-outline-variant/40 text-on-surface text-xs shadow-xs">
-        <span className="flex items-center gap-1.5 font-medium">
-          <Icon name="check_circle" filled className="text-primary text-base" />
-          <span>Clears Tesco {label} minimum ({formatPence(minimum)})</span>
+      <div className="flex items-center justify-between px-md py-2.5 rounded-2xl bg-gradient-to-r from-primary-fixed/50 via-surface-container-lowest to-primary-fixed/25 border border-primary/25 text-on-surface text-xs shadow-xs interactive-card">
+        <span className="flex items-center gap-2 font-medium">
+          <span className="size-6 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+            <Icon name="check_circle" filled className="text-primary text-base" />
+          </span>
+          <span>
+            <strong className="text-primary font-bold">Goal met!</strong> Clears Tesco {label} minimum ({formatPence(minimum)})
+          </span>
         </span>
-        <span className="font-numeric-data font-bold text-primary">{formatPence(total)}</span>
+        <span className="font-numeric-data font-bold text-primary px-2.5 py-0.5 rounded-full bg-primary-fixed border border-primary/20">
+          {formatPence(total)}
+        </span>
       </div>
     );
   }
 
   // When under the threshold, display prominent shortfall alert and progress bar
   return (
-    <Card accent="secondary" className="flex flex-col gap-sm animate-fade-in">
+    <Card accent="secondary" className="flex flex-col gap-sm animate-fade-in interactive-card card-glow">
       <div className="flex items-start justify-between gap-md">
         <div className="min-w-0">
-          <h2 className="font-title-md text-title-md flex items-center gap-xs text-secondary">
-            <Icon name="error" filled className="text-secondary" />
+          <h2 className="font-title-md text-title-md flex items-center gap-xs text-secondary font-bold">
+            <Icon name="error" filled className="text-secondary text-[20px]" />
             {formatPence(shortfall)} short of {label} minimum
           </h2>
           <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
             Tesco {label} requires at least {formatPence(minimum)}. Currently at{' '}
-            <strong className="font-numeric-data">{formatPence(total)}</strong>. Add a few household items or snacks to qualify.
+            <strong className="font-numeric-data text-on-surface">{formatPence(total)}</strong>. Add household staples or snacks to qualify.
           </p>
         </div>
       </div>
 
       <div
-        className="w-full h-2.5 bg-surface-container-highest rounded-full overflow-hidden"
+        className="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden p-0.5 border border-outline-variant/40"
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={minimum}
@@ -65,7 +71,7 @@ export function MinimumOrderBar({
         aria-label={`Progress toward the ${label} minimum`}
       >
         <div
-          className="h-full rounded-full transition-all duration-500 bg-secondary"
+          className="h-full rounded-full transition-all duration-500 bg-gradient-to-r from-secondary via-secondary to-primary shadow-xs"
           style={{ width: `${fraction * 100}%` }}
         />
       </div>

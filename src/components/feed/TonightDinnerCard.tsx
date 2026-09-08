@@ -38,14 +38,14 @@ export function TonightDinnerCard({
   const cleaner = meal.cleanerUserId ? byId.get(meal.cleanerUserId) : undefined;
 
   return (
-    <Card className="flex flex-col gap-sm border-l-4 border-l-primary bg-gradient-to-br from-surface-container-lowest to-surface-container-low/60">
+    <Card className="flex flex-col gap-sm border-l-4 border-l-primary bg-gradient-to-br from-surface-container-lowest via-surface-container-lowest to-primary-fixed/25 interactive-card card-glow">
       <div className="flex items-center justify-between gap-sm">
         <span className="flex items-center gap-1.5 font-label-caps text-label-caps uppercase font-bold text-primary tracking-wider">
           <Icon name={MEAL_TYPE_ICONS[meal.mealType]} className="text-sm" />
           <span>Tonight&apos;s {MEAL_TYPE_LABELS[meal.mealType]}</span>
         </span>
         {joined ? (
-          <Badge tone="solid-primary" className="text-[11px]">
+          <Badge tone="solid-primary" className="text-[11px] shadow-xs">
             YOU&apos;RE IN
           </Badge>
         ) : (
@@ -55,18 +55,18 @@ export function TonightDinnerCard({
         )}
       </div>
 
-      <div className="flex items-start gap-md mt-0.5">
-        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-surface-container-high border border-outline-variant/40">
+      <div className="flex items-start gap-md mt-0.5 group">
+        <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-surface-container-high border border-outline-variant/40 shadow-xs">
           <FoodImage
             src={recipe?.imageUrl ?? null}
             seed={meal.recipeTitle}
             alt={meal.recipeTitle}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
         </div>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-title-md text-title-md font-bold text-on-surface truncate">
+          <h3 className="font-title-md text-title-md font-bold text-on-surface truncate group-hover:text-primary transition-colors">
             {meal.recipeTitle}
           </h3>
           <p className="font-body-sm text-xs text-on-surface-variant mt-0.5">
@@ -105,7 +105,7 @@ export function TonightDinnerCard({
         </span>
         <Link
           href={`/plan#day-${meal.day}`}
-          className="text-xs font-bold text-primary hover:underline flex items-center gap-0.5 btn-tactile"
+          className="text-xs font-bold text-primary hover:text-primary-container px-3 py-1 rounded-full bg-primary/8 hover:bg-primary/15 transition-all flex items-center gap-1 btn-tactile"
         >
           <span>{isCook ? 'Cook mode' : joined ? 'Manage sitting' : 'Join sitting'}</span>
           <Icon name="arrow_forward" className="text-sm" />

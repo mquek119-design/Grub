@@ -28,19 +28,26 @@ export function BottomNav({ basketHasUpdates = false }: BottomNavProps) {
             href={tab.href}
             aria-current={isActive ? 'page' : undefined}
             className={clsx(
-              'relative flex flex-col items-center justify-center transition-transform duration-200 active:scale-90 p-2 rounded-lg',
+              'relative flex flex-col items-center justify-center transition-all duration-150 active:scale-[0.88] px-2 py-1 rounded-xl',
               isActive
                 ? 'text-secondary font-bold'
                 : 'text-[#A3C4A8] hover:text-white'
             )}
           >
-            <Icon name={tab.icon} className="text-[20px]" />
+            <div
+              className={clsx(
+                'flex items-center justify-center rounded-full transition-all duration-200',
+                isActive ? 'w-11 h-7 bg-white/12 border border-white/10 shadow-xs' : 'w-11 h-7'
+              )}
+            >
+              <Icon name={tab.icon} className="text-[20px]" />
+            </div>
             {tab.href === '/basket' && basketHasUpdates && !isActive && (
-              <span className="absolute top-2 right-4 w-2.5 h-2.5 bg-[#E07A5F] rounded-full border-2 border-primary" title="Missing pack prices">
+              <span className="absolute top-1 right-3 w-2.5 h-2.5 bg-[#E07A5F] rounded-full border-2 border-primary animate-pulse" title="Missing pack prices">
                 <span className="sr-only">Missing pack prices</span>
               </span>
             )}
-            <span className="font-label-caps text-[10px] tracking-wide mt-1">
+            <span className="font-label-caps text-[10px] tracking-wide mt-0.5">
               {tab.label}
             </span>
           </Link>

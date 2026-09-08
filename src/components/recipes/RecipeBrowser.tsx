@@ -465,9 +465,9 @@ export function RecipeBrowser({
                   type="button"
                   onClick={() => setChosen(recipe)}
                   className={clsx(
-                    'group w-full h-full text-left bg-surface-container-lowest rounded-xl border border-surface-container-highest',
-                    'shadow-ambient-card overflow-hidden flex flex-col transition-all',
-                    'hover:border-primary/50 hover:shadow-md hover:-translate-y-0.5 active:translate-y-0',
+                    'group w-full h-full text-left bg-surface-container-lowest rounded-2xl border border-surface-container-highest',
+                    'shadow-ambient-card overflow-hidden flex flex-col transition-all duration-300',
+                    'hover:border-primary/50 hover:shadow-lg hover:-translate-y-1 active:translate-y-0 active:scale-[0.99]',
                     'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface-0'
                   )}
                 >
@@ -476,11 +476,11 @@ export function RecipeBrowser({
                       seed={recipe.id}
                       src={recipe.imageUrl}
                       alt={recipe.title}
-                      className="w-full h-24 text-[32px] transition-transform duration-200 group-hover:scale-105"
+                      className="w-full h-28 sm:h-32 text-[32px] transition-transform duration-500 ease-out group-hover:scale-105"
                     />
-                    <span className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-black/25 to-transparent" />
+                    <span className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/30 to-transparent" />
                     {badges.length > 0 && (
-                      <span className="absolute top-1 left-1 flex flex-wrap gap-1">
+                      <span className="absolute top-1.5 left-1.5 flex flex-wrap gap-1">
                         {badges.map((badge) => (
                           <Badge key={badge.label} tone="photo" icon={badge.icon}>
                             {badge.label}
@@ -490,7 +490,7 @@ export function RecipeBrowser({
                     )}
                   </span>
                   <span className="p-sm flex flex-col gap-xs flex-1">
-                    <span className="font-body-lg text-body-lg font-semibold leading-tight line-clamp-2">
+                    <span className="font-body-lg text-body-lg font-semibold leading-tight line-clamp-2 group-hover:text-primary transition-colors">
                       {recipe.title}
                     </span>
                     <span className="font-body-sm text-[12px] text-on-surface-variant flex items-center gap-xs flex-wrap mt-auto">
@@ -510,8 +510,9 @@ export function RecipeBrowser({
                       )}
                     </span>
                     {inPantry > 0 && (
-                      <span className="font-label-caps text-label-caps uppercase text-primary">
-                        {inPantry} already in the pantry
+                      <span className="font-label-caps text-[11px] uppercase tracking-wider text-primary font-bold bg-primary/10 rounded-full px-2 py-0.5 inline-flex items-center gap-1 self-start mt-0.5">
+                        <Icon name="kitchen" className="text-[12px]" />
+                        {inPantry} in pantry
                       </span>
                     )}
                   </span>

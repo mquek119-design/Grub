@@ -151,17 +151,17 @@ const MealRow = memo(function MealRow({
   const ownerName = owner ? byId.get(owner)?.name : undefined;
 
   return (
-    <article className={clsx('flex flex-col gap-xs px-md py-sm', joined && 'bg-primary-fixed/25')}>
+    <article className={clsx('flex flex-col gap-xs px-md py-sm transition-all duration-200', joined ? 'bg-primary-fixed/30 border-l-2 border-l-primary' : 'hover:bg-surface-container-low/50')}>
       <div className="flex items-center gap-sm min-w-0">
         <Link
           href={`/recipes/${meal.recipeId}`}
-          className="shrink-0 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          className="shrink-0 rounded-xl overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-xs group"
         >
           <FoodImage
             seed={meal.recipeId}
             src={recipe?.imageUrl}
             alt={meal.recipeTitle}
-            className="w-11 h-11 rounded-lg text-[20px]"
+            className="w-12 h-12 rounded-xl text-[20px] object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </Link>
 
@@ -173,8 +173,8 @@ const MealRow = memo(function MealRow({
               <Icon name={MEAL_TYPE_ICONS[meal.mealType]} className="text-[13px]" />
               {MEAL_TYPE_LABELS[meal.mealType]}
             </span>
-            <Link href={`/recipes/${meal.recipeId}`} className="min-w-0 hover:underline flex items-center gap-xs">
-              <h4 className="font-title-md text-title-md text-on-surface leading-tight truncate">
+            <Link href={`/recipes/${meal.recipeId}`} className="min-w-0 hover:underline flex items-center gap-xs group">
+              <h4 className="font-title-md text-title-md text-on-surface leading-tight truncate group-hover:text-primary transition-colors">
                 {meal.recipeTitle}
               </h4>
               {full && <Badge tone="error">FULL</Badge>}
@@ -283,7 +283,7 @@ const MealRow = memo(function MealRow({
                 onClick={() => setOptionsOpen(true)}
                 aria-label={`Options for ${meal.recipeTitle}`}
                 className={clsx(
-                  'w-9 h-9 rounded-full transition-colors flex items-center justify-center',
+                  'w-9 h-9 rounded-full transition-all flex items-center justify-center btn-tactile active:scale-90',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                   askedMe
                     ? 'bg-secondary-fixed text-on-secondary-fixed'

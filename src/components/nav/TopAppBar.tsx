@@ -25,7 +25,7 @@ export function TopAppBar({ currentUser, basketNeedsAttention = false }: TopAppB
       </Link>
 
       {/* Desktop navigation tabs */}
-      <nav aria-label="Primary" className="hidden md:flex items-center gap-lg h-full">
+      <nav aria-label="Primary" className="hidden md:flex items-center gap-sm h-full">
         {TABS.map((tab) => {
           const isActive = active === tab.href;
           return (
@@ -34,14 +34,18 @@ export function TopAppBar({ currentUser, basketNeedsAttention = false }: TopAppB
               href={tab.href}
               aria-current={isActive ? 'page' : undefined}
               className={clsx(
-                'flex items-center gap-2 transition-colors duration-200',
-                isActive ? 'text-secondary font-bold' : 'text-[#A3C4A8] hover:text-white'
+                'flex items-center gap-2 px-3.5 py-1.5 rounded-full font-title-md text-[14px] btn-tactile transition-all duration-200',
+                isActive
+                  ? 'nav-pill-active font-bold'
+                  : 'nav-pill-idle font-medium'
               )}
             >
-              <Icon name={tab.icon} className="text-[20px]" />
-              <span className="font-title-md text-title-md">{tab.label}</span>
+              <Icon name={tab.icon} className="text-[18px]" />
+              <span>{tab.label}</span>
               {tab.href === '/basket' && basketNeedsAttention && (
-                <span className="size-2 rounded-full bg-secondary" title="Missing pack prices">
+                <span className="relative flex size-2" title="Missing pack prices">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-secondary opacity-75" />
+                  <span className="relative inline-flex rounded-full size-2 bg-secondary" />
                   <span className="sr-only">Missing pack prices</span>
                 </span>
               )}

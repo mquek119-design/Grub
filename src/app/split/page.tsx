@@ -83,10 +83,10 @@ export default async function SplitPage() {
 
   return (
     <>
-      <div className="bg-gradient-to-b from-surface-container-low to-surface-container-lowest border border-primary/20 rounded-3xl p-lg md:p-xl shadow-ambient-card flex flex-col items-center justify-center text-center relative overflow-hidden my-sm">
-        <div className="flex items-center gap-xs px-md py-1 rounded-full bg-primary/10 text-primary font-label-caps text-[11px] uppercase tracking-wider font-bold mb-xs border border-primary/20">
+      <div className="bg-gradient-to-b from-surface-container-low via-surface-container-lowest to-surface-container-low border border-primary/25 rounded-3xl p-lg md:p-xl shadow-ambient-card flex flex-col items-center justify-center text-center relative overflow-hidden my-sm interactive-card card-glow">
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary font-label-caps text-[11px] uppercase tracking-wider font-bold mb-xs border border-primary/20 shadow-xs">
           <Icon name={!split.isPosted ? 'schedule' : plan?.status === 'delivered' ? 'verified' : 'local_shipping'} className="text-sm" />
-          {!split.isPosted ? 'Live Basket Estimate' : plan?.status === 'delivered' ? 'Delivery Verified' : 'Order Placed'}
+          <span>{!split.isPosted ? 'Live Basket Estimate' : plan?.status === 'delivered' ? 'Delivery Verified' : 'Order Placed'}</span>
         </div>
         <p className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-widest mb-xs font-semibold">
           Week {plan?.weekNumber ?? ''} Settlement
@@ -99,7 +99,7 @@ export default async function SplitPage() {
         </div>
         <p className="font-body-md text-body-md text-on-surface-variant max-w-md mx-auto flex items-center justify-center gap-xs">
           <span>Collector:</span>
-          <span className="font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded-md">{collector.name}</span>
+          <span className="font-bold text-on-surface bg-surface-container px-2 py-0.5 rounded-md border border-outline-variant/40">{collector.name}</span>
         </p>
       </div>
 

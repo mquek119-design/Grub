@@ -42,6 +42,27 @@
   .btn-tactile:active {
     transform: translateY(0.5px) scale(0.98);
   }
+  .nav-pill-active {
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    color: #FDECD0;
+  }
+  .nav-pill-idle {
+    color: #A3C4A8;
+    border: 1px solid transparent;
+  }
+  .nav-pill-idle:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+  .card-glow {
+    box-shadow: 0 4px 20px -2px rgba(27, 67, 50, 0.08), 0 0 0 1px rgba(27, 67, 50, 0.05);
+  }
+  .card-glow:hover {
+    box-shadow: 0 8px 30px -4px rgba(27, 67, 50, 0.14), 0 0 0 1px rgba(27, 67, 50, 0.1);
+  }
 }
 
 @supports (padding-bottom: env(safe-area-inset-bottom)) {

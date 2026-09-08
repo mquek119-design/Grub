@@ -141,10 +141,10 @@ export default async function FeedPage() {
               : { href: '/plan?week=next', label: 'Plan next week' }}
           />
         ) : (
-          <Card padded={false} className="overflow-hidden">
+          <Card padded={false} className="overflow-hidden interactive-card card-glow">
             <div className="p-md flex items-center justify-between gap-sm border-b border-surface-container-highest">
-              <h2 className="font-title-md text-title-md text-on-surface">This Week&apos;s Plan</h2>
-              <Badge tone="solid-primary" className="font-numeric-data text-numeric-data">
+              <h2 className="font-title-md text-title-md text-on-surface font-bold">This Week&apos;s Plan</h2>
+              <Badge tone="solid-primary" className="font-numeric-data text-numeric-data shadow-xs">
                 {sharedMealCount} Shared Meal{sharedMealCount === 1 ? '' : 's'}
               </Badge>
             </div>
@@ -160,16 +160,19 @@ export default async function FeedPage() {
                     .flatMap((meal) => meal.participants.map((p) => byId.get(p.userId)))
                     .filter((user): user is NonNullable<typeof user> => Boolean(user));
                   const hasHint = plan.overlaps.some((entry) => entry.day === day);
+                  const isToday = day === today;
 
                   return (
                     <li
                       key={day}
-                      className={`flex flex-col items-center gap-xs w-16 md:w-auto rounded-lg py-1 ${
+                      className={`flex flex-col items-center gap-xs w-16 md:w-auto rounded-xl py-2 px-1 transition-all duration-200 ${
+                        isToday ? 'bg-primary/8 border border-primary/25 shadow-xs' : 'hover:bg-surface-container/60'
+                      } ${
                         hasHint ? 'bg-secondary-fixed/30 border border-secondary-container/30' : ''
                       }`}
                     >
                       <span className="font-label-caps text-label-caps text-on-surface-variant flex flex-col items-center leading-tight">
-                        <span>{DAY_SHORT[day]}</span>
+                        <span className={isToday ? 'text-primary font-bold' : ''}>{DAY_SHORT[day]}</span>
                         <span className="font-numeric-data text-[10px] text-on-surface-variant/70 font-semibold">
                           {dayDate(plan.weekStartDate, day)}
                         </span>
@@ -180,7 +183,7 @@ export default async function FeedPage() {
                         <Link
                           href="/plan"
                           aria-label={`Add a meal on ${DAY_SHORT[day]}`}
-                          className="w-10 h-10 rounded-full border border-dashed border-outline-variant flex items-center justify-center text-outline-variant hover:border-primary hover:text-primary transition-colors"
+                          className="w-10 h-10 rounded-full border border-dashed border-outline-variant flex items-center justify-center text-outline-variant hover:border-primary hover:text-primary hover:bg-primary/5 transition-all btn-tactile"
                         >
                           <Icon name="add" className="text-[16px]" />
                         </Link>
@@ -196,19 +199,19 @@ export default async function FeedPage() {
 
       <div className="md:col-span-4 flex flex-col gap-md mt-md md:mt-0">
         {cookingTonight.length > 0 && (
-          <Card accent="secondary" className="flex items-start gap-sm">
+          <Card accent="secondary" className="flex items-start gap-sm interactive-card card-glow">
             <Icon name="skillet" filled className="text-secondary mt-1" />
             <div className="min-w-0">
-              <h3 className="font-title-md text-title-md text-on-surface">
+              <h3 className="font-title-md text-title-md text-on-surface font-bold">
                 You&apos;re cooking tonight
               </h3>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">
+              <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
                 {cookingTonight.map((meal) => meal.recipeTitle).join(' and ')} for {mouths}
                 {mouths === 1 ? ' person' : ' people'}.
               </p>
               <Link
                 href={`/recipes/${cookingTonight[0].recipeId}`}
-                className="inline-flex items-center gap-xs mt-xs text-secondary font-semibold text-[14px] hover:opacity-80"
+                className="inline-flex items-center gap-xs mt-xs text-secondary font-bold text-[14px] hover:underline btn-tactile"
               >
                 Open the recipe
                 <Icon name="chevron_right" className="text-[18px]" />
@@ -218,10 +221,10 @@ export default async function FeedPage() {
         )}
 
         {goingOff.length > 0 && (
-          <Card accent="secondary" className="flex items-start gap-sm">
+          <Card accent="secondary" className="flex items-start gap-sm interactive-card card-glow">
             <Icon name="schedule" filled className="text-secondary mt-1" />
             <div className="min-w-0">
-              <h3 className="font-numeric-data text-numeric-data text-on-surface mb-1">
+              <h3 className="font-numeric-data text-numeric-data text-on-surface mb-1 font-bold">
                 Eat this or bin it
               </h3>
               <p className="font-body-sm text-body-sm text-on-surface-variant">
@@ -238,10 +241,10 @@ export default async function FeedPage() {
         )}
 
         {lowStock.length > 0 && (
-          <Card accent="primary" className="flex items-start gap-sm">
+          <Card accent="primary" className="flex items-start gap-sm interactive-card card-glow">
             <Icon name="info" filled className="text-primary mt-1" />
             <div>
-              <h3 className="font-numeric-data text-numeric-data text-on-surface mb-1">
+              <h3 className="font-numeric-data text-numeric-data text-on-surface mb-1 font-bold">
                 House Staples
               </h3>
               <p className="font-body-sm text-body-sm text-on-surface-variant">
@@ -265,7 +268,7 @@ export default async function FeedPage() {
             body="No one owes anyone anything. Enjoy it while it lasts."
           />
         ) : (
-          <Card padded={false} className="overflow-hidden">
+          <Card padded={false} className="overflow-hidden interactive-card card-glow">
             <PaymentStatusList entries={payments} currentUserId={currentUser.id} />
           </Card>
         )}
