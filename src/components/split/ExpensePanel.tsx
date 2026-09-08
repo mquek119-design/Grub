@@ -74,7 +74,7 @@ function SettleChip({
       ) : (
         <Avatar user={user} size="xs" />
       )}
-      {user.name}{user.room && <span> (Room {user.room})</span>} {formatPence(amount)}
+      {user.name} {formatPence(amount)}
       <Icon
         name={settled ? 'check_circle' : 'radio_button_unchecked'}
         className="text-[14px]"
@@ -110,7 +110,6 @@ function ExpenseRow({
             {payer ? (
               <>
                 {payer.name}
-                {payer.room && <span> (Room {payer.room})</span>}
               </>
             ) : (
               'Someone'
@@ -269,7 +268,6 @@ export function ExpensePanel({
                       <Avatar user={user} size="xs" />
                       <span className="font-body-lg text-body-lg font-semibold">
                         {user.name}
-                        {user.room && <span className="text-on-surface-variant text-[13px]"> (Room {user.room})</span>}
                       </span>
                       {included && <Icon name="check" className="ml-auto text-primary text-[18px]" />}
                     </label>

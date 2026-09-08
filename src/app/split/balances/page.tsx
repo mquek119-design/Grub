@@ -72,11 +72,11 @@ export default async function BalancesPage() {
                         <span className="font-semibold text-on-surface">
                           {entry.fromUserId === currentUser.id
                             ? 'You'
-                            : `${from?.name ?? 'Someone'}${from?.room ? ` (Room ${from.room})` : ''}`}
+                            : from?.name ?? 'Someone'}
                         </span>{' '}
                         <span className="text-on-surface-variant">→</span>{' '}
                         <span className="font-semibold text-on-surface">
-                          {entry.toUserId === currentUser.id ? 'you' : `${to?.name ?? 'someone'}${to?.room ? ` (Room ${to.room})` : ''}`}
+                          {entry.toUserId === currentUser.id ? 'you' : to?.name ?? 'someone'}
                         </span>
                       </p>
                       <p className="font-body-sm text-body-sm text-on-surface-variant truncate">
@@ -149,7 +149,6 @@ export default async function BalancesPage() {
                       <div className="flex-grow min-w-0">
                         <p className="font-title-md text-title-md truncate text-on-surface font-semibold">
                           {user.name}
-                          {user.room && <span className="font-normal text-on-surface-variant"> (Room {user.room})</span>}
                         </p>
                         <p className="font-body-sm text-body-sm text-on-surface-variant">
                           {net === 0 ? 'Settled up' : net > 0 ? 'Is owed' : 'Owes the house'}

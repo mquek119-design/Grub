@@ -9,6 +9,7 @@ import { formatPence } from '@/lib/money';
 import {
   getCurrentUser,
   getHouse,
+  getHousemates,
   getLedger,
   getRealUser,
   getSavings,
@@ -32,12 +33,13 @@ export default async function AccountPage() {
   const currentUser = await getCurrentUser();
   if (!currentUser.houseId) redirect('/onboarding');
 
-  const [user, house, ledger, savings, plan] = await Promise.all([
+  const [user, house, ledger, savings, plan, housemates] = await Promise.all([
     Promise.resolve(currentUser),
     getHouse(),
     getLedger(),
     getSavings(),
     getWeeklyPlan(),
+    getHousemates(),
   ]);
 
   const ordersJoined = new Set(ledger.map((entry) => entry.weekNumber)).size;
@@ -68,7 +70,7 @@ export default async function AccountPage() {
               <Icon name="person" className="text-primary text-lg" />
               Personal Settings
             </h2>
-            <ProfileInfoPanel user={user} />
+            <ProfileInfoPanel user={user} housemates={housemates.filter((h) => h.id !== user.id)} />
             <PaymentDetailsPanel user={user} />
             <DietaryPanel user={user} />
             <Card padded={false} className="overflow-hidden hover:border-outline-variant/60 transition-colors">
@@ -118,14 +120,13 @@ export default async function AccountPage() {
             <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-primary/10 to-transparent pointer-events-none" />
 
             <div className="relative mt-2">
-              <Avatar
-                user={user}
-                size="xl"
-                className="ring-4 ring-surface shadow-md"
-              />
+              <Avatar user={user} size="xl" className="ring-4 ring-primary/20 shadow-lg" />
               {user.isAdmin && (
-                <span className="absolute -bottom-1 -right-1 px-2 py-0.5 rounded-full bg-primary text-on-primary text-[10px] font-bold uppercase tracking-wider shadow-xs">
-                  Admin
+                <span
+                  title="House Lead"
+                  className="absolute bottom-0 right-0 w-6 h-6 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-md text-xs font-bold"
+                >
+                  ★
                 </span>
               )}
             </div>
@@ -135,7 +136,7 @@ export default async function AccountPage() {
                 {user.name}
               </h1>
               <p className="font-body-sm text-body-sm text-on-surface-variant">
-                {user.room ? `Room ${user.room}` : 'No room assigned'} · {house.name}
+                {house.name}
               </p>
               {user.dietaryPreferences.length > 0 && (
                 <div className="flex flex-wrap justify-center gap-1 mt-1.5 max-w-xs">

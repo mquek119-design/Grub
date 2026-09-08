@@ -135,9 +135,6 @@ export function CollectorPanel({
                     <div className="min-w-0">
                       <p className="font-body-lg text-body-lg font-semibold truncate text-on-surface">
                         {entry.user.name}
-                        {entry.user.room && (
-                          <span className="text-on-surface-variant font-normal text-xs"> (Room {entry.user.room})</span>
-                        )}
                       </p>
                       <div className="flex items-center gap-xs mt-0.5">
                         <Badge tone={copy.tone}>{copy.label.toUpperCase()}</Badge>

@@ -160,11 +160,11 @@ export default async function SettingsPage() {
                           </span>
                         )}
                       </div>
-                      <p className="font-body-sm text-body-sm text-on-surface-variant truncate">
-                        {user.room ? `Room ${user.room}` : 'No room assigned'}
-                        {user.dietaryPreferences.length > 0 &&
-                          ` · ${user.dietaryPreferences.join(', ')}`}
-                      </p>
+                      {user.dietaryPreferences.length > 0 && (
+                        <p className="font-body-sm text-body-sm text-on-surface-variant truncate">
+                          {user.dietaryPreferences.join(', ')}
+                        </p>
+                      )}
                     </div>
                     <div className="flex gap-xs shrink-0">
                       {user.id === collector?.id && <Badge tone="solid-primary">Collector</Badge>}

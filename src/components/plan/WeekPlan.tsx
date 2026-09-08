@@ -208,7 +208,7 @@ const MealRow = memo(function MealRow({
               <Icon name="skillet" className="text-[13px]" />
               {cook ? (
                 <>
-                  {cook.name}{cook.room ? ` (Room ${cook.room})` : ''}
+                  {cook.name}
                   {coCook && ` & ${coCook.name}`}
                   {coCook ? ' cook' : ' cooks'}
                 </>

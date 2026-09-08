@@ -6,6 +6,7 @@ import { getCurrentUser, getHouse, getHousemates } from '@/lib/queries';
 import { createClient } from '@/lib/supabase/server';
 import { formatPence } from '@/lib/money';
 import { readViewAsId, viewAsRefusal } from '@/lib/viewAs';
+import { parseAvatarUrl, AVATAR_OPTIONS } from '@/components/avatars/AvatarGlyphs';
 import type { User } from '@/lib/types';
 
 export interface AccountActionState {
@@ -48,7 +49,7 @@ function normaliseAccountNumber(raw: string): string | null | 'invalid' {
   return digits;
 }
 
-/** Updates user display name, room number, avatar accent, and custom avatar photo. */
+/** Updates user display name and avatar. */
 export async function updateProfileInfo(
   _prev: AccountActionState,
   formData: FormData
@@ -56,9 +57,6 @@ export async function updateProfileInfo(
   const me = await getCurrentUser();
 
   const name = String(formData.get('name') ?? '').trim();
-  const roomRaw = String(formData.get('room') ?? '').trim();
-  const room = roomRaw.toLowerCase() === 'n/a' || roomRaw === '' ? null : roomRaw;
-
   const accentRaw = String(formData.get('accent') ?? '').trim();
   const validAccents = ['green', 'orange', 'blue', 'purple', 'rust', 'olive'] as const;
   const accent = (validAccents as readonly string[]).includes(accentRaw)
@@ -66,19 +64,46 @@ export async function updateProfileInfo(
     : undefined;
 
   const avatarUrlRaw = String(formData.get('avatarUrl') ?? '').trim();
-  const avatarUrl = avatarUrlRaw.length > 0 ? avatarUrlRaw : null;
+  const { avatarId } = parseAvatarUrl(avatarUrlRaw);
+  const avatarUrl = avatarId ? `avatar:${avatarId}` : null;
 
   if (!name) return fail('Name is required.');
   if (name.length > 60) return fail('Keep your name under 60 characters.');
 
+  // Check housemate collision rules to avoid confusion
+  if (me.houseId) {
+    const housemates = await getHousemates();
+    const otherHousemates = housemates.filter((h) => h.id !== me.id);
+
+    // 1. Character avatar collision check
+    if (avatarId) {
+      const takenBy = otherHousemates.find(
+        (h) => parseAvatarUrl(h.avatarUrl).avatarId === avatarId
+      );
+      if (takenBy) {
+        const charName = AVATAR_OPTIONS.find((o) => o.id === avatarId)?.name ?? avatarId;
+        return fail(`The "${charName}" avatar is already used by ${takenBy.name}. Please pick another character.`);
+      }
+    }
+
+    // 2. Initial letter + accent colour collision check
+    if (accent) {
+      const myInitial = (name[0] || '').toUpperCase();
+      const conflict = otherHousemates.find(
+        (h) => (h.name.trim()[0] || '').toUpperCase() === myInitial && h.accent === accent
+      );
+      if (conflict) {
+        return fail(`${conflict.name} is already using the ${accent} colour with initial "${myInitial}". Please pick another colour.`);
+      }
+    }
+  }
+
   const updates: {
     name: string;
-    room: string | null;
     accent?: User['accent'];
     avatar_url: string | null;
   } = {
     name,
-    room,
     avatar_url: avatarUrl,
   };
   if (accent) updates.accent = accent;

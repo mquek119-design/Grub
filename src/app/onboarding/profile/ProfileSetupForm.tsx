@@ -1,11 +1,11 @@
 'use client';
 
-import { useActionState, useState, useRef } from 'react';
+import { useActionState, useState, useRef, useEffect } from 'react';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { Icon } from '@/components/media/Icon';
 import { clsx } from '@/lib/clsx';
 import { Stocky } from '@/components/mascot/Stocky';
-import { AvatarGlyph, AVATAR_OPTIONS, type AvatarId } from '@/components/avatars/AvatarGlyphs';
+import { AvatarGlyph, AVATAR_OPTIONS, parseAvatarUrl, type AvatarId } from '@/components/avatars/AvatarGlyphs';
 import { ACCENT_CLASSES } from '@/components/avatars/Avatar';
 import { saveProfilePreferences, type OnboardingState } from '../actions';
 import type { User } from '@/lib/types';
@@ -68,7 +68,14 @@ function getBudgetTier(budget: number) {
   };
 }
 
-export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string }) {
+export function ProfileSetupForm({
+  defaultName = '',
+  housemates = [],
+}: {
+  defaultName?: string;
+  housemates?: User[];
+}) {
+  const otherHousemates = housemates;
   const [state, formAction] = useActionState(saveProfilePreferences, INITIAL);
   const [name, setName] = useState(defaultName);
   const [accent, setAccent] = useState<User['accent']>('green');
@@ -79,6 +86,35 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
   const [customAllergyInput, setCustomAllergyInput] = useState('');
   const [selectedVibes, setSelectedVibes] = useState<string[]>(['speedy', 'budget_king']);
   const customAllergyRef = useRef<HTMLInputElement>(null);
+
+  const myInitial = (name.trim()[0] || defaultName.trim()[0] || 'Y').toUpperCase();
+
+  // If the default accent or current accent is taken by someone with the same initial, pick first untaken
+  useEffect(() => {
+    const isConflict = otherHousemates.some(
+      (h) => h.accent === accent && (h.name.trim()[0] || '').toUpperCase() === myInitial
+    );
+    if (isConflict) {
+      const untaken = ACCENTS.find(
+        (a) => !otherHousemates.some((h) => h.accent === a.id && (h.name.trim()[0] || '').toUpperCase() === myInitial)
+      );
+      if (untaken) {
+        setAccent(untaken.id);
+      }
+    }
+  }, [name, accent, myInitial, otherHousemates]);
+
+  // If avatar is taken, clear it
+  useEffect(() => {
+    if (avatar) {
+      const isTaken = otherHousemates.some(
+        (h) => parseAvatarUrl(h.avatarUrl).avatarId === avatar
+      );
+      if (isTaken) {
+        setAvatar(null);
+      }
+    }
+  }, [avatar, otherHousemates]);
 
   const toggleDiet = (id: string) => {
     setSelectedDiets((prev) =>
@@ -148,65 +184,137 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
 
         {/* Avatar Character Picker */}
         <div className="flex flex-col gap-xs pt-1">
-          <span className="font-body-sm text-xs font-semibold text-on-surface-variant">
-            Choose Your Avatar
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="font-body-sm text-xs font-semibold text-on-surface-variant">
+              Choose Your Avatar
+            </span>
+            {avatar && (
+              <button
+                type="button"
+                onClick={() => setAvatar(null)}
+                className="text-xs text-primary font-semibold hover:underline cursor-pointer"
+              >
+                Use colour initials
+              </button>
+            )}
+          </div>
           <div className="flex items-center gap-3">
             {AVATAR_OPTIONS.map((opt) => {
               const isSelected = avatar === opt.id;
+              const takenBy = otherHousemates.find(
+                (h) => parseAvatarUrl(h.avatarUrl).avatarId === opt.id
+              );
+
               return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => setAvatar(isSelected ? null : opt.id)}
-                  title={`${opt.name} (${opt.subtitle})`}
-                  className={clsx(
-                    'w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer',
-                    isSelected
-                      ? `${accentClass} ring-3 ring-primary ring-offset-2 scale-110 shadow-sm`
-                      : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest hover:scale-105'
-                  )}
-                >
-                  <AvatarGlyph id={opt.id} className="w-6 h-6" />
-                </button>
+                <div key={opt.id} className="flex flex-col items-center gap-1">
+                  <button
+                    type="button"
+                    disabled={Boolean(takenBy)}
+                    onClick={() => {
+                      if (takenBy) return;
+                      setAvatar(isSelected ? null : opt.id);
+                    }}
+                    title={
+                      takenBy
+                        ? `${opt.name} — Taken by ${takenBy.name}`
+                        : `${opt.name} (${opt.subtitle})`
+                    }
+                    className={clsx(
+                      'w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 relative',
+                      takenBy
+                        ? 'opacity-35 cursor-not-allowed bg-surface-container-high text-on-surface-variant/40'
+                        : isSelected
+                        ? `${accentClass} ring-3 ring-primary ring-offset-2 scale-110 shadow-sm cursor-pointer`
+                        : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest hover:scale-105 cursor-pointer'
+                    )}
+                  >
+                    <AvatarGlyph id={opt.id} className="w-6 h-6" />
+                  </button>
+                  <span className="text-[10px] text-center font-medium leading-tight max-w-[56px] truncate">
+                    {takenBy ? (
+                      <span className="text-error/80" title={`Taken by ${takenBy.name}`}>
+                        Taken
+                      </span>
+                    ) : (
+                      <span className="text-on-surface-variant">{opt.name}</span>
+                    )}
+                  </span>
+                </div>
               );
             })}
           </div>
-          {avatar && (
-            <span className="font-body-xs text-[10px] text-on-surface-variant">
-              {AVATAR_OPTIONS.find((o) => o.id === avatar)?.name} — {AVATAR_OPTIONS.find((o) => o.id === avatar)?.subtitle}
-            </span>
-          )}
+          <span className="font-body-xs text-[11px] text-on-surface-variant">
+            {avatar
+              ? `${AVATAR_OPTIONS.find((o) => o.id === avatar)?.name} — ${AVATAR_OPTIONS.find((o) => o.id === avatar)?.subtitle}`
+              : 'Pick a unique character for your flat, or skip to use your colour initials.'}
+          </span>
         </div>
 
         {/* Avatar Colour Accent */}
         <div className="flex flex-col gap-xs pt-1">
-          <span className="font-body-sm text-xs font-semibold text-on-surface-variant">
-            Avatar Colour
-          </span>
-          <div className="flex items-center gap-2.5">
-            {ACCENTS.map((item) => (
-              <label
-                key={item.id}
-                title={item.label}
-                className={clsx(
-                  'w-9 h-9 rounded-full cursor-pointer flex items-center justify-center transition-all',
-                  item.bg,
-                  accent === item.id ? 'ring-3 ring-primary ring-offset-2 scale-110' : 'opacity-80 hover:opacity-100'
-                )}
-              >
-                <input
-                  type="radio"
-                  name="accent"
-                  value={item.id}
-                  checked={accent === item.id}
-                  onChange={() => setAccent(item.id)}
-                  className="sr-only"
-                />
-                {accent === item.id && <Icon name="check" className="text-white text-[16px]" />}
-              </label>
-            ))}
+          <div className="flex items-center justify-between">
+            <span className="font-body-sm text-xs font-semibold text-on-surface-variant">
+              Avatar Colour
+            </span>
+            <span className="text-xs text-on-surface-variant font-medium">
+              Initial &apos;{myInitial}&apos;
+            </span>
           </div>
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+            {ACCENTS.map((item) => {
+              const isSelected = accent === item.id;
+              const takenBy = otherHousemates.find(
+                (h) =>
+                  h.accent === item.id &&
+                  (h.name.trim()[0] || '').toUpperCase() === myInitial
+              );
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  disabled={Boolean(takenBy)}
+                  onClick={() => {
+                    if (!takenBy) setAccent(item.id);
+                  }}
+                  title={
+                    takenBy
+                      ? `${item.label} — Taken by ${takenBy.name} (${myInitial})`
+                      : item.label
+                  }
+                  className={clsx(
+                    'flex flex-col items-center gap-1 p-2 rounded-xl border transition-all text-center relative',
+                    takenBy
+                      ? 'opacity-40 cursor-not-allowed border-outline-variant/30 bg-surface-container-lowest'
+                      : isSelected
+                      ? 'border-primary bg-primary/8 ring-2 ring-primary/30 font-bold shadow-xs cursor-pointer'
+                      : 'border-outline-variant/60 bg-surface-container-lowest hover:bg-surface-container cursor-pointer'
+                  )}
+                >
+                  <span
+                    className={clsx(
+                      'w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs text-white shrink-0 shadow-xs',
+                      item.bg
+                    )}
+                  >
+                    {myInitial}
+                  </span>
+                  <span className="text-[11px] text-on-surface truncate w-full">
+                    {item.label}
+                  </span>
+                  {takenBy && (
+                    <span className="text-[9px] text-error font-medium truncate w-full" title={`Taken by ${takenBy.name}`}>
+                      Taken
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <input type="hidden" name="accent" value={accent} />
+          <span className="font-body-xs text-[11px] text-on-surface-variant">
+            Housemates with the same first initial cannot share the same colour.
+          </span>
         </div>
       </div>
 

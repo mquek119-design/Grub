@@ -68,10 +68,16 @@ const ACCENT_OPTIONS: { key: User['accent']; label: string; bg: string; text: st
 ];
 
 /** Revamped Profile & Avatar Studio Panel. */
-export function ProfileInfoPanel({ user }: { user: User }) {
+export function ProfileInfoPanel({
+  user,
+  housemates = [],
+}: {
+  user: User;
+  housemates?: User[];
+}) {
+  const otherHousemates = housemates.filter((h) => h.id !== user.id);
   const [state, action] = useActionState(updateProfileInfo, INITIAL);
   const [selectedAccent, setSelectedAccent] = useState<User['accent']>(user.accent || 'green');
-  const [avatarUrl, setAvatarUrl] = useState<string>(user.avatarUrl || '');
   const [name, setName] = useState<string>(user.name);
 
   // Parse existing avatar character if set
@@ -79,7 +85,8 @@ export function ProfileInfoPanel({ user }: { user: User }) {
   const [selectedAvatar, setSelectedAvatar] = useState<AvatarId | null>(initialAvatarId);
 
   // Build effective avatar URL for preview and submission
-  const effectiveAvatarUrl = selectedAvatar ? `avatar:${selectedAvatar}` : avatarUrl.trim() || null;
+  const effectiveAvatarUrl = selectedAvatar ? `avatar:${selectedAvatar}` : null;
+  const myInitial = (name.trim()[0] || user.name.trim()[0] || 'Y').toUpperCase();
 
   // Live avatar preview object
   const previewUser = {
@@ -96,7 +103,7 @@ export function ProfileInfoPanel({ user }: { user: User }) {
         <div className="min-w-0">
           <h2 className="font-title-md text-title-md font-bold text-on-surface">Profile & Avatar Studio</h2>
           <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5">
-            Personalise your avatar, display name, and house room shown across rosters and splits.
+            Personalise your avatar and display name shown across rosters and splits.
           </p>
         </div>
       </div>
@@ -104,31 +111,23 @@ export function ProfileInfoPanel({ user }: { user: User }) {
       <form action={action} className="flex flex-col gap-lg">
         {/* Avatar Live Studio Preview */}
         <div className="p-md rounded-2xl bg-surface-container-low border border-outline-variant/40 flex flex-col sm:flex-row items-center gap-md">
-          <div className="relative group">
+          <div className="relative">
             <Avatar user={previewUser} size="xl" className="ring-4 ring-primary/20 shadow-md transition-all duration-300" />
-            {previewUser.avatarUrl && (
-              <button
-                type="button"
-                onClick={() => setAvatarUrl('')}
-                title="Remove custom photo"
-                className="absolute -top-1 -right-1 size-6 rounded-full bg-error text-white grid place-items-center shadow-xs hover:opacity-90 btn-tactile"
-              >
-                <Icon name="close" className="text-xs" />
-              </button>
-            )}
           </div>
           <div className="flex flex-col gap-xs text-center sm:text-left min-w-0 flex-1">
             <span className="font-title-md text-body-lg font-bold text-on-surface truncate">
               {name || 'Your Name'}
             </span>
             <span className="font-body-sm text-xs text-on-surface-variant">
-              {selectedAvatar ? `Using ${AVATAR_OPTIONS.find((o) => o.id === selectedAvatar)?.name} avatar` : previewUser.avatarUrl ? 'Using custom photo URL' : `Using ${selectedAccent} color avatar initials`}
+              {selectedAvatar
+                ? `Using ${AVATAR_OPTIONS.find((o) => o.id === selectedAvatar)?.name} character avatar`
+                : `Using ${selectedAccent} color initials (${myInitial})`}
             </span>
-            {previewUser.avatarUrl && (
+            {selectedAvatar && (
               <button
                 type="button"
-                onClick={() => setAvatarUrl('')}
-                className="text-xs text-error font-semibold underline self-center sm:self-start mt-0.5 hover:opacity-80"
+                onClick={() => setSelectedAvatar(null)}
+                className="text-xs text-primary font-semibold underline self-center sm:self-start mt-0.5 hover:opacity-80 cursor-pointer"
               >
                 Switch to color initials
               </button>
@@ -142,95 +141,130 @@ export function ProfileInfoPanel({ user }: { user: User }) {
 
         {/* Avatar Character Picker */}
         <div className="flex flex-col gap-xs">
-          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold tracking-wider">
-            Avatar Character
-          </span>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center justify-between">
+            <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold tracking-wider">
+              Avatar Character
+            </span>
+            {selectedAvatar && (
+              <button
+                type="button"
+                onClick={() => setSelectedAvatar(null)}
+                className="text-xs text-primary font-semibold hover:underline cursor-pointer"
+              >
+                Clear character (use initials)
+              </button>
+            )}
+          </div>
+          <div className="flex items-center gap-3">
             {AVATAR_OPTIONS.map((opt) => {
               const isSelected = selectedAvatar === opt.id;
+              const takenBy = otherHousemates.find(
+                (h) => parseAvatarUrl(h.avatarUrl).avatarId === opt.id
+              );
+
               return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedAvatar(isSelected ? null : opt.id);
-                    if (!isSelected) setAvatarUrl('');
-                  }}
-                  title={`${opt.name} (${opt.subtitle})`}
-                  className={clsx(
-                    'w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer btn-tactile',
-                    isSelected
-                      ? `${accentClass} ring-2 ring-primary ring-offset-2 scale-110 shadow-sm`
-                      : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest hover:scale-105'
-                  )}
-                >
-                  <AvatarGlyph id={opt.id} className="w-5 h-5" />
-                </button>
+                <div key={opt.id} className="flex flex-col items-center gap-1">
+                  <button
+                    type="button"
+                    disabled={Boolean(takenBy)}
+                    onClick={() => {
+                      if (takenBy) return;
+                      setSelectedAvatar(isSelected ? null : opt.id);
+                    }}
+                    title={
+                      takenBy
+                        ? `${opt.name} — Taken by ${takenBy.name}`
+                        : `${opt.name} (${opt.subtitle})`
+                    }
+                    className={clsx(
+                      'w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 relative',
+                      takenBy
+                        ? 'opacity-35 cursor-not-allowed bg-surface-container-high text-on-surface-variant/40'
+                        : isSelected
+                        ? `${accentClass} ring-2 ring-primary ring-offset-2 scale-110 shadow-sm cursor-pointer btn-tactile`
+                        : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest hover:scale-105 cursor-pointer btn-tactile'
+                    )}
+                  >
+                    <AvatarGlyph id={opt.id} className="w-5 h-5" />
+                  </button>
+                  <span className="text-[10px] text-center font-medium leading-tight max-w-[56px] truncate">
+                    {takenBy ? (
+                      <span className="text-error/80" title={`Taken by ${takenBy.name}`}>
+                        Taken
+                      </span>
+                    ) : (
+                      <span className="text-on-surface-variant">{opt.name}</span>
+                    )}
+                  </span>
+                </div>
               );
             })}
           </div>
           <span className="font-body-sm text-[11px] text-on-surface-variant">
-            Pick a character or leave blank for initials. Characters use your chosen accent colour.
+            Pick a character or leave unselected for your initials. Each housemate must have a unique character.
           </span>
         </div>
 
         {/* Avatar Color Accent Palette */}
         <div className="flex flex-col gap-xs">
-          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold tracking-wider">
-            Avatar Color Accent
-          </span>
+          <div className="flex items-center justify-between">
+            <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold tracking-wider">
+              Avatar Color Accent
+            </span>
+            <span className="text-xs text-on-surface-variant">
+              Initial &apos;{myInitial}&apos;
+            </span>
+          </div>
           <div className="grid grid-cols-3 sm:grid-cols-3 gap-xs">
             {ACCENT_OPTIONS.map((opt) => {
               const isSelected = selectedAccent === opt.key;
+              const takenBy = otherHousemates.find(
+                (h) =>
+                  h.accent === opt.key &&
+                  (h.name.trim()[0] || '').toUpperCase() === myInitial
+              );
+
               return (
                 <button
                   key={opt.key}
                   type="button"
-                  onClick={() => setSelectedAccent(opt.key)}
+                  disabled={Boolean(takenBy)}
+                  onClick={() => {
+                    if (!takenBy) setSelectedAccent(opt.key);
+                  }}
+                  title={
+                    takenBy
+                      ? `${opt.label} — Taken by ${takenBy.name} (${myInitial})`
+                      : opt.label
+                  }
                   className={clsx(
-                    'flex items-center gap-2 p-2 rounded-xl border transition-all btn-tactile text-left',
-                    isSelected
-                      ? 'border-primary bg-primary/8 ring-2 ring-primary/30 font-bold shadow-xs'
-                      : 'border-outline-variant/60 bg-surface-container-lowest hover:bg-surface-container'
+                    'flex items-center gap-2 p-2 rounded-xl border transition-all text-left relative',
+                    takenBy
+                      ? 'opacity-40 cursor-not-allowed border-outline-variant/30 bg-surface-container-lowest'
+                      : isSelected
+                      ? 'border-primary bg-primary/8 ring-2 ring-primary/30 font-bold shadow-xs cursor-pointer btn-tactile'
+                      : 'border-outline-variant/60 bg-surface-container-lowest hover:bg-surface-container cursor-pointer btn-tactile'
                   )}
                 >
                   <span className={clsx('size-6 rounded-full flex items-center justify-center font-bold text-xs shrink-0', opt.bg, opt.text)}>
-                    {(name || 'Y')[0]?.toUpperCase()}
+                    {myInitial}
                   </span>
-                  <span className="font-body-sm text-xs text-on-surface truncate">{opt.label}</span>
+                  <div className="flex flex-col min-w-0 flex-1">
+                    <span className="font-body-sm text-xs text-on-surface truncate">{opt.label}</span>
+                    {takenBy && (
+                      <span className="text-[9px] text-error font-medium truncate" title={`Taken by ${takenBy.name}`}>
+                        Taken by {takenBy.name}
+                      </span>
+                    )}
+                  </div>
                 </button>
               );
             })}
           </div>
+          <span className="font-body-sm text-[11px] text-on-surface-variant">
+            Housemates with the same first initial cannot share the same colour accent.
+          </span>
         </div>
-
-        {/* Custom Avatar Photo URL */}
-        <label className="flex flex-col gap-xs">
-          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold tracking-wider">
-            Custom Photo URL (Optional)
-          </span>
-          <div className="relative">
-            <input
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="https://example.com/your-photo.jpg"
-              className={FIELD}
-            />
-            {avatarUrl && (
-              <button
-                type="button"
-                onClick={() => setAvatarUrl('')}
-                aria-label="Clear photo URL"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-error transition-colors"
-              >
-                <Icon name="close" className="text-sm" />
-              </button>
-            )}
-          </div>
-          <span className="font-body-sm text-[12px] text-on-surface-variant">
-            Paste a public image link or GitHub avatar URL. Leave blank to use your chosen color initials.
-          </span>
-        </label>
 
         {/* Display Name */}
         <label className="flex flex-col gap-xs">
@@ -245,22 +279,6 @@ export function ProfileInfoPanel({ user }: { user: User }) {
             required
             className={FIELD}
           />
-        </label>
-
-        {/* Room Number */}
-        <label className="flex flex-col gap-xs">
-          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold tracking-wider">
-            Room number / name (optional)
-          </span>
-          <input
-            name="room"
-            defaultValue={user.room ?? ''}
-            placeholder="e.g. 4B or N/A"
-            className={FIELD}
-          />
-          <span className="font-body-sm text-[12px] text-on-surface-variant">
-            Type room number or &quot;N/A&quot; / leave blank if you have no room number.
-          </span>
         </label>
 
         <SaveButton label="Save Profile & Avatar" />

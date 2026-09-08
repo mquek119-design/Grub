@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getCurrentUserOrNull } from '@/lib/queries';
+import { getCurrentUserOrNull, getHousemates } from '@/lib/queries';
 import { ProfileSetupForm } from './ProfileSetupForm';
 
 export const metadata = {
@@ -15,6 +15,9 @@ export default async function ProfileSetupPage() {
     redirect('/login?next=/onboarding/profile');
   }
 
+  const housemates = user.houseId ? await getHousemates() : [];
+  const otherHousemates = housemates.filter((h) => h.id !== user.id);
+
   return (
     <main className="min-h-screen flex flex-col justify-center px-4 sm:px-6 py-xl max-w-md mx-auto gap-lg">
       <div className="flex flex-col gap-xs pt-sm">
@@ -29,7 +32,10 @@ export default async function ProfileSetupPage() {
         </p>
       </div>
 
-      <ProfileSetupForm defaultName={user.name === 'Housemate' ? '' : user.name} />
+      <ProfileSetupForm
+        defaultName={user.name === 'Housemate' ? '' : user.name}
+        housemates={otherHousemates}
+      />
     </main>
   );
 }

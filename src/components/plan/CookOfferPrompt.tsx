@@ -95,8 +95,7 @@ function CookOfferCard({ meal, housemates, onRespond, disabled }: CookOfferCardP
         <div>
           <p className="font-semibold text-on-surface">{meal.recipeTitle}</p>
           <p className="text-on-surface-variant text-sm">
-            {cookerName}
-            {cooker?.room && <span> (Room {cooker.room})</span>} is asking you to cook on {dayLabel}{' '}
+            {cookerName} is asking you to cook on {dayLabel}{' '}
             {mealLabel}
           </p>
         </div>

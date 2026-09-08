@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
+import { parseAvatarUrl } from '@/components/avatars/AvatarGlyphs';
 import { WEEKDAYS, type Weekday } from '@/lib/types';
 
 export interface OnboardingState {
@@ -133,7 +134,7 @@ export async function joinHouse(
 }
 
 /**
- * Saves individual housemate profile preferences: room, budget, diets, vibes, accent.
+ * Saves individual housemate profile preferences: budget, diets, vibes, accent, avatar.
  */
 export async function saveProfilePreferences(
   _prev: OnboardingState,
@@ -166,19 +167,61 @@ export async function saveProfilePreferences(
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user) {
-    await supabase
-      .from('profiles')
-      .update({
-        name: name || user.email?.split('@')[0] || 'Housemate',
-        accent: validAccents.includes(accent)
-          ? (accent as any)
-          : 'green',
-        avatar_url: avatarUrl,
-        dietary_preferences: dietaryPreferences,
-      })
-      .eq('id', user.id);
+  if (!user) {
+    redirect('/login');
   }
+
+  // Check housemate collision rules if user is in a house
+  const { data: myProfile } = await supabase
+    .from('profiles')
+    .select('house_id')
+    .eq('id', user.id)
+    .maybeSingle();
+
+  if (myProfile?.house_id) {
+    const { data: housemates } = await supabase
+      .from('profiles')
+      .select('id, name, accent, avatar_url')
+      .eq('house_id', myProfile.house_id)
+      .neq('id', user.id);
+
+    if (housemates && housemates.length > 0) {
+      if (avatarRaw && validAvatars.includes(avatarRaw)) {
+        const takenBy = housemates.find(
+          (h) => parseAvatarUrl(h.avatar_url).avatarId === avatarRaw
+        );
+        if (takenBy) {
+          return {
+            status: 'error',
+            message: `The "${avatarRaw}" avatar is already used by ${takenBy.name}. Please pick another character.`,
+          };
+        }
+      }
+
+      const myInitial = (name[0] || user.email?.[0] || '').toUpperCase();
+      const conflictHousemate = housemates.find(
+        (h) => (h.name?.trim()[0] || '').toUpperCase() === myInitial && h.accent === accent
+      );
+      if (conflictHousemate) {
+        return {
+          status: 'error',
+          message: `${conflictHousemate.name} already uses the ${accent} colour with initial "${myInitial}". Please pick another colour.`,
+        };
+      }
+    }
+  }
+
+  await supabase
+    .from('profiles')
+    .update({
+      name: name || user.email?.split('@')[0] || 'Housemate',
+      accent: validAccents.includes(accent)
+        ? (accent as any)
+        : 'green',
+      avatar_url: avatarUrl,
+      dietary_preferences: dietaryPreferences,
+    })
+    .eq('id', user.id);
 
   revalidatePath('/', 'layout');
   redirect('/');

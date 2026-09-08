@@ -192,7 +192,6 @@ export default async function SplitPage() {
               <PayPanel
                 deliveryChecked={plan?.status === 'delivered'}
                 collectorName={collector.name}
-                collectorRoom={collector.room}
                 payment={collector.payment}
                 splitId={split.isPosted ? split.id : undefined}
                 isNotified={split.status === 'notified' || split.status === 'confirmed'}

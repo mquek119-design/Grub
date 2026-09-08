@@ -13,6 +13,14 @@ import { useToast } from '@/components/ui/Toast';
  * notifies the collector, who confirms or disputes. See CLAUDE.md, "No custody
  * of funds".
  *
+
+/**
+ * Payment details display + "I've Paid".
+ *
+ * The app never holds funds and cannot verify a transfer — marking as paid only
+ * notifies the collector, who confirms or disputes. See CLAUDE.md, "No custody
+ * of funds".
+ *
  * Each detail is a separate row with its own copy button, because that is how
  * they are used: a housemate types the sort code into one box of their banking
  * app and the account number into the next. One combined blob meant copying it
@@ -21,7 +29,6 @@ import { useToast } from '@/components/ui/Toast';
  */
 export function PayPanel({
   collectorName,
-  collectorRoom,
   payment,
   splitId,
   isNotified = false,
@@ -29,7 +36,6 @@ export function PayPanel({
   deliveryChecked,
 }: {
   collectorName: string;
-  collectorRoom?: string | null;
   payment: User['payment'];
   splitId?: string;
   isNotified?: boolean;
@@ -102,7 +108,6 @@ export function PayPanel({
         />
         <h3 className="font-title-md text-title-md text-on-background relative z-10">
           {deliveryChecked && isPosted ? 'Pay' : 'Payment to'} {collectorName}
-          {collectorRoom && <span className="text-on-surface-variant"> (Room {collectorRoom})</span>}
         </h3>
 
         {directPayUrl && (
