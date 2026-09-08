@@ -9,6 +9,7 @@ import { parsePounds } from '@/lib/money';
 import { parseIngredientLine, type ParsedIngredient } from '@/lib/parseIngredient';
 import { parseRecipeFromHtml } from '@/lib/recipeImport';
 import { canonicalName } from '@/lib/ingredients';
+import { formatRecipeTitle, formatInstruction, formatInstructionsList } from '@/lib/recipeFormatting';
 import type { IngredientCategory } from '@/lib/types';
 
 export interface RecipeFormState {
@@ -99,20 +100,23 @@ export async function searchIngredients(query: string): Promise<IngredientSugges
 
   // Deduplicate by canonical_name, keeping the first (most recent) name per canonical
   const seen = new Set<string>();
-  return result.data
-    .filter((row) => {
-      const canonical = row.canonical_name || row.name;
-      if (seen.has(canonical)) return false;
+  const suggestions: IngredientSuggestion[] = [];
+
+  for (const row of result.data) {
+    const canonical = row.canonical_name || row.name;
+    if (!seen.has(canonical)) {
       seen.add(canonical);
-      return true;
-    })
-    .slice(0, 10)
-    .map((row) => ({
-      id: row.id,
-      name: row.name,
-      canonicalName: row.canonical_name || row.name,
-      imageUrl: row.image_url || null,
-    }));
+      suggestions.push({
+        id: row.id,
+        name: row.name,
+        canonicalName: canonical,
+        imageUrl: row.image_url,
+      });
+      if (suggestions.length >= 10) break;
+    }
+  }
+
+  return suggestions;
 }
 
 
@@ -145,8 +149,9 @@ export async function createRecipe(
   const me = await getCurrentUser();
   if (!me.houseId) return { status: 'error', message: 'Join a house first.' };
 
-  const title = String(formData.get('title') ?? '').trim();
-  if (!title) return { status: 'error', message: 'Give the recipe a title.' };
+  const rawTitle = String(formData.get('title') ?? '').trim();
+  if (!rawTitle) return { status: 'error', message: 'Give the recipe a title.' };
+  const title = formatRecipeTitle(rawTitle);
 
   const servings = Number.parseInt(String(formData.get('servings') ?? '4'), 10);
   const cookTime = Number.parseInt(String(formData.get('cookTimeMins') ?? '30'), 10);
@@ -171,10 +176,9 @@ export async function createRecipe(
     };
   }
 
-  const instructions = String(formData.get('instructions') ?? '')
-    .split('\n')
-    .map((step) => step.trim())
-    .filter(Boolean);
+  const instructions = formatInstructionsList(
+    String(formData.get('instructions') ?? '').split('\n')
+  );
 
   const tags = String(formData.get('tags') ?? '')
     .split(',')
@@ -201,6 +205,9 @@ export async function createRecipe(
     ingredientIds.push(result.id);
   }
 
+  const rawProTip = String(formData.get('proTip') ?? '').trim();
+  const proTip = rawProTip ? formatInstruction(rawProTip) : null;
+
   const recipe = await supabase
     .from('recipes')
     .insert({
@@ -215,7 +222,7 @@ export async function createRecipe(
       tags,
       dietary_tags: [],
       instructions,
-      pro_tip: String(formData.get('proTip') ?? '').trim() || null,
+      pro_tip: proTip,
     })
     .select('id')
     .single();
@@ -276,8 +283,9 @@ export async function updateRecipe(
   const recipeId = String(formData.get('recipeId') ?? '');
   if (!recipeId) return { status: 'error', message: 'Missing recipe.' };
 
-  const title = String(formData.get('title') ?? '').trim();
-  if (!title) return { status: 'error', message: 'Give the recipe a title.' };
+  const rawTitle = String(formData.get('title') ?? '').trim();
+  if (!rawTitle) return { status: 'error', message: 'Give the recipe a title.' };
+  const title = formatRecipeTitle(rawTitle);
 
   const servings = Number.parseInt(String(formData.get('servings') ?? '4'), 10);
   const cookTime = Number.parseInt(String(formData.get('cookTimeMins') ?? '30'), 10);
@@ -314,6 +322,13 @@ export async function updateRecipe(
     imagePatch = { image_url: null };
   }
 
+  const instructions = formatInstructionsList(
+    String(formData.get('instructions') ?? '').split('\n')
+  );
+
+  const rawProTip = String(formData.get('proTip') ?? '').trim();
+  const proTip = rawProTip ? formatInstruction(rawProTip) : null;
+
   const updated = await supabase
     .from('recipes')
     .update({
@@ -326,11 +341,8 @@ export async function updateRecipe(
         .split(',')
         .map((tag) => tag.trim())
         .filter(Boolean),
-      instructions: String(formData.get('instructions') ?? '')
-        .split('\n')
-        .map((step) => step.trim())
-        .filter(Boolean),
-      pro_tip: String(formData.get('proTip') ?? '').trim() || null,
+      instructions,
+      pro_tip: proTip,
       ...imagePatch,
     })
     .eq('id', recipeId)

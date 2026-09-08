@@ -6,6 +6,7 @@ import { RecipeDetail } from '@/components/recipes/RecipeDetail';
 import { Badge } from '@/components/ui/Badge';
 import { PageShell } from '@/components/ui/PageShell';
 import { getRecipe, getWeeklyPlan } from '@/lib/queries';
+import { formatRecipeTitle } from '@/lib/recipeFormatting';
 import { WEEKDAY_LABELS, MEAL_TYPE_LABELS } from '@/lib/types';
 
 // Recipes are per-house and behind auth, so there is nothing to prerender —
@@ -15,10 +16,11 @@ export const dynamic = 'force-dynamic';
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const recipe = await getRecipe(id);
+  const formattedTitle = recipe ? formatRecipeTitle(recipe.title) : null;
   return {
-    title: recipe ? `${recipe.title} · Grub` : 'Recipe · Grub',
-    description: recipe
-      ? `View ${recipe.title}, its ingredients, and cooking instructions.`
+    title: formattedTitle ? `${formattedTitle} · Grub` : 'Recipe · Grub',
+    description: formattedTitle
+      ? `View ${formattedTitle}, its ingredients, and cooking instructions.`
       : 'View recipe ingredients and cooking instructions.',
   };
 }
@@ -61,8 +63,8 @@ export default async function RecipePage({ params }: { params: Promise<{ id: str
 
       <div className="flex items-start justify-between gap-sm flex-wrap">
         <div className="flex flex-col gap-xs min-w-0">
-          <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg">
-            {recipe.title}
+          <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg font-bold">
+            {formatRecipeTitle(recipe.title)}
           </h1>
           <div className="flex flex-wrap gap-xs">
             {recipe.tags.map((tag) => (

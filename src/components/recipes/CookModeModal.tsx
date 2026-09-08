@@ -7,6 +7,7 @@ import { clsx } from '@/lib/clsx';
 import type { Recipe } from '@/lib/types';
 import { addLeftover, type LeftoverActionState } from '@/app/leftovers/actions';
 import { useSubmitState } from '@/components/ui/SubmitButton';
+import { formatRecipeTitle, formatInstruction } from '@/lib/recipeFormatting';
 
 interface CookModeModalProps {
   recipe: Recipe;
@@ -91,7 +92,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
               Mob Cook Mode · {servings} Servings
             </span>
             <h2 className="font-title-md text-title-md truncate font-bold text-on-surface">
-              {recipe.title}
+              {formatRecipeTitle(recipe.title)}
             </h2>
           </div>
         </div>
@@ -165,7 +166,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                         isDone ? 'line-through opacity-70' : ''
                       }`}
                     >
-                      {stepText}
+                      {formatInstruction(stepText)}
                     </p>
                   </div>
                 </div>

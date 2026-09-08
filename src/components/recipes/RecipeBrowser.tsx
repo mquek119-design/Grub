@@ -18,6 +18,7 @@ import type { MealType, Recipe, Weekday } from '@/lib/types';
 import type { WeekChoice } from '@/lib/weeks';
 import { MEAL_TYPES, MEAL_TYPE_ICONS, MEAL_TYPE_LABELS, WEEKDAYS, WEEKDAY_LABELS } from '@/lib/types';
 import { useToast } from '@/components/ui/Toast';
+import { formatRecipeTitle } from '@/lib/recipeFormatting';
 
 /**
  * The house recipe book, and the way meals get planned.
@@ -184,7 +185,9 @@ function QuickAddSheet({
             className="w-14 h-14 rounded-lg text-[24px] shrink-0"
           />
           <div className="min-w-0 flex-1">
-            <h3 className="font-title-md text-title-md leading-tight">{recipe.title}</h3>
+            <h3 className="font-title-md text-title-md leading-tight">
+              {formatRecipeTitle(recipe.title)}
+            </h3>
             <p className="font-body-sm text-body-sm text-on-surface-variant">
               {recipe.cookTimeMins} min · serves {recipe.servings}
             </p>
@@ -491,7 +494,7 @@ export function RecipeBrowser({
                   </span>
                   <span className="p-sm flex flex-col gap-xs flex-1">
                     <span className="font-body-lg text-body-lg font-semibold leading-tight line-clamp-2 group-hover:text-primary transition-colors">
-                      {recipe.title}
+                      {formatRecipeTitle(recipe.title)}
                     </span>
                     <span className="font-body-sm text-[12px] text-on-surface-variant flex items-center gap-xs flex-wrap mt-auto">
                       <span className="flex items-center gap-0.5">

@@ -10,6 +10,7 @@
  */
 
 import { parseIngredientLine } from './parseIngredient';
+import { formatRecipeTitle, formatInstructionsList, formatIngredientLine } from './recipeFormatting';
 
 export interface ImportedRecipe {
   title: string;
@@ -180,7 +181,7 @@ export function parseRecipeFromHtml(html: string, sourceUrl: string): ImportedRe
       .trim();
 
     if (parseIngredientLine(normalised)) {
-      ingredientLines.push(normalised);
+      ingredientLines.push(formatIngredientLine(normalised));
     } else {
       unparsed.push(text);
     }
@@ -189,9 +190,9 @@ export function parseRecipeFromHtml(html: string, sourceUrl: string): ImportedRe
   const title = firstString(node.name) ?? 'Imported recipe';
 
   return {
-    title: title.trim(),
+    title: formatRecipeTitle(title),
     ingredientLines,
-    instructions: toInstructionList(node.recipeInstructions),
+    instructions: formatInstructionsList(toInstructionList(node.recipeInstructions)),
     servings: parseYield(node.recipeYield),
     cookTimeMins:
       parseIsoDuration(node.totalTime) ??

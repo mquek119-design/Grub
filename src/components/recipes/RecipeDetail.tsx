@@ -7,6 +7,7 @@ import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
 import type { Recipe } from '@/lib/types';
 import { CookModeModal } from '@/components/recipes/CookModeModal';
+import { formatInstruction, formatIngredientName } from '@/lib/recipeFormatting';
 
 export function RecipeDetail({
   recipe,
@@ -125,7 +126,9 @@ export function RecipeDetail({
                           ingredient.inPantry ? 'text-primary' : 'text-outline-variant'
                         )}
                       />
-                      <span className="font-body-lg text-body-lg truncate">{ingredient.name}</span>
+                      <span className="font-body-lg text-body-lg truncate">
+                        {formatIngredientName(ingredient.name)}
+                      </span>
                     </span>
                     <span className="font-numeric-data text-numeric-data text-on-surface-variant shrink-0 font-semibold">
                       {display} {ingredient.unit}
@@ -160,6 +163,7 @@ export function RecipeDetail({
           <ol className="flex flex-col gap-sm">
             {recipe.instructions.map((step, index) => {
               const isDone = done.has(index);
+              const formattedStep = formatInstruction(step);
               return (
                 <li key={index}>
                   <button
@@ -188,7 +192,7 @@ export function RecipeDetail({
                         isDone && 'line-through text-on-surface-variant'
                       )}
                     >
-                      {step}
+                      {formattedStep}
                     </span>
                   </button>
                 </li>
@@ -201,7 +205,9 @@ export function RecipeDetail({
               <Icon name="lightbulb" filled className="text-secondary mt-0.5" />
               <div>
                 <h3 className="font-numeric-data text-numeric-data mb-1 font-bold">Mob Pro Tip</h3>
-                <p className="font-body-sm text-body-sm text-on-surface-variant">{recipe.proTip}</p>
+                <p className="font-body-sm text-body-sm text-on-surface-variant">
+                  {formatInstruction(recipe.proTip)}
+                </p>
               </div>
             </Card>
           )}

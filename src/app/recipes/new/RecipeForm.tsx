@@ -10,6 +10,7 @@ import { createRecipe, updateRecipe, type RecipeFormState } from '../actions';
 import { parseIngredientLine, type ParsedIngredient } from '@/lib/parseIngredient';
 import { IngredientAutocomplete } from '@/components/recipes/IngredientAutocomplete';
 import { compressImageFile } from '@/lib/imageCompression';
+import { formatRecipeTitle, formatInstruction, formatIngredientLine } from '@/lib/recipeFormatting';
 
 const INITIAL: RecipeFormState = { status: 'idle', message: '' };
 
@@ -244,6 +245,7 @@ export function RecipeForm({ prefill }: { prefill?: RecipePrefill }) {
           name="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          onBlur={() => setTitle((t) => formatRecipeTitle(t))}
           required
           aria-required="true"
           maxLength={120}
@@ -335,6 +337,14 @@ export function RecipeForm({ prefill }: { prefill?: RecipePrefill }) {
             rows={7}
             value={ingredientsText}
             onChange={(event) => setIngredientsText(event.target.value)}
+            onBlur={() =>
+              setIngredientsText((text) =>
+                text
+                  .split('\n')
+                  .map((l) => (l.trim() ? formatIngredientLine(l) : ''))
+                  .join('\n')
+              )
+            }
             placeholder={'500 g Penne pasta\n2 tins Chopped tomatoes\n3 cloves Garlic\n1 Lime'}
             className={`${FIELD} resize-y font-numeric-data text-[14px]`}
           />
@@ -370,11 +380,19 @@ export function RecipeForm({ prefill }: { prefill?: RecipePrefill }) {
 
       <label className="flex flex-col gap-xs">
         <span className="font-body-sm text-body-sm font-semibold">Method</span>
-        <span className="font-body-sm text-[12px] text-on-surface-variant">One step per line.</span>
+        <span className="font-body-sm text-[12px] text-on-surface-variant">One step per line. Automatically capitalized and punctuated.</span>
         <textarea
           name="instructions"
           value={instructions}
           onChange={(e) => setInstructions(e.target.value)}
+          onBlur={() =>
+            setInstructions((text) =>
+              text
+                .split('\n')
+                .map((s) => (s.trim() ? formatInstruction(s) : ''))
+                .join('\n')
+            )
+          }
           rows={6}
           placeholder={'Boil the pasta until al dente.\nSoften the garlic in oil.\nAdd the tomatoes and simmer.'}
           className={`${FIELD} resize-y`}
@@ -410,6 +428,7 @@ export function RecipeForm({ prefill }: { prefill?: RecipePrefill }) {
           name="proTip"
           value={proTip}
           onChange={(e) => setProTip(e.target.value)}
+          onBlur={() => setProTip((tip) => (tip.trim() ? formatInstruction(tip) : ''))}
           rows={2}
           placeholder="The one thing that makes this work."
           className={`${FIELD} resize-y`}
