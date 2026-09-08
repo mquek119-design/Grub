@@ -18,13 +18,14 @@ Grub is a shared grocery planning and communal cooking platform purpose-built fo
   2. Allow housemates with any email (personal Gmail, Outlook, iCloud) to **join** via the 6-character house invite code.
   3. Provide an in-app **"Verify Student Status"** badge for any user with an active university email.
 
-### 2.3 Authentication: 6-Digit Email OTP & Magic Link
+### 2.3 Authentication: Magic Sign-In Links
 - **Student Reality**: Warwick SSO with Microsoft Authenticator / Duo 2FA is widely disliked by students due to constant number-matching prompts and session timeouts.
-- **Adopted Auth Strategy**: **6-Digit Numeric Email OTP / Magic Link**:
+- **Adopted Auth Strategy**: **1-Tap Magic Sign-In Links**:
   1. Student enters their email (personal or `@warwick.ac.uk`).
-  2. Supabase sends a 6-digit numeric OTP code (`Your Grub code: 742 819`) alongside a magic link.
-  3. **Why 6-digit OTP solves university spam filters**: Automated university security scanners crawl links, not numeric codes. The student simply glances at the notification banner or email preview and inputs the 6 numbers.
-  4. **Persistent 90-Day Mobile Sessions**: Once logged in on phone, session persists for 90 days with biometric (Face ID / Touch ID) re-entry so students rarely need to re-authenticate.
+  2. Supabase sends a direct 1-tap sign-in link (`emailRedirectTo: /auth/callback`).
+  3. Student taps the link in their mobile email app (with quick "Open Gmail" / "Open Outlook" buttons in Grub) and lands directly in their flat.
+  4. **Status Note**: 6-digit email OTP verification is currently disabled/not working with the default Supabase shared mailer (which only delivers token-hash URLs). 6-digit OTP is deferred until custom SMTP (Resend) is configured. Magic links are the active, reliable sign-in mechanism.
+  5. **Persistent 90-Day Mobile Sessions**: Once logged in on phone, session persists for 90 days so students rarely need to re-authenticate.
 
 ---
 

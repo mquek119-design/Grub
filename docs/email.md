@@ -6,7 +6,13 @@ This document covers both the current Supabase email/authentication setup and th
 
 ## Part 1 — Current Supabase Email Configuration
 
-Grub uses passwordless email authentication (magic links and 6-digit confirmation codes). To ensure emails are branded, reliable, and distinguish sign-up from sign-in:
+> [!IMPORTANT]
+> **Current Sign-In Status: Reverted to Magic Links (6-Digit OTP Still Not Working for Email)**
+> 6-digit numeric OTP codes sent via email do not currently verify reliably against Supabase Auth (`verifyOtp` fails/rejects with default templates). The default Supabase mailer is strictly configured to deliver magic link URLs (`{{ .ConfirmationURL }}`) rather than numeric tokens (`{{ .Token }}`).
+> Therefore, both `/login` and `/onboarding/signup` have been reverted to use **1-Tap Magic Sign-In Links**.
+> Once custom SMTP (via Resend) is connected and Supabase email templates are updated in the Supabase Dashboard to include `{{ .Token }}`, numeric OTP codes can be re-evaluated. Until then, magic links remain the active sign-in flow.
+
+Grub uses passwordless email authentication with magic links. To ensure emails are branded, reliable, and distinguish sign-up from sign-in:
 
 ### 1. Update the Email Template in Supabase Dashboard
 1. Open your **[Supabase Dashboard](https://supabase.com/dashboard)**.
