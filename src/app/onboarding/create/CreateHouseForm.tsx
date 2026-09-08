@@ -189,8 +189,6 @@ export function CreateHouseForm() {
   const [cutoffDay, setCutoffDay] = useState('sun');
   const [cutoffTime, setCutoffTime] = useState('20:00');
   const [appliances, setAppliances] = useState<string[]>([
-    'air_fryer',
-    'microwave',
     'oven',
     'stovetop_4',
   ]);
@@ -590,7 +588,7 @@ export function CreateHouseForm() {
             className="flex-1 sm:flex-initial"
             pendingLabel="Setting up flat…"
           >
-            Create House & Get Invite Code
+            Create House ({appliances.length} {appliances.length === 1 ? 'appliance' : 'appliances'})
           </SubmitButton>
         )}
       </div>
