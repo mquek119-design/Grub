@@ -5,6 +5,7 @@ import { ButtonLink } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { PageShell } from '@/components/ui/PageShell';
+import { KitchenSubNav } from '@/components/kitchen/KitchenSubNav';
 import { RecipeBrowser } from '@/components/recipes/RecipeBrowser';
 import { ImportRecipeCard } from '@/components/recipes/ImportRecipeCard';
 import { getCurrentUser, getRecipes, getWeeklyPlan } from '@/lib/queries';
@@ -58,19 +59,22 @@ export default async function RecipesPage({
 
   return (
     <PageShell wide>
-      <PageHeader
-        title="Recipes"
-        subtitle={
-          planningForDay
-            ? `Pick something for ${WEEKDAY_LABELS[planningForDay]}${week === 'next' ? ' next week' : ''}.`
-            : 'Everything the house can cook. Tap one to put it on a night.'
-        }
-        action={
-          <ButtonLink href="/recipes/new" icon="add" className="shrink-0">
-            Add
-          </ButtonLink>
-        }
-      />
+      <div className="flex flex-col gap-sm">
+        <KitchenSubNav current="recipes" />
+        <PageHeader
+          title="Recipe Book"
+          subtitle={
+            planningForDay
+              ? `Pick something for ${WEEKDAY_LABELS[planningForDay]}${week === 'next' ? ' next week' : ''}.`
+              : 'Everything the house can cook. Tap one to put it on a night.'
+          }
+          action={
+            <ButtonLink href="/recipes/new" icon="add" className="shrink-0">
+              Add Recipe
+            </ButtonLink>
+          }
+        />
+      </div>
 
       {planningForDay && (
         <ButtonLink href={week === 'next' ? '/plan?week=next' : '/plan'} variant="ghost" size="sm" icon="arrow_back" className="self-start -ml-sm">

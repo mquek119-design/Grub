@@ -4,6 +4,7 @@ import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { PageShell } from '@/components/ui/PageShell';
+import { KitchenSubNav } from '@/components/kitchen/KitchenSubNav';
 import { getCurrentUser, getHouse, getHouseStaples, getPantryItems } from '@/lib/queries';
 import type { IngredientCategory, PantryItem } from '@/lib/types';
 import { PantryItemRow } from '@/components/pantry/PantryItemRow';
@@ -78,10 +79,13 @@ export default async function PantryPage() {
   if (items.length === 0 && staples.length === 0) {
     return (
       <PageShell wide>
-        <PageHeader
-          title="House Pantry"
-          subtitle="What you already have, so the shop doesn't buy it twice."
-        />
+        <div className="flex flex-col gap-sm">
+          <KitchenSubNav current="pantry" />
+          <PageHeader
+            title="House Pantry"
+            subtitle="What you already have, so the shop doesn't buy it twice."
+          />
+        </div>
         <EmptyState
           icon="inventory_2"
           title="Your cupboard is empty"
@@ -93,10 +97,13 @@ export default async function PantryPage() {
 
   return (
     <PageShell wide>
-      <PageHeader
-        title="House Pantry"
-        subtitle="What you already have. The optimiser skips these when building the basket."
-      />
+      <div className="flex flex-col gap-sm">
+        <KitchenSubNav current="pantry" />
+        <PageHeader
+          title="House Pantry"
+          subtitle="What you already have. The optimiser skips these when building the basket."
+        />
+      </div>
 
       <div className="flex items-center justify-between p-sm px-md rounded-2xl bg-gradient-to-r from-secondary-fixed/40 via-surface-container-low to-secondary-fixed/20 border border-secondary/30 text-xs interactive-card card-glow">
         <div className="flex items-center gap-sm min-w-0">

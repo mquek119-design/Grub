@@ -18,6 +18,7 @@ export default function robots(): MetadataRoute.Robots {
         '/pantry',
         '/leftovers',
         '/recipes',
+        '/kitchen',
         '/onboarding',
         '/dev',
       ],

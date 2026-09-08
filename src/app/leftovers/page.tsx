@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { LeftoversBoard } from '@/components/leftovers/LeftoversBoard';
+import { KitchenSubNav } from '@/components/kitchen/KitchenSubNav';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { PageShell } from '@/components/ui/PageShell';
 import { getCurrentUser, getHousemates, getLeftovers } from '@/lib/queries';
@@ -15,10 +16,13 @@ export default async function LeftoversPage() {
 
   return (
     <PageShell wide>
-      <PageHeader
-        title="Leftovers"
-        subtitle="Put spare portions on the fridge board before they disappear at the back of a shelf."
-      />
+      <div className="flex flex-col gap-sm">
+        <KitchenSubNav current="leftovers" />
+        <PageHeader
+          title="Fridge Leftovers"
+          subtitle="Put spare portions on the fridge board before they disappear at the back of a shelf."
+        />
+      </div>
       <LeftoversBoard leftovers={leftovers} housemates={housemates} />
     </PageShell>
   );

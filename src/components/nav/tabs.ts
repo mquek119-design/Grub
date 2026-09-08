@@ -24,13 +24,7 @@ export const TABS: Tab[] = [
     href: '/plan',
     label: 'Plan',
     icon: 'ti-calendar',
-    owns: ['/plan', '/pantry'],
-  },
-  {
-    href: '/recipes',
-    label: 'Recipes',
-    icon: 'menu_book',
-    owns: ['/recipes'],
+    owns: ['/plan'],
   },
   {
     href: '/basket',
@@ -45,10 +39,10 @@ export const TABS: Tab[] = [
     owns: ['/split'],
   },
   {
-    href: '/leftovers',
-    label: 'Leftovers',
-    icon: 'soup_kitchen',
-    owns: ['/leftovers'],
+    href: '/kitchen',
+    label: 'Kitchen',
+    icon: 'kitchen',
+    owns: ['/kitchen', '/recipes', '/leftovers', '/pantry'],
   },
 ];
 
