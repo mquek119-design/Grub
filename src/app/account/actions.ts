@@ -6,6 +6,7 @@ import { getCurrentUser, getHouse, getHousemates } from '@/lib/queries';
 import { createClient } from '@/lib/supabase/server';
 import { formatPence } from '@/lib/money';
 import { readViewAsId, viewAsRefusal } from '@/lib/viewAs';
+import type { User } from '@/lib/types';
 
 export interface AccountActionState {
   /**
@@ -59,8 +60,9 @@ export async function updateProfileInfo(
   const room = roomRaw.toLowerCase() === 'n/a' || roomRaw === '' ? null : roomRaw;
 
   const accentRaw = String(formData.get('accent') ?? '').trim();
-  const accent = ['green', 'orange', 'blue', 'purple'].includes(accentRaw)
-    ? (accentRaw as 'green' | 'orange' | 'blue' | 'purple')
+  const validAccents = ['green', 'orange', 'blue', 'purple', 'rust', 'olive'] as const;
+  const accent = (validAccents as readonly string[]).includes(accentRaw)
+    ? (accentRaw as User['accent'])
     : undefined;
 
   const avatarUrlRaw = String(formData.get('avatarUrl') ?? '').trim();
@@ -72,7 +74,7 @@ export async function updateProfileInfo(
   const updates: {
     name: string;
     room: string | null;
-    accent?: 'green' | 'orange' | 'blue' | 'purple';
+    accent?: User['accent'];
     avatar_url: string | null;
   } = {
     name,

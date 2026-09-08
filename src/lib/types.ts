@@ -87,8 +87,7 @@ export interface User {
   houseId: string;
   room: string | null;
   avatarUrl: string | null;
-  /** Tailwind-ready accent used for the initials fallback avatar. */
-  accent: 'green' | 'orange' | 'blue' | 'purple';
+  accent: 'green' | 'orange' | 'blue' | 'purple' | 'rust' | 'olive';
   dietaryPreferences: string[];
   /**
    * How housemates pay this person. Separate fields so an incomplete entry is

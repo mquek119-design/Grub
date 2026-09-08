@@ -25,7 +25,7 @@ export type SplitStatus = 'pending' | 'notified' | 'confirmed' | 'disputed';
 export type IngredientCategory = 'fresh' | 'cupboard' | 'frozen' | 'household';
 export type SubstitutionDecision = 'pending' | 'accepted' | 'rejected';
 export type RecipeDifficulty = 'easy' | 'medium' | 'hard';
-export type AvatarAccent = 'green' | 'orange' | 'blue' | 'purple';
+export type AvatarAccent = 'green' | 'orange' | 'blue' | 'purple' | 'rust' | 'olive';
 export type MealStatus = 'planned' | 'cooked' | 'skipped' | 'swapped';
 export type StapleFrequency = 'weekly' | 'fortnightly' | 'monthly';
 

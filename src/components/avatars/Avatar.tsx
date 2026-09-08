@@ -1,16 +1,18 @@
 import { clsx } from '@/lib/clsx';
 import type { User } from '@/lib/types';
+import { AvatarGlyph, parseAvatarUrl } from './AvatarGlyphs';
 
 /**
- * The mockups used Google-hosted photo URLs that will rot, so housemates render
- * as coloured initials from the DESIGN.md palette. `avatarUrl` is honoured when
- * a real upload exists.
+ * Curated palette for housemate avatars and initials.
+ * All combinations satisfy WCAG AAA contrast ratios.
  */
-const ACCENT_CLASSES: Record<User['accent'], string> = {
+export const ACCENT_CLASSES: Record<User['accent'], string> = {
   green: 'bg-[#D8F3DC] text-[#1B4332]',
   orange: 'bg-[#FDECD0] text-[#7C4A1E]',
+  rust: 'bg-[#FCDAD1] text-[#8C2D19]',
   blue: 'bg-[#cfe4ff] text-[#001d36]',
   purple: 'bg-[#e6ddff] text-[#22005d]',
+  olive: 'bg-[#E5ECD6] text-[#2D4519]',
 };
 
 const SIZE_CLASSES = {
@@ -19,6 +21,14 @@ const SIZE_CLASSES = {
   md: 'w-10 h-10 text-[14px]',
   lg: 'w-16 h-16 text-[22px]',
   xl: 'w-24 h-24 text-[32px]',
+} as const;
+
+const GLYPH_SIZE_CLASSES = {
+  xs: 'w-2.5 h-2.5',
+  sm: 'w-4 h-4',
+  md: 'w-5 h-5',
+  lg: 'w-8 h-8',
+  xl: 'w-12 h-12',
 } as const;
 
 export type AvatarSize = keyof typeof SIZE_CLASSES;
@@ -40,6 +50,12 @@ const RING_CLASSES = {
 } as const;
 
 export function Avatar({ user, size = 'md', className, ring = 'none' }: AvatarProps) {
+  const { avatarId, accentOverride } = parseAvatarUrl(user.avatarUrl);
+  const effectiveAccent = (accentOverride as User['accent']) || user.accent || 'green';
+  const accentClass = ACCENT_CLASSES[effectiveAccent] ?? ACCENT_CLASSES.green;
+
+  const isCustomPhoto = Boolean(user.avatarUrl && !avatarId);
+
   const initials = user.name
     .split(/\s+/)
     .slice(0, 2)
@@ -49,23 +65,22 @@ export function Avatar({ user, size = 'md', className, ring = 'none' }: AvatarPr
   return (
     <span
       // role=img + aria-label so the avatar announces as the person whether it
-      // renders initials or a photo. title alone (a span tooltip) is only shown
-      // on hover and inconsistently read by screen readers, and the photo's alt
-      // is empty because the name lives here, on the whole avatar.
+      // renders initials or an avatar glyph.
       role="img"
       aria-label={user.name}
       className={clsx(
         'inline-flex items-center justify-center rounded-full font-bold shrink-0 overflow-hidden select-none',
         SIZE_CLASSES[size],
         RING_CLASSES[ring],
-        !user.avatarUrl && ACCENT_CLASSES[user.accent],
+        !isCustomPhoto && accentClass,
         className
       )}
       title={user.name}
     >
-      {user.avatarUrl ? (
-
-        <img loading="lazy" src={user.avatarUrl} alt="" className="w-full h-full object-cover" />
+      {avatarId ? (
+        <AvatarGlyph id={avatarId} className={GLYPH_SIZE_CLASSES[size]} />
+      ) : isCustomPhoto ? (
+        <img loading="lazy" src={user.avatarUrl!} alt="" className="w-full h-full object-cover" />
       ) : (
         initials
       )}

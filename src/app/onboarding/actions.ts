@@ -131,15 +131,21 @@ export async function saveProfilePreferences(
 
   const name = String(formData.get('name') ?? '').trim();
   const accent = String(formData.get('accent') ?? 'green');
+  const avatarRaw = String(formData.get('avatar') ?? '').trim();
   const budget = String(formData.get('budget') ?? '30');
   const dietsRaw = formData.getAll('diet');
   const vibesRaw = formData.getAll('vibe');
+
+  const validAccents = ['green', 'orange', 'blue', 'purple', 'rust', 'olive'];
+  const validAvatars = ['ricky', 'onion', 'bap', 'beanie', 'noodz'];
 
   const dietaryPreferences = [
     ...dietsRaw.map(String),
     ...vibesRaw.map((v) => `vibe:${v}`),
     `budget:${budget}`,
   ];
+
+  const avatarUrl = validAvatars.includes(avatarRaw) ? `avatar:${avatarRaw}` : null;
 
   const supabase = await createClient();
   const {
@@ -151,9 +157,10 @@ export async function saveProfilePreferences(
       .from('profiles')
       .update({
         name: name || user.email?.split('@')[0] || 'Housemate',
-        accent: ['green', 'orange', 'blue', 'purple'].includes(accent)
+        accent: validAccents.includes(accent)
           ? (accent as any)
           : 'green',
+        avatar_url: avatarUrl,
         dietary_preferences: dietaryPreferences,
       })
       .eq('id', user.id);

@@ -79,7 +79,7 @@ function unwrap<R extends { data: unknown; error: { message: string } | null }>(
 // Identity & house
 // ---------------------------------------------------------------------------
 
-const ACCENTS = ['green', 'orange', 'blue', 'purple'] as const;
+const ACCENTS = ['green', 'orange', 'blue', 'purple', 'rust', 'olive'] as const;
 
 /**
  * The signed-in profile, or null when signed out. Never throws on absence.

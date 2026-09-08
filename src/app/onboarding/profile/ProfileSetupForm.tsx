@@ -1,11 +1,14 @@
 'use client';
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useRef } from 'react';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { Icon } from '@/components/media/Icon';
 import { clsx } from '@/lib/clsx';
 import { Stocky } from '@/components/mascot/Stocky';
+import { AvatarGlyph, AVATAR_OPTIONS, type AvatarId } from '@/components/avatars/AvatarGlyphs';
+import { ACCENT_CLASSES } from '@/components/avatars/Avatar';
 import { saveProfilePreferences, type OnboardingState } from '../actions';
+import type { User } from '@/lib/types';
 
 const INITIAL: OnboardingState = { status: 'idle', message: '' };
 
@@ -27,20 +30,33 @@ const VIBES = [
   { id: 'comfort_food', label: 'Comfort Food', hint: 'Sunday roast & stews', icon: 'soup_kitchen' },
 ];
 
-const ACCENTS = [
-  { id: 'green', label: 'Sage', bg: 'bg-[#2D6A4F]', border: 'border-[#2D6A4F]' },
-  { id: 'orange', label: 'Amber', bg: 'bg-[#D97706]', border: 'border-[#D97706]' },
-  { id: 'blue', label: 'Ocean', bg: 'bg-[#2563EB]', border: 'border-[#2563EB]' },
-  { id: 'purple', label: 'Lavender', bg: 'bg-[#7C3AED]', border: 'border-[#7C3AED]' },
+const ACCENTS: { id: User['accent']; label: string; bg: string }[] = [
+  { id: 'green', label: 'Sage', bg: 'bg-[#2D6A4F]' },
+  { id: 'orange', label: 'Amber', bg: 'bg-[#D97706]' },
+  { id: 'rust', label: 'Rust', bg: 'bg-[#C2593F]' },
+  { id: 'blue', label: 'Ocean', bg: 'bg-[#2563EB]' },
+  { id: 'purple', label: 'Lavender', bg: 'bg-[#7C3AED]' },
+  { id: 'olive', label: 'Olive', bg: 'bg-[#4A6B3E]' },
 ];
+
+function getBudgetTier(budget: number) {
+  if (budget <= 25) return { mood: 'smug' as const, label: 'Frugal tier' };
+  if (budget <= 45) return { mood: 'neutral' as const, label: 'Average tier' };
+  if (budget <= 80) return { mood: 'cooking' as const, label: 'Gym / High protein' };
+  return { mood: 'cooking' as const, label: 'Premium tier' };
+}
 
 export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string }) {
   const [state, formAction] = useActionState(saveProfilePreferences, INITIAL);
   const [name, setName] = useState(defaultName);
-  const [accent, setAccent] = useState('green');
+  const [accent, setAccent] = useState<User['accent']>('green');
+  const [avatar, setAvatar] = useState<AvatarId | null>(null);
   const [budget, setBudget] = useState(30);
   const [selectedDiets, setSelectedDiets] = useState<string[]>([]);
+  const [customAllergies, setCustomAllergies] = useState<string[]>([]);
+  const [customAllergyInput, setCustomAllergyInput] = useState('');
   const [selectedVibes, setSelectedVibes] = useState<string[]>(['speedy', 'budget_king']);
+  const customAllergyRef = useRef<HTMLInputElement>(null);
 
   const toggleDiet = (id: string) => {
     setSelectedDiets((prev) =>
@@ -60,9 +76,32 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
     }
   };
 
+  const addCustomAllergy = () => {
+    const val = customAllergyInput.trim();
+    if (val && !customAllergies.includes(val.toLowerCase())) {
+      setCustomAllergies((prev) => [...prev, val.toLowerCase()]);
+      setCustomAllergyInput('');
+      customAllergyRef.current?.focus();
+    }
+  };
+
+  const removeCustomAllergy = (allergy: string) => {
+    setCustomAllergies((prev) => prev.filter((x) => x !== allergy));
+  };
+
+  const accentClass = ACCENT_CLASSES[accent] ?? ACCENT_CLASSES.green;
+  const tier = getBudgetTier(budget);
+
   return (
     <form action={formAction} className="flex flex-col gap-xl">
-      {/* 1. Identity */}
+      {/* Hidden inputs for avatar */}
+      {avatar && <input type="hidden" name="avatar" value={avatar} />}
+      {/* Hidden inputs for custom allergies */}
+      {customAllergies.map((allergy) => (
+        <input key={allergy} type="hidden" name="diet" value={`allergy:${allergy}`} />
+      ))}
+
+      {/* 1. Identity & Avatar */}
       <div className="flex flex-col gap-md">
         <div className="flex items-center justify-between">
           <h2 className="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant font-bold">
@@ -85,15 +124,49 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
           />
         </label>
 
-        {/* Avatar Color Accent */}
+        {/* Avatar Character Picker */}
         <div className="flex flex-col gap-xs pt-1">
           <span className="font-body-sm text-xs font-semibold text-on-surface-variant">
-            Avatar Colour Palette
+            Choose Your Avatar
           </span>
           <div className="flex items-center gap-3">
+            {AVATAR_OPTIONS.map((opt) => {
+              const isSelected = avatar === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setAvatar(isSelected ? null : opt.id)}
+                  title={`${opt.name} (${opt.subtitle})`}
+                  className={clsx(
+                    'w-12 h-12 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer',
+                    isSelected
+                      ? `${accentClass} ring-3 ring-primary ring-offset-2 scale-110 shadow-sm`
+                      : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest hover:scale-105'
+                  )}
+                >
+                  <AvatarGlyph id={opt.id} className="w-6 h-6" />
+                </button>
+              );
+            })}
+          </div>
+          {avatar && (
+            <span className="font-body-xs text-[10px] text-on-surface-variant">
+              {AVATAR_OPTIONS.find((o) => o.id === avatar)?.name} — {AVATAR_OPTIONS.find((o) => o.id === avatar)?.subtitle}
+            </span>
+          )}
+        </div>
+
+        {/* Avatar Colour Accent */}
+        <div className="flex flex-col gap-xs pt-1">
+          <span className="font-body-sm text-xs font-semibold text-on-surface-variant">
+            Avatar Colour
+          </span>
+          <div className="flex items-center gap-2.5">
             {ACCENTS.map((item) => (
               <label
                 key={item.id}
+                title={item.label}
                 className={clsx(
                   'w-9 h-9 rounded-full cursor-pointer flex items-center justify-center transition-all',
                   item.bg,
@@ -123,9 +196,9 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
           </span>
           <div className="flex items-center gap-2">
             <Stocky
-              mood={budget <= 25 ? 'smug' : budget >= 50 ? 'cooking' : 'neutral'}
+              mood={tier.mood}
               size="sm"
-              caption={budget <= 25 ? 'Frugal tier' : budget >= 50 ? 'High protein' : 'Average tier'}
+              caption={tier.label}
             />
             <span className="font-numeric-data text-title-md font-extrabold text-primary">
               £{budget}/week
@@ -140,8 +213,8 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
         <input
           type="range"
           name="budget"
-          min={20}
-          max={60}
+          min={10}
+          max={200}
           step={5}
           value={budget}
           onChange={(e) => setBudget(Number(e.target.value))}
@@ -149,9 +222,11 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
         />
 
         <div className="flex justify-between text-[11px] text-on-surface-variant/70 font-numeric-data font-semibold">
-          <span>£20 (Frugal)</span>
-          <span>£35 (Average)</span>
-          <span>£60+ (Gym / High Protein)</span>
+          <span>£10</span>
+          <span>£35</span>
+          <span>£60</span>
+          <span>£100</span>
+          <span>£200</span>
         </div>
       </div>
 
@@ -190,6 +265,55 @@ export function ProfileSetupForm({ defaultName = '' }: { defaultName?: string })
               </label>
             );
           })}
+        </div>
+
+        {/* Custom allergies */}
+        {customAllergies.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 pt-1">
+            {customAllergies.map((allergy) => (
+              <span
+                key={allergy}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-error/10 text-error text-[11px] font-semibold border border-error/20"
+              >
+                <Icon name="warning" className="text-[12px]" />
+                {allergy}
+                <button
+                  type="button"
+                  onClick={() => removeCustomAllergy(allergy)}
+                  className="ml-0.5 hover:opacity-70 transition-opacity"
+                  aria-label={`Remove ${allergy}`}
+                >
+                  <Icon name="close" className="text-[12px]" />
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        <div className="flex items-center gap-2 pt-1">
+          <input
+            ref={customAllergyRef}
+            type="text"
+            value={customAllergyInput}
+            onChange={(e) => setCustomAllergyInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addCustomAllergy();
+              }
+            }}
+            placeholder="Add custom allergy (e.g. shellfish)"
+            className="flex-1 h-10 px-3 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:ring-2 focus:ring-primary text-body-sm text-[13px]"
+          />
+          <button
+            type="button"
+            onClick={addCustomAllergy}
+            disabled={!customAllergyInput.trim()}
+            className="h-10 px-3.5 rounded-xl bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 disabled:opacity-40 disabled:cursor-not-allowed transition-all btn-tactile flex items-center gap-1"
+          >
+            <Icon name="add" className="text-[16px]" />
+            Add
+          </button>
         </div>
       </div>
 

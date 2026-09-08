@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useTransition, useActionState } from 'react';
-import { Avatar } from '@/components/avatars/Avatar';
+import { Avatar, ACCENT_CLASSES } from '@/components/avatars/Avatar';
+import { AvatarGlyph, AVATAR_OPTIONS, parseAvatarUrl, isAvatarId, type AvatarId } from '@/components/avatars/AvatarGlyphs';
 import { Icon } from '@/components/media/Icon';
 import { Button } from '@/components/ui/Button';
 import { SubmitButton } from '@/components/ui/SubmitButton';
@@ -60,8 +61,10 @@ function Status({ state }: { state: AccountActionState }) {
 const ACCENT_OPTIONS: { key: User['accent']; label: string; bg: string; text: string }[] = [
   { key: 'green', label: 'Sage Green', bg: 'bg-[#D8F3DC]', text: 'text-[#1B4332]' },
   { key: 'orange', label: 'Honey Amber', bg: 'bg-[#FDECD0]', text: 'text-[#7C4A1E]' },
+  { key: 'rust', label: 'Rust', bg: 'bg-[#FCDAD1]', text: 'text-[#8C2D19]' },
   { key: 'blue', label: 'Ocean Blue', bg: 'bg-[#cfe4ff]', text: 'text-[#001d36]' },
   { key: 'purple', label: 'Lavender', bg: 'bg-[#e6ddff]', text: 'text-[#22005d]' },
+  { key: 'olive', label: 'Olive', bg: 'bg-[#E5ECD6]', text: 'text-[#2D4519]' },
 ];
 
 /** Revamped Profile & Avatar Studio Panel. */
@@ -71,12 +74,21 @@ export function ProfileInfoPanel({ user }: { user: User }) {
   const [avatarUrl, setAvatarUrl] = useState<string>(user.avatarUrl || '');
   const [name, setName] = useState<string>(user.name);
 
+  // Parse existing avatar character if set
+  const { avatarId: initialAvatarId } = parseAvatarUrl(user.avatarUrl);
+  const [selectedAvatar, setSelectedAvatar] = useState<AvatarId | null>(initialAvatarId);
+
+  // Build effective avatar URL for preview and submission
+  const effectiveAvatarUrl = selectedAvatar ? `avatar:${selectedAvatar}` : avatarUrl.trim() || null;
+
   // Live avatar preview object
   const previewUser = {
     name: name || user.name || 'You',
     accent: selectedAccent,
-    avatarUrl: avatarUrl.trim() || null,
+    avatarUrl: effectiveAvatarUrl,
   };
+
+  const accentClass = ACCENT_CLASSES[selectedAccent] ?? ACCENT_CLASSES.green;
 
   return (
     <Card id="profile-studio" className="flex flex-col gap-lg interactive-card card-glow">
@@ -110,7 +122,7 @@ export function ProfileInfoPanel({ user }: { user: User }) {
               {name || 'Your Name'}
             </span>
             <span className="font-body-sm text-xs text-on-surface-variant">
-              {previewUser.avatarUrl ? 'Using custom photo URL' : `Using ${selectedAccent} color avatar initials`}
+              {selectedAvatar ? `Using ${AVATAR_OPTIONS.find((o) => o.id === selectedAvatar)?.name} avatar` : previewUser.avatarUrl ? 'Using custom photo URL' : `Using ${selectedAccent} color avatar initials`}
             </span>
             {previewUser.avatarUrl && (
               <button
@@ -126,14 +138,48 @@ export function ProfileInfoPanel({ user }: { user: User }) {
 
         {/* Hidden inputs for accent and avatarUrl */}
         <input type="hidden" name="accent" value={selectedAccent} />
-        <input type="hidden" name="avatarUrl" value={avatarUrl} />
+        <input type="hidden" name="avatarUrl" value={effectiveAvatarUrl ?? ''} />
+
+        {/* Avatar Character Picker */}
+        <div className="flex flex-col gap-xs">
+          <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold tracking-wider">
+            Avatar Character
+          </span>
+          <div className="flex items-center gap-2.5">
+            {AVATAR_OPTIONS.map((opt) => {
+              const isSelected = selectedAvatar === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => {
+                    setSelectedAvatar(isSelected ? null : opt.id);
+                    if (!isSelected) setAvatarUrl('');
+                  }}
+                  title={`${opt.name} (${opt.subtitle})`}
+                  className={clsx(
+                    'w-11 h-11 rounded-full flex items-center justify-center transition-all duration-200 cursor-pointer btn-tactile',
+                    isSelected
+                      ? `${accentClass} ring-2 ring-primary ring-offset-2 scale-110 shadow-sm`
+                      : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest hover:scale-105'
+                  )}
+                >
+                  <AvatarGlyph id={opt.id} className="w-5 h-5" />
+                </button>
+              );
+            })}
+          </div>
+          <span className="font-body-sm text-[11px] text-on-surface-variant">
+            Pick a character or leave blank for initials. Characters use your chosen accent colour.
+          </span>
+        </div>
 
         {/* Avatar Color Accent Palette */}
         <div className="flex flex-col gap-xs">
           <span className="font-label-caps text-label-caps uppercase text-on-surface-variant font-bold tracking-wider">
             Avatar Color Accent
           </span>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-xs">
+          <div className="grid grid-cols-3 sm:grid-cols-3 gap-xs">
             {ACCENT_OPTIONS.map((opt) => {
               const isSelected = selectedAccent === opt.key;
               return (
