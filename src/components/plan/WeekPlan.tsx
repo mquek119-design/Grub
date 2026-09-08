@@ -57,9 +57,9 @@ function JoinToggle({
     return (
       <span
         title="Planning is closed for this week"
-        className="shrink-0 inline-flex items-center gap-xs px-sm h-9 rounded-full border border-outline-variant text-on-surface-variant/70 text-[13px] font-semibold"
+        className="shrink-0 inline-flex items-center gap-xs px-2.5 h-8 rounded-full border border-outline-variant text-on-surface-variant/70 text-[12px] font-semibold"
       >
-        <Icon name="lock" className="text-[16px]" />
+        <Icon name="lock" className="text-[14px]" />
         Closed
       </span>
     );
@@ -69,9 +69,9 @@ function JoinToggle({
     return (
       <span
         title="Cooked for a set number. Put your own meal on for the same night instead."
-        className="shrink-0 inline-flex items-center gap-xs px-sm h-9 rounded-full border border-outline-variant text-on-surface-variant/70 text-[13px] font-semibold"
+        className="shrink-0 inline-flex items-center gap-xs px-2.5 h-8 rounded-full border border-outline-variant text-on-surface-variant/70 text-[12px] font-semibold"
       >
-        <Icon name="lock" className="text-[16px]" />
+        <Icon name="lock" className="text-[14px]" />
         Full
       </span>
     );
@@ -153,42 +153,42 @@ const MealRow = memo(function MealRow({
   return (
     <article
       className={clsx(
-        'flex flex-col gap-sm px-md md:px-lg py-3.5 md:py-4 transition-all duration-200',
+        'flex flex-col gap-xs px-3 md:px-4 py-2 md:py-2.5 transition-all duration-200',
         joined ? 'bg-primary-fixed/25 border-l-4 border-l-primary' : 'hover:bg-surface-container-low/60'
       )}
     >
-      <div className="flex items-center gap-md min-w-0">
+      <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
         <Link
           href={`/recipes/${meal.recipeId}`}
-          className="shrink-0 rounded-2xl overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-xs group"
+          className="shrink-0 rounded-xl overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-xs group"
         >
           <FoodImage
             seed={meal.recipeId}
             src={recipe?.imageUrl}
             alt={meal.recipeTitle}
-            className="w-14 h-14 md:w-16 md:h-16 rounded-2xl text-[24px] object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-10 h-10 md:w-11 md:h-11 rounded-xl text-[18px] object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </Link>
 
         <div className="min-w-0 flex-1 flex flex-col justify-center">
           {/* Sitting eyebrow placed cleanly on its own line above the dish name */}
-          <div className="flex items-center gap-1.5 font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant font-bold mb-0.5">
-            <Icon name={MEAL_TYPE_ICONS[meal.mealType]} className="text-[13px] text-primary" />
+          <div className="flex items-center gap-1 font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant font-bold leading-none mb-0.5">
+            <Icon name={MEAL_TYPE_ICONS[meal.mealType]} className="text-[12px] text-primary" />
             <span>{MEAL_TYPE_LABELS[meal.mealType]}</span>
             {full && (
-              <Badge tone="error" className="text-[9px] py-0 px-1.5 ml-1">
+              <Badge tone="error" className="text-[8px] py-0 px-1 ml-1">
                 FULL
               </Badge>
             )}
           </div>
 
           <Link href={`/recipes/${meal.recipeId}`} className="min-w-0 hover:underline block group">
-            <h4 className="font-title-md text-[15px] md:text-title-md font-bold text-on-surface leading-snug truncate group-hover:text-primary transition-colors">
+            <h4 className="font-title-md text-[13.5px] md:text-[14.5px] font-bold text-on-surface leading-tight truncate group-hover:text-primary transition-colors">
               {meal.recipeTitle}
             </h4>
           </Link>
 
-          <div className="flex items-center gap-x-3 gap-y-1 flex-wrap font-body-sm text-[12px] text-on-surface-variant mt-1">
+          <div className="flex items-center gap-x-2.5 gap-y-0.5 flex-wrap font-body-sm text-[11px] text-on-surface-variant mt-0.5 leading-tight">
             {diners.length > 0 ? (
               <span className="flex items-center gap-1.5">
                 <span className="flex items-center -space-x-1.5">
@@ -290,14 +290,14 @@ const MealRow = memo(function MealRow({
                 onClick={() => setOptionsOpen(true)}
                 aria-label={`Options for ${meal.recipeTitle}`}
                 className={clsx(
-                  'w-9 h-9 rounded-full transition-all flex items-center justify-center btn-tactile active:scale-90',
+                  'w-8 h-8 rounded-full transition-all flex items-center justify-center btn-tactile active:scale-90',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
                   askedMe
                     ? 'bg-secondary-fixed text-on-secondary-fixed'
                     : 'text-on-surface-variant hover:bg-surface-container hover:text-on-surface'
                 )}
               >
-                <Icon name={askedMe ? 'notifications' : 'tune'} className="text-[18px]" />
+                <Icon name={askedMe ? 'notifications' : 'tune'} className="text-[16px]" />
               </button>
             )}
             {/* Gone days and post-cutoff periods keep the sheet and lose the toggle. */}
