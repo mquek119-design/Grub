@@ -12,6 +12,7 @@ import { FirstRunTip } from '@/components/ui/FirstRunTip';
 import { NextActionCard } from '@/components/feed/NextActionCard';
 import { RunningLowStapleCard } from '@/components/feed/RunningLowStapleCard';
 import { TonightDinnerCard } from '@/components/feed/TonightDinnerCard';
+import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 import { nextAction } from '@/lib/nextAction';
 import { isCutoffPassed } from '@/lib/weeks';
 import {
@@ -128,6 +129,7 @@ export default async function FeedPage() {
         )}
 
         <RunningLowStapleCard />
+        <InstallPrompt />
 
         {plan.meals.length === 0 ? (
           <EmptyState

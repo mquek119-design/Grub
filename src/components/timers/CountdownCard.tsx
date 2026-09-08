@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/Card';
+import { Icon } from '@/components/media/Icon';
 import { clsx } from '@/lib/clsx';
 
 /**
@@ -62,6 +63,32 @@ export function CountdownCard({ cutoffAt, windowHours = 24 }: CountdownCardProps
   const elapsedFraction =
     remaining === null ? 0 : 1 - Math.min(1, Math.max(0, remaining / (windowHours * 3600_000)));
 
+  function handleNudgeFlat() {
+    const timeStr = new Date(cutoffAt).toLocaleTimeString('en-GB', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true,
+    });
+    const hoursLeft = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
+    const shareText = `🛒 Hey flat! Grub cutoff for this week's Tesco shop is at ${timeStr} (${hoursLeft} left). Lock in your dinners and add your staples: ${typeof window !== 'undefined' ? window.location.origin : ''}/plan`;
+
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator
+        .share({
+          title: 'Grub Planning Cutoff',
+          text: shareText,
+          url: `${window.location.origin}/plan`,
+        })
+        .catch(() => {});
+    } else {
+      window.open(
+        `https://wa.me/?text=${encodeURIComponent(shareText)}`,
+        '_blank',
+        'noopener,noreferrer'
+      );
+    }
+  }
+
   return (
     <Card className="flex flex-col justify-between gap-sm">
       <div>
@@ -106,6 +133,17 @@ export function CountdownCard({ cutoffAt, windowHours = 24 }: CountdownCardProps
           style={{ width: `${elapsedFraction * 100}%` }}
         />
       </div>
+
+      {!locked && remaining !== null && (
+        <button
+          type="button"
+          onClick={handleNudgeFlat}
+          className="mt-xs h-9 px-3 rounded-xl bg-surface-container-high hover:bg-surface-container-highest text-on-surface text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors border border-outline-variant/40 btn-tactile"
+        >
+          <Icon name="share" className="text-[15px] text-[#25D366]" />
+          <span>Nudge Flat on WhatsApp</span>
+        </button>
+      )}
     </Card>
   );
 }

@@ -144,25 +144,26 @@ Transforming the mobile web app into an installable PWA gives students a native 
 ## 6. Implementation Phases
 
 ### Phase 1: Touch & Ergonomic Hardening (High Priority)
-- [ ] Add `visualViewport` resize listener / `dvh` CSS variable to keep floating basket and split bars above virtual keyboards.
-- [ ] Ensure all form inputs have `text-[16px]` to permanently disable iOS Safari auto-zoom.
-- [ ] Implement sticky horizontal weekday selector on `WeekPlan.tsx` (`Mon · Tue · Wed...`) so mobile users jump directly to any day without infinite scrolling.
-- [ ] Audit bottom sheets: ensure touch drag-handle dismiss and backdrop blur.
+- [x] Add `visualViewport` resize listener / `dvh` CSS variable to keep floating basket and split bars above virtual keyboards.
+- [x] Ensure all form inputs have `text-[16px]` to permanently disable iOS Safari auto-zoom (`globals.css`).
+- [x] Implement sticky horizontal weekday selector on `WeekPlan.tsx` (`Mon · Tue · Wed...`) so mobile users jump directly to any day without infinite scrolling.
+- [x] Audit bottom sheets: ensure touch drag-handle dismiss and backdrop blur.
 
 ### Phase 2: Cook Mode Counter Experience
-- [ ] Integrate Screen Wake Lock API in `RecipeModal.tsx` / Cook Mode.
-- [ ] Add enlarged step cards (22px text) with knuckle-friendly checkboxes.
-- [ ] Add ingredients checklist strip inside cook mode.
+- [x] Integrate Screen Wake Lock API in `CookModeModal.tsx` / Cook Mode (`navigator.wakeLock`).
+- [x] Add enlarged step cards (20–24px text) with knuckle-friendly checkboxes.
+- [x] Add ingredients checklist strip inside cook mode.
+- [x] Integrate 1-tap leftover logging to fridge board upon completion.
 
 ### Phase 3: 1-Tap Banking Deep Links
-- [ ] In Account Settings &rarr; Payment details, add optional fields for `Monzo handle` and `Revolut username`.
-- [ ] In `/split`, render direct "Pay via Monzo" and "Pay via Revolut" deep link buttons that pre-fill the exact pence balance.
+- [x] In Account Settings &rarr; Payment details, add optional fields for `Monzo handle` and `Revolut username` (`AccountPanels.tsx`).
+- [x] In `/split`, render direct "Pay via Monzo" and "Pay via Revolut" deep link buttons that pre-fill the exact pence balance (`PayPanel.tsx`).
 
-### Phase 4: PWA Packaging
-- [ ] Create `manifest.json` and link in `src/app/layout.tsx`.
-- [ ] Generate 192x192 and 512x512 PNG app icons from `src/app/icon.svg`.
-- [ ] Add Apple Touch Icon meta tags (`<link rel="apple-touch-icon" href="...">`).
-- [ ] Add gentle "Add Grub to Home Screen" first-run tip card for mobile visitors.
+### Phase 4: PWA Packaging & Mascot
+- [x] Create Next.js Web App Manifest (`src/app/manifest.ts`) with standalone display mode.
+- [x] Add Apple Touch Icon and web app meta tags in `src/app/layout.tsx`.
+- [x] Add gentle "Install Grub / Add to Home Screen" PWA install prompt card for mobile visitors (`InstallPrompt.tsx`).
+- [x] Launch Stocky the Bouillon Cube mascot with multi-mood vector component (`Stocky.tsx`).
 
 ---
 
