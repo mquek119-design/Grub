@@ -34,6 +34,9 @@ function overlap(a: Set<string>, b: Set<string>): number {
   return shared / (a.size + b.size - shared);
 }
 
+/** Typical portion cost baseline (200p / £2.00) when a recipe lacks explicit pricing */
+const DEFAULT_ESTIMATED_PORTION_PENCE = 200;
+
 /**
  * Roughly what buying twice costs.
  *
@@ -43,7 +46,9 @@ function overlap(a: Set<string>, b: Set<string>): number {
  * number designed to make anyone feel bad about wanting a curry.
  */
 function estimateDuplicateSpend(a: Recipe, b: Recipe, diners: number, sharedFraction: number) {
-  const cheaper = Math.min(a.costPerPortion, b.costPerPortion);
+  const costA = a.costPerPortion > 0 ? a.costPerPortion : DEFAULT_ESTIMATED_PORTION_PENCE;
+  const costB = b.costPerPortion > 0 ? b.costPerPortion : DEFAULT_ESTIMATED_PORTION_PENCE;
+  const cheaper = Math.min(costA, costB);
   return Math.round(cheaper * Math.max(1, diners) * (1 - sharedFraction) * 0.5);
 }
 

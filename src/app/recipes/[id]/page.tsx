@@ -30,7 +30,7 @@ export default async function RecipePage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ cook?: string }>;
+  searchParams?: Promise<{ cook?: string; day?: string; mealType?: string; week?: string }>;
 }) {
   const { id } = await params;
   const resolvedSearchParams = searchParams ? await searchParams : {};
@@ -38,6 +38,10 @@ export default async function RecipePage({
     resolvedSearchParams.cook === 'true' ||
     resolvedSearchParams.cook === '1' ||
     resolvedSearchParams.cook === 'mode';
+
+  const targetDay = resolvedSearchParams.day;
+  const targetMealType = resolvedSearchParams.mealType;
+  const targetWeek = resolvedSearchParams.week ?? 'this';
 
   const [recipe, plan] = await Promise.all([
     getRecipe(id),
@@ -58,13 +62,28 @@ export default async function RecipePage({
 
   return (
     <PageShell>
-      <Link
-        href="/recipes"
-        className="flex items-center gap-xs text-primary font-semibold text-[14px] hover:opacity-80 w-fit"
-      >
-        <Icon name="arrow_back" className="text-[18px]" />
-        All recipes
-      </Link>
+      <div className="flex items-center justify-between gap-sm">
+        <Link
+          href={targetDay ? `/plan?week=${targetWeek}` : '/recipes'}
+          className="flex items-center gap-xs text-primary font-semibold text-[14px] hover:opacity-80 w-fit"
+        >
+          <Icon name="arrow_back" className="text-[18px]" />
+          {targetDay ? 'Back to plan' : 'All recipes'}
+        </Link>
+      </div>
+
+      {targetDay && (
+        <div className="flex items-center gap-sm px-md py-sm rounded-xl bg-secondary-fixed/50 border border-secondary-container/40 text-on-surface">
+          <Icon name="lightbulb" filled className="text-secondary text-[20px] shrink-0" />
+          <p className="font-body-sm text-body-sm">
+            Suggested for{' '}
+            <strong className="font-semibold capitalize">
+              {targetDay} {targetMealType ?? 'meal'}
+            </strong>{' '}
+            to share ingredients with your housemates and save money on the shop.
+          </p>
+        </div>
+      )}
 
       <FoodImage
         seed={recipe.id}
@@ -105,10 +124,11 @@ export default async function RecipePage({
               Edit
             </Link>
             <Link
-              href="/plan#roster"
-              className="shrink-0 px-lg py-3 rounded-full bg-primary text-on-primary font-semibold hover:opacity-90 transition-opacity"
+              href={targetDay ? `/recipes?day=${targetDay}&week=${targetWeek}` : '/plan#roster'}
+              className="shrink-0 px-lg py-3 rounded-full bg-primary text-on-primary font-semibold hover:opacity-90 transition-opacity flex items-center gap-1.5"
             >
-              Plan
+              <Icon name="calendar_today" className="text-[18px]" />
+              <span className="capitalize">{targetDay ? `Plan for ${targetDay}` : 'Plan'}</span>
             </Link>
           </>
         )}

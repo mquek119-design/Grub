@@ -10,7 +10,7 @@ import { Icon } from '@/components/media/Icon';
 import { Badge } from '@/components/ui/Badge';
 import { Button, ButtonLink } from '@/components/ui/Button';
 import { Chip } from '@/components/ui/Chip';
-import { RecipeFilterChips, matchesDietaryFilter, type DietaryTagKey } from '@/components/recipes/RecipeFilterChips';
+import { NutritionPill } from '@/components/recipes/NutritionPill';
 import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
 import { addMealToPlan, type PlanActionState } from '@/app/plan/actions';
@@ -55,16 +55,16 @@ const MEAT_WORDS = [
   'pepperoni', 'gelatin', 'stock cube',
 ];
 
-type ChipKey = 'quick' | 'budget' | 'pantry' | 'veggie';
+type VibeKey = 'quick' | 'budget' | 'comfort' | 'protein' | 'fakeaway' | 'low-washup' | 'pantry' | 'veggie';
 
-interface Chip {
-  key: ChipKey;
+interface VibeChip {
+  key: VibeKey;
   label: string;
   icon: string;
   matches: (recipe: Recipe) => boolean;
 }
 
-const CHIPS: Chip[] = [
+const VIBE_CHIPS: VibeChip[] = [
   {
     key: 'quick',
     label: 'Quick',
@@ -75,9 +75,41 @@ const CHIPS: Chip[] = [
     key: 'budget',
     label: 'Budget',
     icon: 'savings',
-    // Zero means "not priced yet", not "free" — an unpriced recipe must never
-    // pass a budget filter by being cheapest of all.
-    matches: (recipe) => recipe.costPerPortion > 0 && recipe.costPerPortion <= BUDGET_PENCE,
+    matches: (recipe) =>
+      (recipe.costPerPortion > 0 && recipe.costPerPortion <= BUDGET_PENCE) ||
+      recipe.tags.some((t) => /budget|cheap|frugal/i.test(t)),
+  },
+  {
+    key: 'comfort',
+    label: 'Comfort',
+    icon: 'soup_kitchen',
+    matches: (recipe) =>
+      recipe.tags.some((t) => /comfort|pasta|bake|curry|stew|bolognese|chilli|pie|lasagne|cheese/i.test(t)) ||
+      /pasta|curry|stew|chilli|pie|bake|bolognese|lasagne|mac/i.test(recipe.title),
+  },
+  {
+    key: 'protein',
+    label: 'High Protein',
+    icon: 'fitness_center',
+    matches: (recipe) =>
+      recipe.tags.some((t) => /protein|gym|beef|chicken|salmon|tuna|steak/i.test(t)) ||
+      recipe.ingredients.some((i) => /chicken|beef|salmon|tuna|steak|mince|turkey|tofu|eggs?/i.test(i.name)),
+  },
+  {
+    key: 'fakeaway',
+    label: 'Fakeaway',
+    icon: 'takeout_dining',
+    matches: (recipe) =>
+      recipe.tags.some((t) => /fakeaway|asian|curry|stir fry|noodles|burger|pizza|tacos?|burrito|mexican/i.test(t)) ||
+      /stir fry|curry|noodle|burger|tikka|pizza|taco|burrito|katsu|ramen/i.test(recipe.title),
+  },
+  {
+    key: 'low-washup',
+    label: 'One-Pot',
+    icon: 'cleaning_services',
+    matches: (recipe) =>
+      recipe.tags.some((t) => /one-pot|traybake|skillet|pan|sheet/i.test(t)) ||
+      /stir fry|soup|stew|curry|pasta bake|ramen|frittata/i.test(recipe.title),
   },
   {
     key: 'pantry',
@@ -91,7 +123,7 @@ const CHIPS: Chip[] = [
     icon: 'eco',
     matches: (recipe) => {
       const tags = recipe.tags.map((tag) => tag.toLowerCase());
-      if (tags.includes('vegetarian') || tags.includes('vegan') || tags.includes('veggie')) {
+      if (tags.includes('vegetarian') || tags.includes('vegan') || tags.includes('veggie') || tags.includes('salad')) {
         return true;
       }
       return !recipe.ingredients.some((ingredient) => {
@@ -105,25 +137,19 @@ const CHIPS: Chip[] = [
 /**
  * At-a-glance facts for the card photo, Mob-style corner badges rather than
  * text you have to read the whole card to find.
- *
- * Capped at two and ordered by what a shared house actually decides on first:
- * whether they can eat it, then whether it fits a weeknight. Reuses the same
- * `CHIPS` criteria the filter row already applies, so a card never claims
- * something the filters would disagree with.
  */
 function cardBadges(recipe: Recipe): { label: string; icon: string }[] {
   const badges: { label: string; icon: string }[] = [];
-  const tags = recipe.tags.map((tag) => tag.toLowerCase());
-  const dietary = recipe.dietaryTags.map((tag) => tag.toLowerCase());
 
-  if (dietary.includes('vegan') || tags.includes('vegan')) {
-    badges.push({ label: 'Vegan', icon: 'eco' });
-  } else if (CHIPS.find((chip) => chip.key === 'veggie')?.matches(recipe)) {
-    badges.push({ label: 'Veggie', icon: 'eco' });
-  }
-
-  if (CHIPS.find((chip) => chip.key === 'quick')?.matches(recipe)) {
+  if (VIBE_CHIPS.find((chip) => chip.key === 'quick')?.matches(recipe)) {
     badges.push({ label: 'Quick', icon: 'bolt' });
+  }
+  if (VIBE_CHIPS.find((chip) => chip.key === 'comfort')?.matches(recipe)) {
+    badges.push({ label: 'Comfort', icon: 'soup_kitchen' });
+  } else if (VIBE_CHIPS.find((chip) => chip.key === 'protein')?.matches(recipe)) {
+    badges.push({ label: 'Protein', icon: 'fitness_center' });
+  } else if (VIBE_CHIPS.find((chip) => chip.key === 'veggie')?.matches(recipe)) {
+    badges.push({ label: 'Veggie', icon: 'eco' });
   }
 
   return badges.slice(0, 2);
@@ -278,7 +304,7 @@ export function RecipeBrowser({
   locked,
   planningForDay,
   week = 'this',
-  initialDietaryFilters = [],
+  houseDiets = [],
 }: {
   recipes: Recipe[];
   locked: boolean;
@@ -286,72 +312,21 @@ export function RecipeBrowser({
   planningForDay?: Weekday;
   /** Which week a pick lands on. */
   week?: WeekChoice;
-  /** Initial dietary filters from URL params. */
+  /** Optional legacy initial filters. */
   initialDietaryFilters?: string[];
+  /** Aggregated house dietary restrictions to reassure users */
+  houseDiets?: string[];
 }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [query, setQuery] = useState('');
-  const [active, setActive] = useState<ChipKey[]>([]);
-
-  // Initialize dietary filters from URL or prop; sync with URL on changes
-  const [dietaryFilters, setDietaryFiltersState] = useState<DietaryTagKey[]>(() => {
-    const urlDietary = searchParams.get('dietary');
-    if (urlDietary) {
-      return urlDietary.split(',').map((f) => f.trim()) as DietaryTagKey[];
-    }
-    return initialDietaryFilters as DietaryTagKey[];
-  });
-
+  const [activeVibes, setActiveVibes] = useState<VibeKey[]>([]);
   const [chosen, setChosen] = useState<Recipe | null>(null);
-
-  // Sync dietary filters with URL when searchParams change
-  useEffect(() => {
-    const urlDietary = searchParams.get('dietary');
-    const urlFilters = urlDietary
-      ? urlDietary.split(',').map((f) => f.trim()) as DietaryTagKey[]
-      : [];
-
-    // Only update if different from current state to avoid unnecessary updates
-    if (JSON.stringify(urlFilters) !== JSON.stringify(dietaryFilters)) {
-      setDietaryFiltersState(urlFilters);
-    }
-  }, [searchParams, dietaryFilters]);
-
-  // Helper to update dietary filters and URL
-  function setDietaryFilters(filters: DietaryTagKey[]) {
-    setDietaryFiltersState(filters);
-
-    // Update URL with new dietary filters
-    const params = new URLSearchParams(searchParams);
-    if (filters.length > 0) {
-      params.set('dietary', filters.join(','));
-    } else {
-      params.delete('dietary');
-    }
-    router.push(`?${params.toString()}`, { scroll: false });
-  }
 
   const today = WEEKDAYS[(new Date().getDay() + 6) % 7];
 
-  // A chip that can only ever return nothing is worse than no chip: it looks
-  // like the house has no cheap meals rather than no recorded prices.
+  // A vibe chip that can only ever return nothing is disabled
   const usable = useMemo(
-    () => new Set(CHIPS.filter((chip) => recipes.some(chip.matches)).map((chip) => chip.key)),
-    [recipes]
-  );
-
-  // Determine which dietary tags are available in the recipe collection.
-  const usableDietary = useMemo(
-    () =>
-      new Set(
-        recipes
-          .flatMap((r) => r.dietaryTags)
-          .filter((tag): tag is DietaryTagKey => {
-            const keys = ['vegetarian', 'vegan', 'gluten-free', 'nut-free', 'dairy-free', 'egg-free'];
-            return keys.includes(tag.toLowerCase());
-          })
-      ),
+    () => new Set(VIBE_CHIPS.filter((chip) => recipes.some(chip.matches)).map((chip) => chip.key)),
     [recipes]
   );
 
@@ -364,20 +339,16 @@ export function RecipeBrowser({
           .join(' ')}`.toLowerCase();
         if (!haystack.includes(needle)) return false;
       }
-      // Check regular filters
-      if (!active.every((key) => CHIPS.find((chip) => chip.key === key)?.matches(recipe))) {
-        return false;
-      }
-      // Check dietary filters
-      if (!matchesDietaryFilter(recipe, dietaryFilters)) {
+      // Check active meal vibe filters
+      if (!activeVibes.every((key) => VIBE_CHIPS.find((chip) => chip.key === key)?.matches(recipe))) {
         return false;
       }
       return true;
     });
-  }, [recipes, query, active, dietaryFilters]);
+  }, [recipes, query, activeVibes]);
 
-  function toggle(key: ChipKey) {
-    setActive((current) =>
+  function toggleVibe(key: VibeKey) {
+    setActiveVibes((current) =>
       current.includes(key) ? current.filter((entry) => entry !== key) : [...current, key]
     );
   }
@@ -395,7 +366,7 @@ export function RecipeBrowser({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Search a recipe, or something in the fridge…"
-            className="w-full h-12 pl-10 pr-10 rounded-lg bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-body-lg"
+            className="w-full h-11 pl-10 pr-10 rounded-xl bg-surface-container-low border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-md transition-all shadow-xs"
           />
           {query && (
             <button
@@ -409,9 +380,46 @@ export function RecipeBrowser({
           )}
         </div>
 
-        <div className="flex gap-xs overflow-x-auto hide-scrollbar pb-1">
-          {CHIPS.map((chip) => {
-            const on = active.includes(chip.key);
+        {/* Dietary Reassurance Banner: lets students know their flat's diets are noted down */}
+        {houseDiets && houseDiets.length > 0 ? (
+          <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-primary/8 border border-primary/20 text-xs text-on-surface animate-fade-in">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Icon name="verified_user" className="text-primary text-[15px] shrink-0" />
+              <span className="truncate">
+                House diets noted: <strong className="font-semibold text-primary">{houseDiets.join(', ')}</strong>
+              </span>
+            </div>
+            <Link
+              href="/account"
+              className="shrink-0 text-[11px] font-bold text-primary hover:underline flex items-center gap-0.5"
+              title="Manage dietary preferences in My Account"
+            >
+              <span>Profile</span>
+              <Icon name="arrow_forward" className="text-[12px]" />
+            </Link>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-surface-container-low border border-outline-variant/30 text-xs text-on-surface-variant">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Icon name="shield" className="text-on-surface-variant text-[15px] shrink-0" />
+              <span className="truncate">No dietary restrictions recorded for flat</span>
+            </div>
+            <Link
+              href="/account"
+              className="shrink-0 text-[11px] font-bold text-primary hover:underline"
+            >
+              Add in profile &rarr;
+            </Link>
+          </div>
+        )}
+
+        {/* Meal Vibes Bar */}
+        <div className="flex items-center gap-xs overflow-x-auto hide-scrollbar pb-1">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/70 shrink-0 mr-1 hidden sm:inline-block">
+            Vibe:
+          </span>
+          {VIBE_CHIPS.map((chip) => {
+            const on = activeVibes.includes(chip.key);
             const available = usable.has(chip.key);
             return (
               <Chip
@@ -419,31 +427,15 @@ export function RecipeBrowser({
                 active={on}
                 icon={chip.icon}
                 disabled={!available}
-                onClick={() => toggle(chip.key)}
-                title={
-                  available
-                    ? undefined
-                    : chip.key === 'budget'
-                      ? 'No recipe has a cost per portion yet — build a basket to price them.'
-                      : 'Nothing matches this yet.'
-                }
+                onClick={() => toggleVibe(chip.key)}
+                className="shrink-0 text-xs font-semibold py-1.5"
+                title={available ? undefined : 'No recipes match this vibe yet.'}
               >
                 {chip.label}
               </Chip>
             );
           })}
         </div>
-
-        <RecipeFilterChips
-          active={dietaryFilters}
-          usable={usableDietary}
-          onToggle={(key: DietaryTagKey) => {
-            const newFilters = dietaryFilters.includes(key)
-              ? dietaryFilters.filter((tag) => tag !== key)
-              : [...dietaryFilters, key];
-            setDietaryFilters(newFilters);
-          }}
-        />
       </div>
 
       {results.length === 0 ? (
@@ -512,12 +504,21 @@ export function RecipeBrowser({
                         </>
                       )}
                     </span>
-                    {inPantry > 0 && (
-                      <span className="font-label-caps text-[11px] uppercase tracking-wider text-primary font-bold bg-primary/10 rounded-full px-2 py-0.5 inline-flex items-center gap-1 self-start mt-0.5">
-                        <Icon name="kitchen" className="text-[12px]" />
-                        {inPantry} in pantry
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1 flex-wrap mt-0.5">
+                      {(recipe.caloriesPerPortion || recipe.proteinGrams) && (
+                        <NutritionPill
+                          calories={recipe.caloriesPerPortion}
+                          proteinGrams={recipe.proteinGrams}
+                          variant="compact"
+                        />
+                      )}
+                      {inPantry > 0 && (
+                        <span className="font-label-caps text-[10px] uppercase tracking-wider text-primary font-bold bg-primary/10 rounded-full px-2 py-0.5 inline-flex items-center gap-1">
+                          <Icon name="kitchen" className="text-[11px]" />
+                          {inPantry} pantry
+                        </span>
+                      )}
+                    </div>
                   </span>
                 </button>
               </li>

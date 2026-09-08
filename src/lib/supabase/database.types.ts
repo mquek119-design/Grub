@@ -69,6 +69,8 @@ type ProfileRow = {
   payment_account_number: string | null;
   payment_link: string | null;
   is_admin: boolean;
+  daily_calorie_target?: number | null;
+  daily_protein_target?: number | null;
   created_at: string;
 }
 
@@ -106,6 +108,10 @@ type RecipeRow = {
   dietary_tags: string[];
   instructions: string[];
   pro_tip: string | null;
+  calories_per_portion?: number | null;
+  protein_grams?: number | null;
+  carbs_grams?: number | null;
+  fat_grams?: number | null;
   created_at: string;
 }
 

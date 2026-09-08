@@ -7,6 +7,7 @@ import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
 import type { Recipe } from '@/lib/types';
 import { CookModeModal } from '@/components/recipes/CookModeModal';
+import { NutritionPill } from '@/components/recipes/NutritionPill';
 import { formatInstruction, formatIngredientName } from '@/lib/recipeFormatting';
 
 export function RecipeDetail({
@@ -49,7 +50,7 @@ export function RecipeDetail({
       )}
 
       <div className="flex items-center justify-between gap-md flex-wrap">
-        <div className="flex items-center gap-md flex-wrap">
+        <div className="flex items-center gap-sm md:gap-md flex-wrap">
           <span className="flex items-center gap-xs font-body-sm text-body-sm text-on-surface-variant bg-surface-container px-sm py-xs rounded-full">
             <Icon name="schedule" className="text-[18px] text-primary" />
             {recipe.cookTimeMins} mins cook
@@ -62,16 +63,33 @@ export function RecipeDetail({
             <Icon name="payments" className="text-[18px]" />
             {formatPence(recipe.costPerPortion)}/portion
           </span>
+          {(recipe.caloriesPerPortion || recipe.proteinGrams) && (
+            <NutritionPill
+              calories={recipe.caloriesPerPortion}
+              proteinGrams={recipe.proteinGrams}
+              carbsGrams={recipe.carbsGrams}
+              fatGrams={recipe.fatGrams}
+              variant="bar"
+            />
+          )}
         </div>
 
-        <button
-          type="button"
-          onClick={() => setCookModeModalOpen(true)}
-          className="inline-flex items-center gap-xs px-xl py-sm rounded-2xl bg-secondary text-on-secondary-container font-bold text-sm btn-tactile shadow-md hover:shadow-lg transition-all"
-        >
-          <Icon name="skillet" className="text-lg" />
-          Start Cook Mode
-        </button>
+        <div className="flex flex-col items-end gap-1">
+          <button
+            type="button"
+            onClick={() => setCookModeModalOpen(true)}
+            className="inline-flex items-center gap-xs px-xl py-sm rounded-2xl bg-secondary text-on-secondary-container font-bold text-sm btn-tactile shadow-md hover:shadow-lg transition-all"
+          >
+            <Icon name="smartphone" className="text-lg" />
+            <span>Start Cook Mode</span>
+            <span className="hidden md:inline-flex text-[11px] font-semibold bg-black/10 px-2 py-0.5 rounded-full ml-1">
+              Phone
+            </span>
+          </button>
+          <span className="hidden md:inline-block text-[11px] text-on-surface-variant font-medium">
+            Designed for your phone in the kitchen · Click for QR code
+          </span>
+        </div>
       </div>
 
       <div className="grid gap-lg lg:grid-cols-12">

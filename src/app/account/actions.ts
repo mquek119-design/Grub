@@ -257,6 +257,15 @@ export async function updateDietaryPreferences(
     ]),
   ];
 
+  const calorieTargetRaw = formData.get('dailyCalorieTarget');
+  const proteinTargetRaw = formData.get('dailyProteinTarget');
+  const dailyCalorieTarget = calorieTargetRaw && !isNaN(Number(calorieTargetRaw)) && Number(calorieTargetRaw) > 0
+    ? Number(calorieTargetRaw)
+    : null;
+  const dailyProteinTarget = proteinTargetRaw && !isNaN(Number(proteinTargetRaw)) && Number(proteinTargetRaw) > 0
+    ? Number(proteinTargetRaw)
+    : null;
+
   const supabase = await createClient();
   const actingAs = await readViewAsId();
 
@@ -267,10 +276,13 @@ export async function updateDietaryPreferences(
     });
     if (error) return fail(`${error.message}${migrationHint(error.code)}`);
     if ((data ?? 0) === 0) return fail('Could not save that dietary profile.');
-  } else {
     const result = await supabase
       .from('profiles')
-      .update({ dietary_preferences: merged })
+      .update({
+        dietary_preferences: merged,
+        daily_calorie_target: dailyCalorieTarget,
+        daily_protein_target: dailyProteinTarget,
+      })
       .eq('id', me.id)
       .select('id');
 

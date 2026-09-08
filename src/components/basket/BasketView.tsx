@@ -200,14 +200,17 @@ export function BasketView({
 
   return (
     <div className="pb-[140px] flex flex-col gap-md">
-      <HostedHandoffBanner
-        planId={planId}
-        isCollector={isCollector}
-        collectorName={collectorName}
-        itemCount={liveItems.length}
-        hasCookies={sessionAuth}
-        sessionDaysLeft={sessionDaysLeft}
-      />
+      {/* On mobile, HostedHandoffBanner gives quick access to the trolley sync; on desktop, DesktopCheckoutCard in the right sidebar handles it */}
+      <div className="lg:hidden">
+        <HostedHandoffBanner
+          planId={planId}
+          isCollector={isCollector}
+          collectorName={collectorName}
+          itemCount={liveItems.length}
+          hasCookies={sessionAuth}
+          sessionDaysLeft={sessionDaysLeft}
+        />
+      </div>
 
     {selectedSwapItem && (
       <BrandSwapModal
@@ -276,23 +279,9 @@ export function BasketView({
         </div>
       </Card>
 
-      {/* Own-brand savings tip banner */}
-      {availableSwapValue > 0 && (
-        <div className="flex items-start gap-sm px-md py-sm rounded-xl bg-surface-container-low border border-outline-variant/40 font-body-sm text-xs text-on-surface-variant">
-          <Icon name="savings" className="text-primary mt-0.5 shrink-0 text-[18px]" />
-          <span>
-            Own-brand picks have already taken{' '}
-            <strong className="font-numeric-data text-on-surface font-bold">
-              {formatPence(availableSwapValue)}
-            </strong>{' '}
-            off this shop. Tap <span className="font-semibold text-primary">Swap brand</span> on any item if the house prefers a specific brand.
-          </span>
-        </div>
-      )}
-
-      {/* Instant basket item search bar */}
-      <div className="flex flex-col gap-xs">
-        <div className="relative flex items-center">
+      {/* Instant basket item search bar + inline savings badge */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-sm">
+        <div className="relative flex-1 flex items-center">
           <Icon
             name="search"
             className="absolute left-3 text-on-surface-variant pointer-events-none text-[20px]"
@@ -317,6 +306,19 @@ export function BasketView({
           )}
         </div>
 
+        {availableSwapValue > 0 && (
+          <div
+            title="Own-brand picks have already taken this off your total. Tap 'Swap brand' on any item to switch."
+            className="h-11 px-3.5 rounded-xl bg-primary/10 border border-primary/25 text-primary flex items-center gap-1.5 shrink-0 text-xs font-semibold"
+          >
+            <Icon name="savings" className="text-sm text-primary shrink-0" />
+            <span>
+              Saved <strong className="font-bold">{formatPence(availableSwapValue)}</strong> with own-brand
+            </span>
+          </div>
+        )}
+      </div>
+
         {searchQuery && (
           <div className="flex items-center justify-between px-xs text-xs text-on-surface-variant">
             <span>
@@ -331,7 +333,6 @@ export function BasketView({
             </button>
           </div>
         )}
-      </div>
 
       {grouped.map(({ category, items: categoryItems }) => {
         const meta = CATEGORY_META[category];

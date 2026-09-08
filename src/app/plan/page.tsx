@@ -143,7 +143,12 @@ export default async function PlanPage({
             <FirstMealModal recipes={recipes} weekStartDate={plan.weekStartDate} />
           )}
           <WeekPlan plan={plan} housemates={housemates} currentUser={currentUser} week={week} />
-          <OverlapHints overlaps={plan.overlaps} />
+          <OverlapHints
+            overlaps={plan.overlaps}
+            currentUserId={currentUser.id}
+            planMeals={plan.meals}
+            week={week}
+          />
         </>
       )}
     </PageShell>

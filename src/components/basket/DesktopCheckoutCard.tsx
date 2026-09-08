@@ -7,8 +7,9 @@ import { Icon } from '@/components/media/Icon';
 import { formatPence } from '@/lib/money';
 import { basketTotal, basketSavings } from '@/lib/calc';
 import type { BasketItem } from '@/lib/types';
-import { checkTescoSession, syncBasketToTesco, startTescoCheckout } from '@/app/basket/tescoActions';
+import { checkTescoSession, syncBasketToTesco, startTescoCheckout, confirmOrderPlaced } from '@/app/basket/tescoActions';
 import { TESCO_ORDERING_UNAVAILABLE_MESSAGE } from '@/lib/tescoOrdering';
+import { useTransition } from 'react';
 
 interface DesktopCheckoutCardProps {
   items: BasketItem[];
@@ -31,6 +32,7 @@ export function DesktopCheckoutCard({
   const [sessionAuth, setSessionAuth] = useState(initialHasCookies);
   const [syncStatusMsg, setSyncStatusMsg] = useState<string | null>(null);
   const [actualTotalCost, setActualTotalCost] = useState<number | null>(null);
+  const [isConfirming, startTransition] = useTransition();
 
   useEffect(() => {
     checkTescoSession()
@@ -87,6 +89,18 @@ export function DesktopCheckoutCard({
         setSyncStatusMsg(`Synced successfully, but could not fetch checkout total: ${checkoutRes.message}`);
       }
     }
+  }
+
+  function handleConfirmPlaced() {
+    if (!planId || !sessionAuth) return;
+    startTransition(async () => {
+      const res = await confirmOrderPlaced(planId);
+      if (res.status === 'error') {
+        setSyncStatusMsg(`Error: ${res.message}`);
+      } else {
+        setSyncStatusMsg(res.message);
+      }
+    });
   }
 
   return (
@@ -161,6 +175,33 @@ export function DesktopCheckoutCard({
             ? 'Proceed to Checkout'
             : `${collectorName} checks out`}
       </button>
+
+      {/* Secondary desktop handoff actions */}
+      {sessionAuth && (
+        <div className="flex items-center justify-between gap-sm pt-xs border-t border-outline/20">
+          <a
+            href="https://www.tesco.com/groceries/en-GB/trolley"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 text-xs text-on-surface-variant hover:text-primary font-medium transition-colors"
+          >
+            <Icon name="open_in_new" className="text-sm text-primary" />
+            <span>Open Tesco Trolley</span>
+          </a>
+
+          {isCollector && planId && (
+            <button
+              type="button"
+              disabled={isConfirming}
+              onClick={handleConfirmPlaced}
+              className="inline-flex items-center gap-1 text-xs text-secondary hover:underline font-bold transition-all disabled:opacity-50"
+            >
+              <Icon name="check_circle" className="text-sm" />
+              <span>{isConfirming ? 'Confirming...' : 'Mark as Ordered & Paid'}</span>
+            </button>
+          )}
+        </div>
+      )}
     </Card>
   );
 }

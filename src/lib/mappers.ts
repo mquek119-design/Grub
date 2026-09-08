@@ -83,6 +83,8 @@ export function toUser(row: ProfileRow): User {
     },
     isAdmin: row.is_admin,
     isDemo: row.is_demo ?? false,
+    dailyCalorieTarget: row.daily_calorie_target ?? null,
+    dailyProteinTarget: row.daily_protein_target ?? null,
   };
 }
 
@@ -116,6 +118,10 @@ export function toRecipe(row: RecipeRow, ingredients: RecipeIngredient[]): Recip
     instructions: row.instructions,
     proTip: row.pro_tip,
     ingredients,
+    caloriesPerPortion: row.calories_per_portion ?? undefined,
+    proteinGrams: row.protein_grams ?? undefined,
+    carbsGrams: row.carbs_grams ?? undefined,
+    fatGrams: row.fat_grams ?? undefined,
   };
 }
 

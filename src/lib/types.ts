@@ -109,6 +109,9 @@ export interface User {
    * split. Real housemates are never impersonable.
    */
   isDemo: boolean;
+  /** Optional personal daily diet/fitness targets */
+  dailyCalorieTarget?: number | null;
+  dailyProteinTarget?: number | null;
 }
 
 export interface Ingredient {
@@ -142,6 +145,11 @@ export interface Recipe {
   instructions: string[];
   proTip: string | null;
   ingredients: RecipeIngredient[];
+  /** Per-portion nutritional estimates */
+  caloriesPerPortion?: number;
+  proteinGrams?: number;
+  carbsGrams?: number;
+  fatGrams?: number;
 }
 
 export interface MealParticipant {

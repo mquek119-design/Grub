@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/Badge';
 import { AvatarStack } from '@/components/avatars/Avatar';
 import { FoodImage } from '@/components/media/FoodImage';
 import { CookModeModal } from '@/components/recipes/CookModeModal';
+import { NutritionPill } from '@/components/recipes/NutritionPill';
 import type { PlannedMeal, Recipe, User } from '@/lib/types';
 import { MEAL_TYPE_ICONS, MEAL_TYPE_LABELS } from '@/lib/types';
 
@@ -74,11 +75,18 @@ export function TonightDinnerCard({
           {recipe?.cookTimeMins ? ` · ${recipe.cookTimeMins}m` : ''}
         </p>
 
-        <div className="flex items-center gap-sm mt-2">
+        <div className="flex items-center gap-sm mt-2 flex-wrap">
           <AvatarStack users={diners.slice(0, 4)} size="sm" />
           <span className="font-numeric-data text-xs text-on-surface-variant font-medium">
             {mouths} {mouths === 1 ? 'diner' : 'diners'}
           </span>
+          {(recipe?.caloriesPerPortion || recipe?.proteinGrams) && (
+            <NutritionPill
+              calories={recipe.caloriesPerPortion}
+              proteinGrams={recipe.proteinGrams}
+              variant="compact"
+            />
+          )}
         </div>
       </div>
     </div>
@@ -154,16 +162,22 @@ export function TonightDinnerCard({
                 onClick={() => setCookModeOpen(true)}
                 className="text-xs font-bold text-on-secondary-container px-3.5 py-1.5 rounded-full bg-secondary hover:bg-secondary-container transition-all flex items-center gap-1.5 btn-tactile shadow-xs"
               >
-                <Icon name="skillet" className="text-base" />
+                <Icon name="smartphone" className="text-base" />
                 <span>Start Cook Mode</span>
+                <span className="hidden md:inline-block text-[10px] font-semibold bg-black/10 px-1.5 py-0.5 rounded-full">
+                  Phone
+                </span>
               </button>
             ) : (
               <Link
                 href={`/recipes/${meal.recipeId}?cook=true`}
                 className="text-xs font-bold text-on-secondary-container px-3.5 py-1.5 rounded-full bg-secondary hover:bg-secondary-container transition-all flex items-center gap-1.5 btn-tactile shadow-xs"
               >
-                <Icon name="skillet" className="text-base" />
+                <Icon name="smartphone" className="text-base" />
                 <span>Start Cook Mode</span>
+                <span className="hidden md:inline-block text-[10px] font-semibold bg-black/10 px-1.5 py-0.5 rounded-full">
+                  Phone
+                </span>
               </Link>
             )
           ) : (

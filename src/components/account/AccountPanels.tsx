@@ -646,6 +646,45 @@ export function DietaryPanel({ user }: { user: User }) {
           </div>
         </div>
 
+        {/* 4. Daily Nutrition Targets (Optional) */}
+        <div className="flex flex-col gap-xs pt-xs border-t border-outline/20">
+          <div className="flex items-center justify-between">
+            <span className="font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant font-bold flex items-center gap-1">
+              <Icon name="local_fire_department" className="text-amber-500 text-sm" />
+              Daily Nutrition Targets <span className="text-[11px] font-normal lowercase">(optional)</span>
+            </span>
+          </div>
+          <p className="font-body-xs text-[11px] text-on-surface-variant">
+            Set optional calorie and protein goals to see how planned meals fit into your day.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm mt-1">
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-semibold text-on-surface">Daily Calories (kcal)</span>
+              <input
+                type="number"
+                name="dailyCalorieTarget"
+                defaultValue={user.dailyCalorieTarget ?? ''}
+                placeholder="e.g. 2200"
+                min="1000"
+                max="6000"
+                className="w-full h-10 px-3 rounded-xl bg-surface-container-low border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-sm font-numeric-data"
+              />
+            </label>
+            <label className="flex flex-col gap-1">
+              <span className="text-xs font-semibold text-on-surface">Daily Protein (g)</span>
+              <input
+                type="number"
+                name="dailyProteinTarget"
+                defaultValue={user.dailyProteinTarget ?? ''}
+                placeholder="e.g. 140"
+                min="30"
+                max="400"
+                className="w-full h-10 px-3 rounded-xl bg-surface-container-low border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-sm font-numeric-data"
+              />
+            </label>
+          </div>
+        </div>
+
         <SaveButton label="Save Dietary Profile" />
         <Status state={state} />
       </form>

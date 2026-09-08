@@ -154,11 +154,15 @@ Transforming the mobile web app into an installable PWA gives students a native 
 - [x] Implement sticky horizontal weekday selector on `WeekPlan.tsx` (`Mon · Tue · Wed...`) so mobile users jump directly to any day without infinite scrolling.
 - [x] Audit bottom sheets: ensure touch drag-handle dismiss and backdrop blur.
 
-### Phase 2: Cook Mode Counter Experience
+### Phase 2: Cook Mode Counter Experience (Anki Flashcard Deck)
 - [x] Integrate Screen Wake Lock API in `CookModeModal.tsx` / Cook Mode (`navigator.wakeLock`).
-- [x] Add enlarged step cards (20–24px text) with knuckle-friendly checkboxes.
-- [x] Add ingredients checklist strip inside cook mode.
-- [x] Integrate 1-tap leftover logging to fridge board upon completion.
+- [x] Anki Flashcard UI: Single physical-feeling card center stage with 3D stacked deck visual cues, segmented deck progress bar, and card flip capability (Action front / Ingredients & Tips back).
+- [x] Knuckle-friendly Anki response buttons (Previous, Flip, Done / Next Step with 56px touch targets).
+- [x] Smart step classification (PREP, SEAR, SIMMER, BAKE, MIX, SEASON, SERVE badges) and auto-matched step ingredient chips.
+- [x] Built-in interactive countdown timers with Web Audio chime when cooking intervals are detected in step text.
+- [x] Deck Drawer sheet to jump across cards or check full recipe ingredients.
+- [x] Integrate 1-tap leftover logging to fridge board upon completion ("All Cards Mastered! 🎉").
+- [x] Enforce phone exclusivity: desktop users receive a dedicated kitchen-counter companion modal with live QR code and mobile link; full screen cooking interface is reserved for phone.
 
 ### Phase 3: 1-Tap Banking Deep Links
 - [x] In Account Settings &rarr; Payment details, add optional fields for `Monzo handle` and `Revolut username` (`AccountPanels.tsx`).

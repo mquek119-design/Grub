@@ -28,10 +28,18 @@ export function InstallPrompt() {
     const wasDismissed = window.localStorage.getItem('grub:pwa-dismissed') === 'true';
     setDismissed(wasDismissed);
 
-    // Detect iOS
+    // Detect mobile device
     const ua = window.navigator.userAgent.toLowerCase();
+    const isMobileDevice = /iphone|ipad|ipod|android|mobile/.test(ua);
     const isIosDevice = /iphone|ipad|ipod/.test(ua);
     setIsIOS(isIosDevice);
+
+    // Never show on desktop
+    const isDesktop = window.innerWidth >= 768 && !isMobileDevice;
+    if (isDesktop) {
+      setMounted(false);
+      return;
+    }
 
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
@@ -68,7 +76,7 @@ export function InstallPrompt() {
   return (
     <aside
       aria-label="Add Grub to your home screen"
-      className="p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant/40 shadow-ambient-card flex items-start gap-3 my-sm animate-fade-in"
+      className="md:hidden p-3.5 rounded-2xl bg-surface-container-low border border-outline-variant/40 shadow-ambient-card flex items-start gap-3 my-sm animate-fade-in"
     >
       <Stocky mood="smug" size="sm" className="shrink-0 pt-0.5" />
 

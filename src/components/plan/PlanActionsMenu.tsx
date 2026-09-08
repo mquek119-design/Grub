@@ -79,6 +79,15 @@ export function PlanActionsMenu({ plan }: { plan: WeeklyPlan }) {
             <Icon name="menu_book" className="text-lg text-primary" />
             <span>Browse Recipe Book</span>
           </Link>
+
+          <Link
+            href="/settings#calendar-sync"
+            onClick={() => setOpen(false)}
+            className="w-full px-4 py-2.5 text-left text-sm font-semibold text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors"
+          >
+            <Icon name="event" className="text-lg text-primary" />
+            <span>Sync to Calendar (Apple/Google)</span>
+          </Link>
         </div>
       )}
     </div>

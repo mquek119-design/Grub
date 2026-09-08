@@ -46,7 +46,7 @@ export function KitchenSubNav({ current, className }: KitchenSubNavProps) {
     <nav
       aria-label="Kitchen Sections"
       className={clsx(
-        'inline-flex items-center gap-1 p-1 rounded-2xl bg-surface-container-low/90 border border-outline-variant/40 shadow-xs max-w-full overflow-x-auto no-scrollbar',
+        'w-fit inline-flex items-center gap-1 p-1 rounded-2xl bg-surface-container-low/90 border border-outline-variant/40 shadow-xs max-w-full overflow-x-auto no-scrollbar',
         className
       )}
     >

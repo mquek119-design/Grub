@@ -215,8 +215,11 @@ export default async function FeedPage() {
                 href={`/recipes/${cookingTonight[0].recipeId}?cook=true`}
                 className="inline-flex items-center gap-xs mt-xs text-secondary font-bold text-[14px] hover:underline btn-tactile"
               >
+                <Icon name="smartphone" className="text-[18px]" />
                 <span>Start Cook Mode</span>
-                <Icon name="skillet" className="text-[18px]" />
+                <span className="hidden md:inline text-[11px] font-semibold bg-secondary-fixed/50 text-on-secondary-fixed px-1.5 py-0.5 rounded-full">
+                  Phone
+                </span>
               </Link>
             </div>
           </Card>

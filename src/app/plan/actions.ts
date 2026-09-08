@@ -266,6 +266,126 @@ export async function leaveMeal(
   return OK;
 }
 
+/**
+ * Switches the caller's planned meal on a given sitting to another recipe (e.g. from an overlap suggestion).
+ * Atomically removes the caller from the old meal (cleaning up empty rows) and adds/joins the new recipe.
+ */
+export async function switchMeal(
+  _prev: PlanActionState,
+  formData: FormData
+): Promise<PlanActionState> {
+  const me = await getCurrentUser();
+  if (!me.houseId) return fail('Join a house first.');
+
+  const oldMealId = String(formData.get('oldMealId') ?? '').trim();
+  const newRecipeId = String(formData.get('newRecipeId') ?? '').trim();
+  const day = asWeekday(formData.get('day'));
+  const mealType = asMealType(formData.get('mealType'));
+  const week: WeekChoice = parseWeekChoice(String(formData.get('week') ?? ''));
+
+  if (!day) return fail('Pick a day.');
+  if (!newRecipeId) return fail('Pick a recipe to switch to.');
+
+  const weekStart = weekStartFor(week);
+  const plan = await getWeeklyPlanFor(weekStart);
+  if (plan && plan.id && plan.status !== 'planning') {
+    return fail('The shop for that week has gone in — nothing more can be changed.');
+  }
+  if (plan && plan.cutoffAt && isCutoffPassed(plan.cutoffAt)) {
+    return fail('Planning has closed for this week. No more changes allowed.');
+  }
+  if (isDayPast(weekStart, day)) {
+    return fail(`${WEEKDAY_LABELS[day]} has been and gone. Put it on a day still to come.`);
+  }
+
+  const supabase = await createClient();
+
+  // 1. Leave the old meal if provided
+  if (oldMealId) {
+    const context = await getMealContext(oldMealId);
+    if (context && context.planStatus === 'planning') {
+      await supabase
+        .from('meal_participants')
+        .delete()
+        .eq('planned_meal_id', oldMealId)
+        .eq('user_id', me.id);
+
+      const remaining = await supabase
+        .from('meal_participants')
+        .select('user_id')
+        .eq('planned_meal_id', oldMealId)
+        .eq('opted_out', false);
+
+      const count = remaining.data?.length ?? 0;
+      if (count === 0) {
+        await supabase.from('planned_meals').delete().eq('id', oldMealId);
+      } else {
+        const isCurrentCook = context.meal.cookedByUserId === me.id;
+        await supabase
+          .from('planned_meals')
+          .update({
+            is_shared: count > 1,
+            ...(isCurrentCook ? { cooked_by_user_id: null, cook_offer_to: null } : {}),
+          })
+          .eq('id', oldMealId);
+      }
+    }
+  }
+
+  // 2. Add or join the new recipe
+  const planId = await ensurePlanId(weekStart);
+  const existing = await supabase
+    .from('planned_meals')
+    .select('id')
+    .eq('plan_id', planId)
+    .eq('day', day)
+    .eq('meal_type', mealType)
+    .eq('recipe_id', newRecipeId)
+    .maybeSingle();
+
+  let mealId = existing.data?.id;
+  if (!mealId) {
+    const inserted = await supabase
+      .from('planned_meals')
+      .insert({
+        plan_id: planId,
+        recipe_id: newRecipeId,
+        day,
+        meal_type: mealType,
+        created_by: me.id,
+        cooked_by_user_id: me.id,
+      })
+      .select('id')
+      .single();
+
+    if (inserted.error || !inserted.data) {
+      return fail(inserted.error?.message ?? 'Could not switch to that meal.');
+    }
+    mealId = inserted.data.id;
+  }
+
+  const participant = await supabase
+    .from('meal_participants')
+    .upsert({ planned_meal_id: mealId, user_id: me.id, opted_out: false });
+  if (participant.error) return fail(participant.error.message);
+
+  const { count } = await supabase
+    .from('meal_participants')
+    .select('user_id', { count: 'exact', head: true })
+    .eq('planned_meal_id', mealId)
+    .eq('opted_out', false);
+
+  await supabase
+    .from('planned_meals')
+    .update({ is_shared: (count ?? 1) > 1 })
+    .eq('id', mealId);
+
+  revalidatePath('/plan');
+  revalidatePath('/');
+  revalidatePath('/basket');
+  return DONE;
+}
+
 /** Saves the caller's dietary constraints onto their profile. */
 export async function saveConstraints(
   _prev: PlanActionState,

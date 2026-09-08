@@ -26,7 +26,7 @@ export async function seedStarterRecipes(houseId: string, createdBy: string): Pr
         dietary_tags: [],
         instructions: recipe.instructions,
         difficulty: 'easy',
-        cost_per_portion: 0,
+        cost_per_portion: recipe.costPerPortion ?? 180,
       })
       .select('id')
       .single();

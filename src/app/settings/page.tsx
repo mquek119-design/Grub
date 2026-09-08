@@ -101,7 +101,7 @@ export default async function SettingsPage() {
             </div>
           </section>
 
-          <section className="flex flex-col gap-sm">
+          <section id="calendar-sync" className="flex flex-col gap-sm scroll-mt-24">
             <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs font-bold">
               <Icon name="event" className="text-primary text-lg" />
               Calendar Sync &amp; Alerts

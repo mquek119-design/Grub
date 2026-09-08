@@ -10,8 +10,13 @@ export interface StarterRecipe {
   title: string;
   cookTimeMins: number;
   servings: number;
+  costPerPortion?: number;
   tags: string[];
   instructions: string[];
+  caloriesPerPortion?: number;
+  proteinGrams?: number;
+  carbsGrams?: number;
+  fatGrams?: number;
   ingredients: {
     name: string;
     quantity: number;
@@ -25,7 +30,12 @@ export const STARTER_RECIPES: StarterRecipe[] = [
     title: 'Spaghetti Bolognese',
     cookTimeMins: 45,
     servings: 4,
-    tags: ['Western', 'Pasta', 'Beef'],
+    costPerPortion: 165,
+    tags: ['Western', 'Pasta', 'Beef', 'Comfort'],
+    caloriesPerPortion: 620,
+    proteinGrams: 42,
+    carbsGrams: 68,
+    fatGrams: 18,
     instructions: [
       'Brown the mince in a large pan.',
       'Add chopped onion and garlic, cook until soft.',
@@ -44,7 +54,12 @@ export const STARTER_RECIPES: StarterRecipe[] = [
     title: 'Chicken Tikka Masala',
     cookTimeMins: 40,
     servings: 5,
-    tags: ['Asian', 'Curry', 'Spicy', 'Chicken'],
+    costPerPortion: 195,
+    tags: ['Asian', 'Curry', 'Spicy', 'Chicken', 'Comfort'],
+    caloriesPerPortion: 580,
+    proteinGrams: 38,
+    carbsGrams: 62,
+    fatGrams: 19,
     instructions: [
       'Cut chicken into chunks and fry until golden.',
       'Add tikka paste and cook for 2 minutes.',
@@ -62,7 +77,12 @@ export const STARTER_RECIPES: StarterRecipe[] = [
     title: 'Beef Stir Fry',
     cookTimeMins: 20,
     servings: 2,
-    tags: ['Asian', 'Noodles', 'Beef', 'Quick'],
+    costPerPortion: 240,
+    tags: ['Asian', 'Noodles', 'Beef', 'Quick', 'Fakeaway'],
+    caloriesPerPortion: 490,
+    proteinGrams: 34,
+    carbsGrams: 52,
+    fatGrams: 15,
     instructions: [
       'Heat oil in a wok or large pan.',
       'Sear the beef strips until cooked.',
@@ -80,7 +100,12 @@ export const STARTER_RECIPES: StarterRecipe[] = [
     title: 'Mac and Cheese',
     cookTimeMins: 30,
     servings: 4,
+    costPerPortion: 125,
     tags: ['Western', 'Pasta', 'Cheese', 'Comfort'],
+    caloriesPerPortion: 590,
+    proteinGrams: 22,
+    carbsGrams: 64,
+    fatGrams: 28,
     instructions: [
       'Boil the macaroni according to the packet.',
       'Make a roux with butter and flour.',
@@ -99,7 +124,12 @@ export const STARTER_RECIPES: StarterRecipe[] = [
     title: 'Thai Green Curry',
     cookTimeMins: 35,
     servings: 4,
-    tags: ['Asian', 'Thai', 'Curry', 'Chicken'],
+    costPerPortion: 190,
+    tags: ['Asian', 'Thai', 'Curry', 'Chicken', 'Fakeaway'],
+    caloriesPerPortion: 540,
+    proteinGrams: 36,
+    carbsGrams: 55,
+    fatGrams: 20,
     instructions: [
       'Fry curry paste in coconut milk for 2 minutes.',
       'Add chicken pieces and simmer for 20 minutes.',

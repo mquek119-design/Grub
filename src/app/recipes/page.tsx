@@ -8,7 +8,8 @@ import { PageShell } from '@/components/ui/PageShell';
 import { KitchenSubNav } from '@/components/kitchen/KitchenSubNav';
 import { RecipeBrowser } from '@/components/recipes/RecipeBrowser';
 import { ImportRecipeCard } from '@/components/recipes/ImportRecipeCard';
-import { getCurrentUser, getRecipes, getWeeklyPlan } from '@/lib/queries';
+import { getCurrentUser, getHousemates, getRecipes, getWeeklyPlan } from '@/lib/queries';
+import { parseDietaryPreferences, DIETS } from '@/lib/dietary';
 import { WEEKDAYS, WEEKDAY_LABELS, type Weekday } from '@/lib/types';
 import { parseWeekChoice } from '@/lib/weeks';
 
@@ -37,7 +38,11 @@ export default async function RecipesPage({
   const currentUser = await getCurrentUser();
   if (!currentUser.houseId) redirect('/onboarding');
 
-  const [recipes, plan] = await Promise.all([getRecipes(), getWeeklyPlan()]);
+  const [recipes, plan, housemates] = await Promise.all([
+    getRecipes(),
+    getWeeklyPlan(),
+    getHousemates(),
+  ]);
 
   const params = searchParams ? await searchParams : {};
   const requested = String(params.day ?? '');
@@ -47,11 +52,18 @@ export default async function RecipesPage({
 
   const week = parseWeekChoice(params.week);
 
-  // Parse dietary filters from the URL (comma-separated list)
-  const dietaryParam = String(params.dietary ?? '');
-  const initialDietaryFilters = dietaryParam
-    ? dietaryParam.split(',').map((f) => f.trim())
-    : [];
+  // Compute aggregated house dietary preferences to reassure users
+  const houseDiets = Array.from(
+    new Set(
+      housemates.flatMap((h) => {
+        const parsed = parseDietaryPreferences(h.dietaryPreferences);
+        return [
+          ...parsed.diets.map((d) => DIETS.find((opt) => opt.id === d)?.label ?? d),
+          ...parsed.customAllergies.map((a) => `No ${a}`),
+        ];
+      })
+    )
+  );
 
   // Next week is always open; only the week being eaten can be locked by an
   // order that has already gone in.
@@ -59,21 +71,29 @@ export default async function RecipesPage({
 
   return (
     <PageShell wide>
-      <div className="flex flex-col gap-sm">
-        <KitchenSubNav current="recipes" />
-        <PageHeader
-          title="Recipe Book"
-          subtitle={
-            planningForDay
-              ? `Pick something for ${WEEKDAY_LABELS[planningForDay]}${week === 'next' ? ' next week' : ''}.`
-              : 'Everything the house can cook. Tap one to put it on a night.'
-          }
-          action={
+      <div className="flex flex-col gap-sm mb-xs">
+        <div className="flex flex-wrap items-center justify-between gap-md">
+          <KitchenSubNav current="recipes" />
+          <div className="flex items-center gap-sm">
+            <span className="hidden sm:inline-block font-label-caps text-xs text-on-surface-variant font-medium">
+              {recipes.length} {recipes.length === 1 ? 'recipe' : 'recipes'}
+            </span>
             <ButtonLink href="/recipes/new" icon="add" className="shrink-0">
               Add Recipe
             </ButtonLink>
-          }
-        />
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-xs pt-xs">
+          <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-background font-bold">
+            Recipe Book
+          </h1>
+          <p className="font-body-sm text-body-sm text-on-surface-variant">
+            {planningForDay
+              ? `Pick something for ${WEEKDAY_LABELS[planningForDay]}${week === 'next' ? ' next week' : ''}.`
+              : 'Everything the house can cook. Tap one to put it on a night.'}
+          </p>
+        </div>
       </div>
 
       {planningForDay && (
@@ -105,7 +125,7 @@ export default async function RecipesPage({
           locked={locked}
           planningForDay={planningForDay}
           week={week}
-          initialDietaryFilters={initialDietaryFilters}
+          houseDiets={houseDiets}
         />
       )}
 

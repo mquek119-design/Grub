@@ -123,3 +123,88 @@ In `Settings -> Notifications & Integrations`, each student can customize their 
 ### 6.2 Campus Touchpoint & Viral Sticker Strategy
 - **Metallic Foil Die-Cut Stickers**: High-appeal stickers mimicking foil-wrapped bouillon cubes handed out during Warwick Freshers' Week and Cannon Park flyering. High pickup rate for student laptops, drink flasks, and kitchen whiteboards.
 - **Micro-Interaction Moments**: Vector-rendered inside the web app for instant 0ms load times, subtle hover animations, and emotional feedback during cutoff count-downs, basket sync, and recipe steps.
+
+---
+
+## 7. Future Spin-off: Grub Studio / Solo Meal Prep & Macro Budgeting (Post-Launch Expansion)
+
+> [!NOTE]
+> **Product Boundary & Roadmap Priority**: Grub's active product focus is 100% on **shared student households and flatshares**. Grub Studio is a planned future spin-off product for students living in single studios and postgraduates living alone, rather than an in-app toggle inside the household product. It is cataloged here for long-term vision and investor context.
+
+### 7.1 The Pivot from "Shared Flat" to "Studio / Solo Spin-off"
+While Grub was born to solve the social and financial chaos of shared student kitchens, the underlying mathematical engine — **cross-meal ingredient combination and pack-level supermarket cart optimization** — solves an equally massive problem for individual students and young professionals living in private studios or cooking purely for themselves.
+
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                                SAME ENGINE, DUAL LENS                                  │
+├─────────────────────────────────────────┬──────────────────────────────────────────────┤
+│            GRUB HOUSEHOLD               │                  GRUB SOLO                   │
+├─────────────────────────────────────────┼──────────────────────────────────────────────┤
+│ Splitting ingredients across PEOPLE     │ Splitting ingredients across DAYS (Meal Prep)│
+│ "5 housemates sharing 1kg chicken"      │ "1 person batching 1kg chicken across 4 days"│
+│ Bill splitting & debt settlement        │ Macro budgeting (£ per 100g protein)         │
+│ Shared kitchen cook rotas               │ Sunday batch prep & freezer storage schedule │
+│ Eliminates social cooking friction      │ Eliminates solo food waste & takeaway drift  │
+└────────────────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 7.2 The Solo Cooking Trap: The "Pack-Size Curse"
+1. **Supermarkets are Built for Families**: Retail packaging (500g mince, 1kg carrots, 300ml cream, bags of spinach) makes cooking for one person extraordinarily wasteful. Single shoppers either:
+   - Overbuy and watch £10–£15 of fresh greens rot into brown sludge in the crisper drawer by Thursday, or
+   - Give up and spend £8–£12/night on Deliveroo or ready-meals.
+2. **The Solo Meal Prep Solution**: Grub Solo schedules recipes that **exhaust whole supermarket packs across 3–4 days**. If a Thai Curry calls for 200ml coconut milk and half a bag of coriander on Monday, Tuesday’s Stir Fry automatically absorbs the remainder. Zero food waste, minimum spend.
+
+---
+
+### 7.3 Macro Budgeting: The "Protein-per-Pence" Engine
+Fitness and gym culture is ubiquitous among university students, but existing solutions are siloed:
+- **MyFitnessPal / MacroFactor**: Track calories and macros *after* you have already bought and eaten them, with zero knowledge of price or supermarket availability.
+- **Supermarket Apps (Tesco, Sainsbury's)**: Price groceries with zero awareness of nutritional macro composition.
+
+**Grub bridges this gap with Macro Budgeting:**
+
+#### A. Dual-Constraint Knapsack Solver
+Users input both their **Financial Budget** and their **Macro Target**:
+> *"Hit 150g protein/day & 2,300 kcal/day on a strict £28 weekly grocery budget."*
+
+#### B. The "Protein Efficiency Index" (£/100g Protein)
+Grub’s supermarket pricing engine indexes every Tesco product by protein cost-efficiency:
+* **High Efficiency**: Eggs (£0.95/100g protein), Greek Style Yoghurt (£1.10/100g protein), Canned Tuna (£1.35/100g protein), Own-brand Chicken Breast (£1.65/100g protein), Red Lentils (£0.60/100g protein).
+* **Low Efficiency**: Branded protein bars (£6.50/100g protein), pre-made protein shakes (£5.80/100g protein), premium steak fillets (£7.20/100g protein).
+
+#### C. Smart Macro Swaps in the Basket
+If a user is 25g short of their weekly protein target or £3 over budget, Grub suggests high-yield substitutions directly in the cart:
+> *"💡 Swap brand granola for 0% Greek Yoghurt + frozen berries: Saves £1.80 and adds +32g protein to your week."*
+
+---
+
+### 7.4 Solo Meal Prep Workflow & Product Features
+
+1. **The "Sunday Batch Prep" Session**:
+   - Cook Mode adapts to **batch cooking**: instead of cooking for 1 sitting, it guides the student to cook 4–6 portions at once in 45 minutes.
+   - **Container Divvy Guidance**: Clear visual prompts for storage:
+     - *Container 1 & 2* &rarr; Fridge (Eaten Monday & Tuesday).
+     - *Container 3 & 4* &rarr; Freezer (Eaten Thursday & Friday).
+2. **Smart Freezer & Defrost Alerts (Calendar Integration)**:
+   - Automatically schedules 1-tap alarms into Apple/Google Calendar:
+     > *"🧊 Grub Defrost Alert: Move Tupperware #3 from freezer to fridge tonight so it’s ready for tomorrow’s lunch."*
+3. **Macro Progress Strip**:
+   - The weekly plan dashboard displays daily average macro bars:
+     `Calories: 2,250 / 2,300 kcal` | `Protein: 152g / 150g` | `Cost: £3.85 / day`
+
+---
+
+### 7.5 Strategic Business & Market Impact
+
+1. **Massive TAM Expansion**:
+   - Unlocks students in studio apartments, postgraduates, individual hall residents without a communal cooking circle, and young professionals living alone in major cities.
+2. **Zero-Churn Graduation Flywheel**:
+   - When a student graduates from a shared house at Warwick and moves into a 1-bed flat in London or Manchester, they do not churn. They toggle their account from **"Household Mode"** to **"Solo Meal Prep Mode"**, keeping their recipes, meal history, and grocery habits intact.
+3. **High-Margin Monetization (Grub Pro)**:
+   - **Household Grub (Free)**: Core communal meal planning, split settlement, basic supermarket sync.
+   - **Grub Pro / Fitness Tier (£3.99/mo or £32/yr)**:
+     - Automated Macro Budgeting & Goal Optimizer.
+     - 1-Click sync to Apple Health & MyFitnessPal.
+     - Custom high-protein / low-carb batch prep catalog.
+     - Bulk prep freezer scheduler with calendar defrost reminders.
+

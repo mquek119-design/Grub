@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useActionState } from 'react';
+import { useEffect, useState, useActionState, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '@/components/media/Icon';
 import { clsx } from '@/lib/clsx';
@@ -17,17 +17,172 @@ interface CookModeModalProps {
 
 const LEFTOVER_INITIAL: LeftoverActionState = { status: 'idle', message: '' };
 
+/**
+ * Categorizes an instruction into a primary cooking phase for the Anki flashcard badge.
+ */
+function getStepPhase(instruction: string): { label: string; icon: string; tone: string } {
+  const lower = instruction.toLowerCase();
+  if (/\b(chop|dice|slice|peel|grate|prep|trim|finely|mince|shred)\b/.test(lower)) {
+    return { label: 'PREP', icon: 'content_cut', tone: 'bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border-emerald-500/30' };
+  }
+  if (/\b(sear|fry|saut[eé]|brown|pan-fry|crisp|heat\s+oil|skillet|sizzle)\b/.test(lower)) {
+    return { label: 'SEAR', icon: 'local_fire_department', tone: 'bg-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-500/30' };
+  }
+  if (/\b(boil|simmer|reduce|bubble|poach|steam|stock|broth)\b/.test(lower)) {
+    return { label: 'SIMMER', icon: 'soup_kitchen', tone: 'bg-sky-500/15 text-sky-800 dark:text-sky-300 border-sky-500/30' };
+  }
+  if (/\b(bake|roast|oven|preheat|grill|broil|sheet)\b/.test(lower)) {
+    return { label: 'BAKE', icon: 'skillet', tone: 'bg-orange-500/15 text-orange-800 dark:text-orange-300 border-orange-500/30' };
+  }
+  if (/\b(stir|mix|whisk|combine|fold|toss|blend|puree)\b/.test(lower)) {
+    return { label: 'MIX', icon: 'restaurant', tone: 'bg-purple-500/15 text-purple-800 dark:text-purple-300 border-purple-500/30' };
+  }
+  if (/\b(season|taste|salt|pepper|garnish|drizzle|lemon|herb|coriander|parsley)\b/.test(lower)) {
+    return { label: 'SEASON', icon: 'grain', tone: 'bg-teal-500/15 text-teal-800 dark:text-teal-300 border-teal-500/30' };
+  }
+  if (/\b(serve|plate|rest|carve|enjoy|bowl|divide|dish\s+up)\b/.test(lower)) {
+    return { label: 'SERVE', icon: 'dinner_dining', tone: 'bg-secondary-fixed text-on-secondary-fixed border-secondary/30' };
+  }
+  return { label: 'COOK', icon: 'skillet', tone: 'bg-primary/10 text-primary border-primary/20' };
+}
+
+/**
+ * Extracts a countdown duration in seconds from step text (e.g. "10 mins" -> 600).
+ */
+function extractStepTimer(instruction: string): number | null {
+  const match = instruction.match(/(\d+)(?:-(\d+))?\s*(mins?|minutes?|secs?|seconds?|hours?)\b/i);
+  if (!match) return null;
+  const num = parseInt(match[2] ?? match[1], 10);
+  const unit = match[3].toLowerCase();
+  if (unit.startsWith('hour')) return num * 3600;
+  if (unit.startsWith('min')) return num * 60;
+  if (unit.startsWith('sec')) return num;
+  return null;
+}
+
+/**
+ * Matches ingredients mentioned in this specific step instruction.
+ */
+function getStepIngredients(instruction: string, ingredients: Recipe['ingredients'], scale: number) {
+  const lower = instruction.toLowerCase();
+  return ingredients.filter((ing) => {
+    const nameWords = ing.name.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+    return nameWords.some((w) => lower.includes(w)) || lower.includes(ing.name.toLowerCase());
+  }).map((ing) => {
+    const qty = ing.quantity * scale;
+    const display = qty % 1 === 0 ? qty.toString() : qty.toFixed(1);
+    return {
+      name: ing.name,
+      amount: `${display} ${ing.unit}`.trim(),
+    };
+  });
+}
+
+function playTimerChime() {
+  try {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+    osc.frequency.setValueAtTime(880, ctx.currentTime + 0.15);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.6);
+  } catch {
+    // Audio unavailable or muted
+  }
+}
+
 export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps) {
   const [mounted, setMounted] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [previewOnDesktop, setPreviewOnDesktop] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+
+  // Anki Flashcard State
   const [currentStep, setCurrentStep] = useState(0);
+  const [isFlipped, setIsFlipped] = useState(false);
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set([0]));
   const [finished, setFinished] = useState(false);
+  const [deckDrawerOpen, setDeckDrawerOpen] = useState(false);
+
+  // Step Timer State
+  const [timerSecondsLeft, setTimerSecondsLeft] = useState<number | null>(null);
+  const [timerRunning, setTimerRunning] = useState(false);
+  const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Leftovers action
   const [showLeftoverForm, setShowLeftoverForm] = useState(false);
   const [leftoverState, leftoverAction] = useActionState(addLeftover, LEFTOVER_INITIAL);
   const { pending } = useSubmitState();
 
+  const totalSteps = recipe.instructions.length;
+  const scale = servings / recipe.servings;
+  const activeInstruction = recipe.instructions[currentStep] || '';
+
+  const stepPhase = useMemo(() => getStepPhase(activeInstruction), [activeInstruction]);
+  const stepIngredients = useMemo(
+    () => getStepIngredients(activeInstruction, recipe.ingredients, scale),
+    [activeInstruction, recipe.ingredients, scale]
+  );
+  const detectedSeconds = useMemo(() => extractStepTimer(activeInstruction), [activeInstruction]);
+
+  // Reset timer and flip state on card advance
+  useEffect(() => {
+    setIsFlipped(false);
+    if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (detectedSeconds !== null) {
+      setTimerSecondsLeft(detectedSeconds);
+      setTimerRunning(false);
+    } else {
+      setTimerSecondsLeft(null);
+      setTimerRunning(false);
+    }
+  }, [currentStep, detectedSeconds]);
+
+  // Countdown clock effect
+  useEffect(() => {
+    if (!timerRunning || timerSecondsLeft === null) return;
+    timerIntervalRef.current = setInterval(() => {
+      setTimerSecondsLeft((prev) => {
+        if (prev === null || prev <= 1) {
+          clearInterval(timerIntervalRef.current as NodeJS.Timeout);
+          setTimerRunning(false);
+          playTimerChime();
+          if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+            navigator.vibrate([200, 100, 200]);
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    };
+  }, [timerRunning, timerSecondsLeft]);
+
+  // Screen size check for desktop prompt
   useEffect(() => {
     setMounted(true);
+    const checkDevice = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
+
+  // Screen Wake Lock API for Mobile Cook Mode
+  useEffect(() => {
+    if (isDesktop && !previewOnDesktop) return;
     let wakeLock: any = null;
     if ('wakeLock' in navigator) {
       (navigator as any).wakeLock
@@ -40,25 +195,39 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
     return () => {
       if (wakeLock) wakeLock.release();
     };
-  }, []);
+  }, [isDesktop, previewOnDesktop]);
+
+  // Keyboard navigation shortcuts
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (finished || showLeftoverForm) return;
+      if (e.key === 'ArrowRight' || e.key === 'Enter') {
+        e.preventDefault();
+        handleNextStep();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        handlePrevStep();
+      } else if (e.key === ' ' || e.key === 'f') {
+        e.preventDefault();
+        setIsFlipped((prev) => !prev);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [currentStep, totalSteps, finished, showLeftoverForm]);
 
   if (!mounted) return null;
-
-  const totalSteps = recipe.instructions.length;
-  const scale = servings / recipe.servings;
-
-  function toggleStep(idx: number) {
-    setCompletedSteps((prev) => {
-      const next = new Set(prev);
-      if (next.has(idx)) next.delete(idx);
-      else next.add(idx);
-      return next;
-    });
-  }
 
   function handleSelectStep(idx: number) {
     setCurrentStep(idx);
     setCompletedSteps((prev) => new Set(prev).add(idx));
+    setDeckDrawerOpen(false);
+  }
+
+  function handlePrevStep() {
+    if (currentStep > 0) {
+      setCurrentStep((prev) => prev - 1);
+    }
   }
 
   function handleNextStep() {
@@ -69,165 +238,496 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
       setCurrentStep(nextIdx);
       setCompletedSteps((prev) => new Set(prev).add(nextIdx));
     } else {
-      // All steps completed!
+      // Finished all cards in deck
       setCompletedSteps(new Set(Array.from({ length: totalSteps }, (_, i) => i)));
       setFinished(true);
     }
   }
 
-  return createPortal(
-    <div className="fixed inset-0 z-[110] bg-surface-container-lowest flex flex-col h-screen overflow-hidden">
-      {/* Header */}
-      <header className="px-lg py-md border-b border-surface-container-highest flex items-center justify-between gap-md bg-surface-container-low shrink-0">
-        <div className="flex items-center gap-md min-w-0">
+  const cookUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/recipes/${recipe.id}?cook=true`
+    : `/recipes/${recipe.id}?cook=true`;
+
+  // Desktop Notice: Cook Mode is on phone
+  if (isDesktop && !previewOnDesktop) {
+    return createPortal(
+      <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-center justify-center p-md animate-fade-in">
+        <div className="bg-surface-container-lowest border border-surface-container-highest rounded-3xl p-lg md:p-xl max-w-md w-full shadow-ambient-modal flex flex-col items-center text-center gap-md relative animate-pop-in">
           <button
             type="button"
             onClick={onClose}
-            className="p-sm rounded-full text-on-surface-variant hover:bg-surface-container transition-colors shrink-0"
+            aria-label="Close"
+            className="absolute top-4 right-4 p-2 rounded-full text-on-surface-variant hover:bg-surface-container transition-colors"
           >
-            <Icon name="arrow_back" className="text-xl" />
+            <Icon name="close" className="text-xl" />
           </button>
-          <div className="min-w-0">
-            <span className="font-label-caps text-label-caps uppercase text-primary font-bold">
-              Mob Cook Mode · {servings} Servings
+
+          <div className="w-16 h-16 rounded-2xl bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed shadow-sm">
+            <Icon name="smartphone" filled className="text-[32px]" />
+          </div>
+
+          <div className="flex flex-col gap-xs">
+            <span className="font-label-caps text-label-caps uppercase text-primary font-bold tracking-wider">
+              Phone Exclusive · Kitchen Companion
             </span>
-            <h2 className="font-title-md text-title-md truncate font-bold text-on-surface">
-              {formatRecipeTitle(recipe.title)}
+            <h2 className="font-headline-sm text-headline-sm font-bold text-on-surface">
+              Cook Mode is on your phone
             </h2>
           </div>
+
+          <p className="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Cook Mode turns your phone into an interactive Anki-style recipe flashcard deck propped by the stove—with screen wake-lock, step timers, and knuckle check-offs—keeping your laptop safe from kitchen spills.
+          </p>
+
+          <div className="w-full bg-surface-container-low border border-surface-container-highest rounded-2xl p-md flex flex-col items-center gap-xs">
+            <div className="p-2 bg-white rounded-xl shadow-xs border border-outline-variant/40">
+              <img
+                src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(cookUrl)}&color=1B4332&bgcolor=FFFFFF`}
+                alt="Scan to open Cook Mode on your phone"
+                width={150}
+                height={150}
+                className="rounded-lg"
+              />
+            </div>
+            <span className="font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant font-bold mt-1">
+              Point phone camera to start cooking
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-xs w-full">
+            <button
+              type="button"
+              onClick={() => {
+                if (navigator.clipboard) {
+                  navigator.clipboard.writeText(cookUrl);
+                  setCopiedLink(true);
+                  setTimeout(() => setCopiedLink(false), 2000);
+                }
+              }}
+              className="w-full h-11 rounded-xl bg-primary text-on-primary font-semibold text-sm flex items-center justify-center gap-xs btn-tactile shadow-xs"
+            >
+              <Icon name={copiedLink ? 'check' : 'content_copy'} className="text-[18px]" />
+              <span>{copiedLink ? 'Link Copied to Clipboard!' : 'Copy Mobile Link'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full h-11 rounded-xl bg-surface-container-high text-on-surface font-semibold text-sm hover:bg-surface-container-highest transition-colors"
+            >
+              Back to Recipe
+            </button>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setPreviewOnDesktop(true)}
+            className="text-xs text-on-surface-variant/60 hover:text-primary hover:underline -mt-1"
+          >
+            Preview desktop flashcards anyway
+          </button>
+        </div>
+      </div>,
+      document.body
+    );
+  }
+
+  // Format timer minutes/seconds
+  const timerMins = timerSecondsLeft !== null ? Math.floor(timerSecondsLeft / 60) : 0;
+  const timerSecs = timerSecondsLeft !== null ? timerSecondsLeft % 60 : 0;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[110] bg-[#121B17] text-white flex flex-col h-screen overflow-hidden select-none">
+      {/* Top Deck Bar */}
+      <header className="px-md py-sm flex flex-col gap-2 shrink-0 bg-[#0E1512] border-b border-white/10">
+        <div className="flex items-center justify-between gap-sm">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Exit Cook Mode"
+            className="w-10 h-10 rounded-full flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+          >
+            <Icon name="close" className="text-xl" />
+          </button>
+
+          <div className="flex flex-col items-center">
+            <span className="font-label-caps text-[11px] uppercase tracking-widest text-[#A3C4A8] font-bold">
+              Card {currentStep + 1} of {totalSteps}
+            </span>
+            <span className="text-xs font-semibold text-white/90 truncate max-w-[200px]">
+              {formatRecipeTitle(recipe.title)}
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setDeckDrawerOpen(true)}
+            aria-label="Deck overview & ingredients"
+            className="h-9 px-3 rounded-full bg-white/10 hover:bg-white/15 text-white/90 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+          >
+            <Icon name="layers" className="text-[16px]" />
+            <span>Deck</span>
+          </button>
         </div>
 
-        <div className="flex items-center gap-xs text-xs font-bold text-on-surface-variant shrink-0">
-          <span className="bg-primary/10 text-primary px-3 py-1 rounded-full border border-primary/20 font-numeric-data">
-            {completedSteps.size} / {totalSteps} Steps Done
-          </span>
-        </div>
-      </header>
-
-      {/* Main Body */}
-      <main className="flex-1 overflow-y-auto p-lg max-w-4xl mx-auto w-full flex flex-col gap-lg">
-        {/* Ingredients Quick Check */}
-        <details className="bg-surface-container-low border border-surface-container-highest rounded-xl p-md">
-          <summary className="font-title-md text-title-md font-bold cursor-pointer text-on-surface flex items-center gap-xs">
-            <Icon name="kitchen" className="text-primary text-lg" />
-            <span>Ingredients Checklist ({servings} portions)</span>
-          </summary>
-          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-sm mt-md pt-md border-t border-surface-container-highest">
-            {recipe.ingredients.map((ing) => {
-              const qty = ing.quantity * scale;
-              const display = qty % 1 === 0 ? qty.toString() : qty.toFixed(1);
-              return (
-                <li key={ing.ingredientId} className="flex items-center gap-xs text-body-lg text-on-surface">
-                  <Icon name="check_circle" className="text-primary text-base" />
-                  <span className="font-semibold">{ing.name}:</span>
-                  <span className="text-on-surface-variant font-numeric-data">
-                    {display} {ing.unit}
-                  </span>
-                </li>
-              );
-            })}
-          </ul>
-        </details>
-
-        {/* Step-by-Step Focus View */}
-        <div className="flex flex-col gap-md">
-          {recipe.instructions.map((stepText, idx) => {
+        {/* Anki Segmented Progress Deck Bar */}
+        <div className="flex items-center gap-1.5 w-full">
+          {Array.from({ length: totalSteps }).map((_, idx) => {
             const isDone = completedSteps.has(idx);
             const isCurrent = currentStep === idx;
-
             return (
-              <div
+              <button
                 key={idx}
+                type="button"
                 onClick={() => handleSelectStep(idx)}
-                className={`p-lg rounded-2xl border transition-all cursor-pointer ${
+                aria-label={`Jump to Card ${idx + 1}`}
+                className={clsx(
+                  'h-1.5 flex-1 rounded-full transition-all duration-300',
                   isCurrent
-                    ? 'border-primary bg-primary-container/10 shadow-ambient-card ring-2 ring-primary/30'
+                    ? 'bg-secondary ring-2 ring-secondary/40 shadow-xs'
                     : isDone
-                    ? 'border-surface-container-highest bg-surface-container-lowest opacity-75'
-                    : 'border-surface-container-highest bg-surface-container-lowest'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-md">
-                  <div className="flex items-start gap-md min-w-0">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleStep(idx);
-                      }}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg shrink-0 transition-colors ${
-                        isDone ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant'
-                      }`}
-                    >
-                      {isDone ? <Icon name="check" className="text-xl" /> : idx + 1}
-                    </button>
-                    <p
-                      className={`font-body-lg text-[20px] leading-relaxed text-on-surface ${
-                        isDone ? 'line-through opacity-70' : ''
-                      }`}
-                    >
-                      {formatInstruction(stepText)}
-                    </p>
-                  </div>
-                </div>
-              </div>
+                    ? 'bg-[#2D6A4F]'
+                    : 'bg-white/20'
+                )}
+              />
             );
           })}
         </div>
+      </header>
+
+      {/* Anki Flashcard Center Stage */}
+      <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 overflow-hidden relative">
+        <div className="relative w-full max-w-md mx-auto flex flex-col justify-center">
+          {/* Layered Card 3 (Bottom Deck Shadow) */}
+          <div className="absolute -bottom-4 inset-x-6 h-full rounded-3xl bg-[#1C2C24] border border-white/5 -z-20 opacity-40 shadow-xs pointer-events-none" />
+
+          {/* Layered Card 2 (Middle Deck Shadow) */}
+          <div className="absolute -bottom-2 inset-x-3 h-full rounded-3xl bg-[#23382E] border border-white/10 -z-10 opacity-75 shadow-sm pointer-events-none" />
+
+          {/* Active Flashcard */}
+          <div
+            onClick={() => setIsFlipped((prev) => !prev)}
+            className={clsx(
+              'w-full min-h-[420px] max-h-[72vh] flex flex-col justify-between p-6 sm:p-8 rounded-3xl transition-all duration-200 cursor-pointer shadow-ambient-modal border',
+              isFlipped
+                ? 'bg-[#1E2E25] border-secondary/50 text-white ring-1 ring-secondary/30'
+                : 'bg-[#FAF7F2] text-[#1B4332] border-white/20 shadow-2xl'
+            )}
+          >
+            {/* Flashcard Header */}
+            <div className="flex items-center justify-between gap-sm shrink-0">
+              <div className="flex items-center gap-2">
+                <span
+                  className={clsx(
+                    'px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider font-label-caps border flex items-center gap-1',
+                    isFlipped
+                      ? 'bg-secondary-fixed/20 text-secondary border-secondary/30'
+                      : stepPhase.tone
+                  )}
+                >
+                  <Icon name={stepPhase.icon} className="text-xs" />
+                  <span>{isFlipped ? 'INGREDIENTS & TECHNIQUE' : stepPhase.label}</span>
+                </span>
+                <span className={clsx('font-label-caps text-xs font-bold', isFlipped ? 'text-white/60' : 'text-[#2D6A4F]/70')}>
+                  STEP {String(currentStep + 1).padStart(2, '0')}
+                </span>
+              </div>
+
+              <div
+                className={clsx(
+                  'flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors',
+                  isFlipped
+                    ? 'bg-white/10 text-white border-white/20'
+                    : 'bg-[#1B4332]/10 text-[#1B4332] border-[#1B4332]/20'
+                )}
+              >
+                <Icon name="flip_to_back" className="text-sm" />
+                <span>{isFlipped ? 'Flip to Action' : 'Flip Details'}</span>
+              </div>
+            </div>
+
+            {/* Flashcard Core Content */}
+            <div className="flex-1 flex flex-col justify-center my-4 overflow-y-auto pr-1">
+              {!isFlipped ? (
+                /* FRONT: Big, bold knuckle-friendly action text */
+                <div className="flex flex-col gap-4">
+                  <p className="font-headline-sm sm:font-headline-md text-[22px] sm:text-[26px] font-bold leading-snug tracking-tight">
+                    {formatInstruction(activeInstruction)}
+                  </p>
+
+                  {/* Step Ingredients Chips */}
+                  {stepIngredients.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-2">
+                      {stepIngredients.map((item, i) => (
+                        <span
+                          key={i}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#1B4332]/10 text-[#1B4332] border border-[#1B4332]/20"
+                        >
+                          <Icon name="check" className="text-xs text-[#2D6A4F]" />
+                          <span>{item.name}:</span>
+                          <span className="font-numeric-data">{item.amount}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Interactive Timer (if time detected in step) */}
+                  {timerSecondsLeft !== null && (
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-2 p-3 rounded-2xl bg-[#1B4332]/10 border border-[#1B4332]/25 flex items-center justify-between gap-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={clsx(
+                            'w-9 h-9 rounded-xl flex items-center justify-center',
+                            timerRunning
+                              ? 'bg-secondary text-on-secondary-container animate-pulse'
+                              : 'bg-[#1B4332] text-white'
+                          )}
+                        >
+                          <Icon name={timerRunning ? 'timer' : 'timer'} className="text-lg" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-numeric-data text-title-md font-bold text-[#1B4332] tabular-nums">
+                            {String(timerMins).padStart(2, '0')}:{String(timerSecs).padStart(2, '0')}
+                          </span>
+                          <span className="font-label-caps text-[10px] uppercase tracking-wider text-[#2D6A4F] font-bold">
+                            {timerRunning ? 'Timer ticking...' : timerSecondsLeft === 0 ? 'Time up! 🎉' : 'Step timer ready'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setTimerRunning((prev) => !prev)}
+                          className={clsx(
+                            'px-3.5 py-2 rounded-xl text-xs font-bold transition-all shadow-xs flex items-center gap-1 btn-tactile',
+                            timerRunning
+                              ? 'bg-amber-600 text-white hover:bg-amber-700'
+                              : 'bg-[#1B4332] text-white hover:bg-[#2D6A4F]'
+                          )}
+                        >
+                          <Icon name={timerRunning ? 'pause' : 'play_arrow'} className="text-sm" />
+                          <span>{timerRunning ? 'Pause' : 'Start'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setTimerRunning(false);
+                            setTimerSecondsLeft(detectedSeconds);
+                          }}
+                          aria-label="Reset timer"
+                          className="w-8 h-8 rounded-xl bg-[#1B4332]/10 hover:bg-[#1B4332]/20 text-[#1B4332] flex items-center justify-center transition-colors"
+                        >
+                          <Icon name="restart_alt" className="text-base" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* BACK: Flashcard Answer / Recipe Technique & Full Ingredients Breakdown */
+                <div className="flex flex-col gap-3 text-left">
+                  <span className="font-label-caps text-xs uppercase tracking-wider text-secondary font-bold">
+                    Ingredients for this recipe ({servings} portions):
+                  </span>
+                  <ul className="grid grid-cols-1 gap-1.5 max-h-[36vh] overflow-y-auto pr-1">
+                    {recipe.ingredients.map((ing) => {
+                      const qty = ing.quantity * scale;
+                      const display = qty % 1 === 0 ? qty.toString() : qty.toFixed(1);
+                      const isMentioned = activeInstruction.toLowerCase().includes(ing.name.toLowerCase());
+                      return (
+                        <li
+                          key={ing.ingredientId}
+                          className={clsx(
+                            'flex items-center justify-between text-xs p-2 rounded-xl border transition-colors',
+                            isMentioned
+                              ? 'bg-secondary/20 border-secondary/40 text-white font-bold'
+                              : 'bg-white/5 border-white/10 text-white/80'
+                          )}
+                        >
+                          <span className="flex items-center gap-1.5 truncate">
+                            <Icon
+                              name={isMentioned ? 'check_circle' : 'circle'}
+                              className={clsx('text-xs', isMentioned ? 'text-secondary' : 'text-white/40')}
+                            />
+                            <span className="truncate">{ing.name}</span>
+                          </span>
+                          <span className="font-numeric-data font-bold shrink-0 ml-2 text-white">
+                            {display} {ing.unit}
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+
+                  <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-2 mt-1">
+                    <Icon name="lightbulb" filled className="text-secondary text-base shrink-0 mt-0.5" />
+                    <p className="text-xs text-white/90 leading-relaxed">
+                      <strong>Chef Tip:</strong> Keep heat consistent. Tap anywhere to flip back to the step action.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Flashcard Footer Tip */}
+            <div className="flex items-center justify-between text-xs shrink-0 pt-2 border-t border-black/10 dark:border-white/10">
+              <span className={clsx('font-label-caps text-[11px] font-semibold', isFlipped ? 'text-white/60' : 'text-[#2D6A4F]/80')}>
+                Tap card or spacebar to flip
+              </span>
+              <span className={clsx('font-numeric-data text-xs font-bold', isFlipped ? 'text-secondary' : 'text-[#1B4332]')}>
+                {servings} Servings
+              </span>
+            </div>
+          </div>
+        </div>
       </main>
 
-      {/* Footer Controls */}
-      <footer className="p-md border-t border-surface-container-highest bg-surface-container-low shrink-0 flex items-center justify-between gap-md max-w-4xl mx-auto w-full">
-        <button
-          type="button"
-          disabled={currentStep === 0}
-          onClick={() => setCurrentStep((prev) => Math.max(0, prev - 1))}
-          className="px-lg py-sm rounded-xl border border-outline-variant text-on-surface font-semibold disabled:opacity-40"
-        >
-          Previous Step
-        </button>
-        <span className="font-numeric-data text-body-lg font-bold text-primary">
-          Step {currentStep + 1} of {totalSteps}
-        </span>
-        <button
-          type="button"
-          onClick={handleNextStep}
-          className={clsx(
-            'px-lg py-sm rounded-xl font-bold transition-all flex items-center gap-xs',
-            currentStep === totalSteps - 1 || completedSteps.size === totalSteps
-              ? 'bg-secondary text-on-secondary-container shadow-md hover:shadow-lg text-title-md'
-              : 'bg-primary text-on-primary hover:opacity-90'
-          )}
-        >
-          {currentStep === totalSteps - 1 || completedSteps.size === totalSteps ? (
-            <>
-              <Icon name="verified" className="text-xl" />
-              Finish Cooking 🎉
-            </>
-          ) : (
-            'Next Step'
-          )}
-        </button>
+      {/* Anki Bottom Action Bar (Knuckle-Friendly) */}
+      <footer className="px-md py-3 shrink-0 bg-[#0E1512] border-t border-white/10 pb-safe">
+        <div className="max-w-md mx-auto flex items-center gap-2">
+          {/* Previous Card */}
+          <button
+            type="button"
+            disabled={currentStep === 0}
+            onClick={handlePrevStep}
+            aria-label="Previous step card"
+            className="w-14 h-14 rounded-2xl bg-white/10 hover:bg-white/15 active:bg-white/20 text-white flex items-center justify-center disabled:opacity-30 disabled:pointer-events-none transition-colors shrink-0"
+          >
+            <Icon name="arrow_back" className="text-xl" />
+          </button>
+
+          {/* Flip Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setIsFlipped((prev) => !prev)}
+            className="h-14 px-4 rounded-2xl bg-white/10 hover:bg-white/15 active:bg-white/20 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors shrink-0"
+          >
+            <Icon name="sync_alt" className="text-base" />
+            <span>Flip</span>
+          </button>
+
+          {/* Anki Next / Good Button */}
+          <button
+            type="button"
+            onClick={handleNextStep}
+            className={clsx(
+              'flex-1 h-14 rounded-2xl font-bold transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98',
+              currentStep === totalSteps - 1
+                ? 'bg-secondary hover:bg-secondary/90 text-on-secondary-container text-base'
+                : 'bg-[#2D6A4F] hover:bg-[#1B4332] text-white text-base'
+            )}
+          >
+            {currentStep === totalSteps - 1 ? (
+              <>
+                <Icon name="verified" className="text-xl" />
+                <span>Finish Cooking 🎉</span>
+              </>
+            ) : (
+              <>
+                <span>Done · Next Step</span>
+                <Icon name="arrow_forward" className="text-xl" />
+              </>
+            )}
+          </button>
+        </div>
       </footer>
+
+      {/* Deck Overview & Ingredients Drawer */}
+      {deckDrawerOpen && (
+        <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-fade-in">
+          <div className="bg-[#18241F] border-t border-white/20 rounded-t-3xl p-md w-full max-w-md max-h-[80vh] overflow-y-auto flex flex-col gap-md text-white pb-safe animate-fade-in-up">
+            <div className="flex items-center justify-between pb-sm border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <Icon name="layers" className="text-secondary text-lg" />
+                <h3 className="font-title-md text-title-md font-bold text-white">Recipe Deck Overview</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setDeckDrawerOpen(false)}
+                className="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center text-white/80 hover:text-white"
+              >
+                <Icon name="close" className="text-lg" />
+              </button>
+            </div>
+
+            <div className="flex flex-col gap-xs">
+              <span className="font-label-caps text-xs uppercase tracking-wider text-[#A3C4A8] font-bold">
+                Jump to Card ({completedSteps.size}/{totalSteps} Done):
+              </span>
+              <div className="grid grid-cols-1 gap-1.5">
+                {recipe.instructions.map((step, idx) => {
+                  const isDone = completedSteps.has(idx);
+                  const isCurrent = currentStep === idx;
+                  const phase = getStepPhase(step);
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => handleSelectStep(idx)}
+                      className={clsx(
+                        'flex items-center gap-2 p-2.5 rounded-xl border text-left transition-all',
+                        isCurrent
+                          ? 'bg-secondary/20 border-secondary text-white font-bold'
+                          : isDone
+                          ? 'bg-white/5 border-white/10 text-white/70'
+                          : 'bg-white/5 border-white/10 text-white/90'
+                      )}
+                    >
+                      <span
+                        className={clsx(
+                          'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0',
+                          isCurrent
+                            ? 'bg-secondary text-on-secondary-container'
+                            : isDone
+                            ? 'bg-[#2D6A4F] text-white'
+                            : 'bg-white/10 text-white/60'
+                        )}
+                      >
+                        {isDone ? <Icon name="check" className="text-xs" /> : idx + 1}
+                      </span>
+                      <span className="text-xs font-semibold text-white/80 truncate flex-1">
+                        [{phase.label}] {step}
+                      </span>
+                      {isCurrent && <span className="text-[10px] uppercase font-bold text-secondary">Active</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setDeckDrawerOpen(false)}
+              className="w-full h-11 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-sm transition-colors mt-2"
+            >
+              Resume Cooking
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Completion Modal */}
       {finished && (
-        <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-center justify-center p-md animate-fade-in">
-          <div className="bg-surface-container-lowest border border-outline-variant/40 rounded-3xl p-lg max-w-md w-full shadow-ambient-modal flex flex-col items-center text-center gap-md">
-            <div className="w-16 h-16 rounded-full bg-secondary-fixed/50 flex items-center justify-center text-secondary">
+        <div className="fixed inset-0 z-[120] bg-black/70 backdrop-blur-sm flex items-center justify-center p-md animate-fade-in">
+          <div className="bg-[#FAF7F2] text-[#1B4332] border border-outline-variant/40 rounded-3xl p-lg max-w-md w-full shadow-ambient-modal flex flex-col items-center text-center gap-md">
+            <div className="w-16 h-16 rounded-full bg-secondary-fixed flex items-center justify-center text-secondary">
               <Icon name="verified" filled className="text-[36px]" />
             </div>
 
-            <h3 className="font-title-md text-headline-sm font-bold text-on-surface">
-              Bon Appétit! 🎉
+            <h3 className="font-headline-sm text-headline-sm font-bold text-[#1B4332]">
+              All Cards Mastered! 🎉
             </h3>
-            <p className="font-body-sm text-body-md text-on-surface-variant">
-              You finished cooking <strong className="text-on-surface">{recipe.title}</strong>.
+            <p className="font-body-sm text-body-md text-[#2D6A4F]">
+              You completed all {totalSteps} cards for <strong className="text-[#1B4332]">{recipe.title}</strong>.
             </p>
 
             {showLeftoverForm ? (
-              <form action={leftoverAction} className="w-full flex flex-col gap-sm p-md rounded-xl bg-surface-container-low border border-primary/20 text-left">
-                <span className="font-title-md text-sm font-bold text-on-surface">
+              <form action={leftoverAction} className="w-full flex flex-col gap-sm p-md rounded-xl bg-white border border-[#1B4332]/20 text-left shadow-xs">
+                <span className="font-title-md text-sm font-bold text-[#1B4332]">
                   Put Spare Portions on Leftovers Board
                 </span>
                 <input
@@ -236,17 +736,17 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                   defaultValue={recipe.title}
                   required
                   maxLength={80}
-                  className="px-sm py-1.5 rounded-lg border border-outline-variant text-sm bg-surface-container-lowest"
+                  className="px-sm py-2 rounded-lg border border-outline-variant text-sm bg-surface-container-lowest"
                 />
                 <div className="flex items-center justify-between gap-sm">
-                  <label className="text-xs font-semibold text-on-surface-variant">Portions</label>
+                  <label className="text-xs font-semibold text-[#2D6A4F]">Portions</label>
                   <input
                     type="number"
                     name="portions"
                     defaultValue={2}
                     min={1}
                     max={10}
-                    className="w-16 px-sm py-1 rounded border text-center font-bold text-sm"
+                    className="w-16 px-sm py-1.5 rounded-lg border text-center font-bold text-sm"
                   />
                 </div>
                 {leftoverState.message && (
@@ -255,7 +755,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                 <button
                   type="submit"
                   disabled={pending}
-                  className="w-full py-2 bg-primary text-on-primary rounded-lg font-bold text-xs"
+                  className="w-full py-2.5 bg-[#1B4332] text-white rounded-xl font-bold text-xs btn-tactile"
                 >
                   {pending ? 'Saving...' : 'Post to Leftovers Board'}
                 </button>
@@ -268,12 +768,12 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                   className="w-full py-md rounded-2xl bg-secondary text-on-secondary-container font-title-md text-title-md font-bold btn-tactile flex items-center justify-center gap-xs shadow-md"
                 >
                   <Icon name="soup_kitchen" className="text-xl" />
-                  + Put Extra Portions in Leftovers
+                  <span>+ Put Extra Portions in Leftovers</span>
                 </button>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="w-full py-md rounded-2xl bg-surface-container-high text-on-surface font-title-md text-title-md font-semibold hover:bg-surface-container-highest transition-colors"
+                  className="w-full py-md rounded-2xl bg-surface-container-high text-[#1B4332] font-title-md text-title-md font-semibold hover:bg-surface-container-highest transition-colors"
                 >
                   Done
                 </button>
