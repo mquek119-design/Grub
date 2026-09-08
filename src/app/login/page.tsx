@@ -10,12 +10,22 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string; error?: string }>;
 }) {
   const params = await searchParams;
-  const errorMessage =
-    params.error === 'exchange_failed'
-      ? 'That link has expired or was already used. Request a new one.'
-      : params.error === 'missing_code'
-        ? 'That sign-in link was incomplete. Request a new one.'
-        : null;
+  let errorMessage: string | null = null;
+  if (params.error) {
+    if (params.error === 'exchange_failed') {
+      errorMessage = 'That link has expired or was already used. Request a new one.';
+    } else if (params.error === 'missing_code') {
+      errorMessage = 'That sign-in link was incomplete or invalid. Request a new one.';
+    } else if (params.error === 'missing_config') {
+      errorMessage = 'Authentication is not configured yet.';
+    } else {
+      try {
+        errorMessage = decodeURIComponent(params.error);
+      } catch {
+        errorMessage = params.error;
+      }
+    }
+  }
 
   return (
     <main className="min-h-screen flex flex-col justify-center px-margin-mobile py-xl max-w-md mx-auto gap-lg">

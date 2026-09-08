@@ -42,6 +42,9 @@ export async function sendSignupLink(
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
+      data: {
+        flow: 'signup',
+      },
       emailRedirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
@@ -50,5 +53,39 @@ export async function sendSignupLink(
     return { status: 'error', message: error.message };
   }
 
-  return { status: 'sent', message: `Check ${email} for your sign-up link.` };
+  return { status: 'sent', message: `Check ${email} for your sign-up link or 6-digit code.` };
 }
+
+/**
+ * Verify 6-digit OTP code directly on screen without leaving the page.
+ */
+export async function verifySignupOtp(
+  email: string,
+  token: string,
+  next = '/onboarding/instructions'
+): Promise<{ success: boolean; message?: string }> {
+  if (!isSupabaseConfigured) {
+    return { success: false, message: 'Supabase is not configured yet.' };
+  }
+
+  const cleanEmail = email.trim();
+  const cleanToken = token.trim();
+
+  if (!cleanEmail || !cleanToken) {
+    return { success: false, message: 'Enter your email and the 6-digit code.' };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.verifyOtp({
+    email: cleanEmail,
+    token: cleanToken,
+    type: 'email',
+  });
+
+  if (error) {
+    return { success: false, message: error.message };
+  }
+
+  return { success: true };
+}
+
