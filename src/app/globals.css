@@ -58,10 +58,56 @@
     border-color: rgba(255, 255, 255, 0.08);
   }
   .card-glow {
-    box-shadow: 0 4px 20px -2px rgba(27, 67, 50, 0.08), 0 0 0 1px rgba(27, 67, 50, 0.05);
+    box-shadow: 0 2px 4px rgba(27, 67, 50, 0.03), 0 8px 24px -2px rgba(27, 67, 50, 0.07), 0 0 0 1px rgba(27, 67, 50, 0.05);
   }
   .card-glow:hover {
-    box-shadow: 0 8px 30px -4px rgba(27, 67, 50, 0.14), 0 0 0 1px rgba(27, 67, 50, 0.1);
+    box-shadow: 0 4px 8px rgba(27, 67, 50, 0.04), 0 14px 34px -4px rgba(27, 67, 50, 0.12), 0 0 0 1px rgba(27, 67, 50, 0.08);
+  }
+
+  /* Warm editorial culinary canvas with ambient lighting & tactile micro-structure */
+  .app-canvas-bg {
+    background-color: #F8F6F1;
+    background-image:
+      /* 1. Subtle downward vignette under the fixed dark forest header */
+      linear-gradient(to bottom, rgba(27, 67, 50, 0.05) 0px, rgba(27, 67, 50, 0) 180px),
+      /* 2. Top-left warm culinary honey/amber diffuse glow (morning kitchen light) */
+      radial-gradient(ellipse 70% 55% at 12% 0%, rgba(212, 165, 116, 0.14), transparent 70%),
+      /* 3. Top-right botanical sage bloom */
+      radial-gradient(ellipse 60% 45% at 88% 8%, rgba(216, 243, 220, 0.38), transparent 70%),
+      /* 4. Center-bottom warm kitchen glow */
+      radial-gradient(circle 800px at 50% 100%, rgba(253, 236, 208, 0.20), transparent 80%),
+      /* 5. Delicate culinary micro-dot grid */
+      radial-gradient(rgba(27, 67, 50, 0.035) 0.75px, transparent 0.75px);
+    background-size:
+      100% 180px,
+      100% 100%,
+      100% 100%,
+      100% 100%,
+      24px 24px;
+    background-repeat:
+      no-repeat,
+      no-repeat,
+      no-repeat,
+      no-repeat,
+      repeat;
+    background-attachment:
+      scroll,
+      fixed,
+      fixed,
+      fixed,
+      scroll;
+  }
+
+  /* Tactile organic paper noise layer */
+  .canvas-grain {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
   }
 }
 

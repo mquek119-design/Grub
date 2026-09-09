@@ -118,10 +118,10 @@ const config: Config = {
         'numeric-data': ['14px', { lineHeight: '20px', fontWeight: '600' }],
       },
       boxShadow: {
-        // Soft ambient shadows per DESIGN.md "Elevation & Depth"
-        'ambient-card': '0px 4px 20px rgba(0, 0, 0, 0.05)',
-        'ambient-modal': '0px 12px 32px rgba(0, 0, 0, 0.12)',
-        'elevated-card': '0px 8px 28px rgba(0, 0, 0, 0.10)',
+        // Soft ambient shadows per DESIGN.md "Elevation & Depth" with warm organic forest tint
+        'ambient-card': '0px 2px 4px rgba(27, 67, 50, 0.03), 0px 8px 24px -4px rgba(27, 67, 50, 0.06)',
+        'ambient-modal': '0px 12px 32px rgba(27, 67, 50, 0.14)',
+        'elevated-card': '0px 4px 12px rgba(27, 67, 50, 0.04), 0px 12px 32px -4px rgba(27, 67, 50, 0.10)',
       },
       // Motion vocabulary — front-of-house only. These are entrance and ambient
       // effects; nothing here is ever put on a price, a split or a countdown

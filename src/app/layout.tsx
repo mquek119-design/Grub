@@ -89,10 +89,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"
         />
       </head>
-      {/* bg-surface-0, not bg-background: Surface Level 0 is the mint tint.
-          A utility here beats any @layer base rule, so it must be set on the
-          element rather than in globals.css. */}
-      <body className="bg-surface-0 text-on-background font-body-lg text-body-lg antialiased min-h-screen selection:bg-primary selection:text-on-primary">
+      {/* Warm editorial culinary canvas with tactile grain and ambient lighting */}
+      <body className="app-canvas-bg text-on-background font-body-lg text-body-lg antialiased min-h-screen selection:bg-primary selection:text-on-primary relative">
+        <div className="canvas-grain" aria-hidden="true" />
         <AuthHashHandler />
         <AnalyticsConsent />
         <AppChrome currentUser={currentUser} viewingAsName={viewingAsName} basketNeedsAttention={basketNeedsAttention}>
