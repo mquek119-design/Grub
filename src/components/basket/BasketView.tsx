@@ -7,6 +7,7 @@ import { Icon } from '@/components/media/Icon';
 import { Card } from '@/components/ui/Card';
 import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
+import { formatRecipeTitle } from '@/lib/recipeFormatting';
 import { basketLineTotal, basketSavings, basketTotal } from '@/lib/calc';
 import type { BasketItem, IngredientCategory, User } from '@/lib/types';
 import { updateBasketItemQuantity } from '@/app/basket/actions';
@@ -43,6 +44,7 @@ interface BasketViewProps {
   planId?: string;
   orderingEnabled: boolean;
   hasCookies?: boolean;
+  recipesByItem?: Record<string, string[]>;
 }
 
 export function BasketView({
@@ -53,6 +55,7 @@ export function BasketView({
   planId,
   orderingEnabled,
   hasCookies: initialHasCookies = false,
+  recipesByItem,
 }: BasketViewProps) {
   const [quantities, setQuantities] = useState<Record<string, number>>(
     () => Object.fromEntries(items.map((item) => [item.id, item.quantity]))
@@ -418,12 +421,37 @@ export function BasketView({
                         </span>
 
                         <div className="flex items-center gap-xs flex-wrap mt-1.5">
-                          {item.quantityAssumed && (
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-800 text-[10px] font-bold uppercase tracking-wider">
-                              <Icon name="help" className="text-amber-600 text-[12px]" />
-                              1 pack assumed — check
-                            </span>
-                          )}
+                          {item.quantityAssumed && (() => {
+                            const linked = recipesByItem?.[item.id] ?? [];
+                            const recipeLabel =
+                              linked.length === 1
+                                ? formatRecipeTitle(linked[0])
+                                : linked.length === 2
+                                ? `${formatRecipeTitle(linked[0])} & ${formatRecipeTitle(linked[1])}`
+                                : linked.length > 2
+                                ? `${formatRecipeTitle(linked[0])} +${linked.length - 1} more`
+                                : null;
+
+                            return (
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-800 text-[10px] font-bold max-w-full"
+                                title={
+                                  linked.length > 0
+                                    ? `Needed for: ${linked.map(formatRecipeTitle).join(', ')}`
+                                    : 'Quantity assumed as 1 pack — check amount needed'
+                                }
+                              >
+                                <Icon name="help" className="text-amber-600 text-[12px] shrink-0" />
+                                <span className="uppercase tracking-wider shrink-0">1 pack assumed</span>
+                                {recipeLabel && (
+                                  <span className="normal-case font-medium text-amber-900/80 truncate max-w-[160px] sm:max-w-[280px]">
+                                    (for {recipeLabel})
+                                  </span>
+                                )}
+                                <span className="uppercase tracking-wider shrink-0">— check</span>
+                              </span>
+                            );
+                          })()}
                           <span className="font-body-sm text-xs text-on-surface-variant font-medium">
                             {item.subtitle}
                           </span>

@@ -45,6 +45,35 @@ export default async function BasketPage() {
   const mealCount = plan?.meals.length ?? 0;
   const unpriced = items.filter((item) => item.needsPackData);
 
+  // Map each basket item to the recipe title(s) in this week's plan that call for it
+  const recipesByItem: Record<string, string[]> = {};
+  if (plan?.meals && plan.recipes) {
+    for (const item of items) {
+      const titles: string[] = [];
+      for (const meal of plan.meals) {
+        const recipe = plan.recipes.get(meal.recipeId);
+        const title = recipe?.title ?? meal.recipeTitle;
+        if (!title) continue;
+
+        const isUsedInRecipe = recipe?.ingredients?.some((ing) => {
+          if (item.ingredientId && ing.ingredientId) {
+            return ing.ingredientId === item.ingredientId;
+          }
+          const itemNorm = item.name.toLowerCase().trim();
+          const ingNorm = ing.name.toLowerCase().trim();
+          return itemNorm === ingNorm;
+        });
+
+        if (isUsedInRecipe && !titles.includes(title)) {
+          titles.push(title);
+        }
+      }
+      if (titles.length > 0) {
+        recipesByItem[item.id] = titles;
+      }
+    }
+  }
+
   // Unpriced lines cannot count toward a spend threshold — including them would
   // claim the minimum was met on the strength of items worth an unknown amount.
   const pricedTotal = basketTotal(items.filter((item) => !item.needsPackData));
@@ -125,6 +154,7 @@ export default async function BasketPage() {
                 planId={plan?.id}
                 orderingEnabled={tescoOrderingEnabled}
                 hasCookies={hasCookies}
+                recipesByItem={recipesByItem}
               />
             </div>
           )}
