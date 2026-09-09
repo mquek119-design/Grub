@@ -62,6 +62,11 @@ export function FirstRunTip({
     }, 7000);
   }
 
+  const positionClasses =
+    tab === 'basket'
+      ? 'bottom-[calc(9.75rem+env(safe-area-inset-bottom,16px))] lg:bottom-6 right-4 lg:right-6'
+      : 'bottom-[calc(5.25rem+env(safe-area-inset-bottom,12px))] md:bottom-6 right-4 md:right-6';
+
   if (!visible) {
     return (
       <button
@@ -70,7 +75,8 @@ export function FirstRunTip({
         title="View page guide"
         aria-label={`Open ${tab} guide`}
         className={clsx(
-          'fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-30 w-11 h-11 rounded-full bg-secondary-fixed text-secondary shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center border border-secondary-container/60 btn-tactile',
+          'fixed z-40 w-12 h-12 rounded-full bg-secondary-fixed text-secondary shadow-ambient-card hover:shadow-ambient-modal hover:scale-105 active:scale-95 transition-all flex items-center justify-center border border-secondary-container/60 btn-tactile',
+          positionClasses,
           className
         )}
       >
@@ -83,7 +89,8 @@ export function FirstRunTip({
     <aside
       aria-label={`${tip.title} — first-run guidance`}
       className={clsx(
-        'fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-50 max-w-sm w-[calc(100%-2rem)] rounded-2xl border border-secondary-container/60 bg-surface-container-lowest p-md shadow-elevated-card backdrop-blur-md transition-all',
+        'fixed z-[60] max-w-sm w-[calc(100%-2rem)] rounded-2xl border border-secondary-container/60 bg-surface-container-lowest p-md shadow-ambient-modal backdrop-blur-md transition-all',
+        positionClasses,
         className
       )}
     >
