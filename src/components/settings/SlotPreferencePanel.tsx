@@ -49,24 +49,24 @@ export function SlotPreferencePanel({ house }: { house: House }) {
 
       <form action={save} className="flex flex-col gap-md">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
-          <label className="flex flex-col gap-xs">
+          <div className="flex flex-col gap-xs">
             <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
-              Method
+              Fulfilment Type
             </span>
-            <select
-              name="preferredMethod"
-              defaultValue={preference.method ?? ''}
-              className={FIELD}
-            >
-              <option value="">No preference</option>
-              <option value="delivery">Delivery</option>
-              <option value="collect">Click &amp; Collect</option>
-            </select>
-          </label>
+            <div className="h-11 px-3 rounded-lg bg-surface-container-low flex items-center justify-between text-body-md text-on-surface">
+              <span className="capitalize font-medium text-body-md">
+                {house.fulfillmentMethod === 'delivery' ? 'Home Delivery' : 'Click & Collect'}
+              </span>
+              <span className="text-[10px] font-label-caps text-on-surface-variant uppercase px-2 py-0.5 rounded bg-surface-container">
+                House Default
+              </span>
+            </div>
+            <input type="hidden" name="preferredMethod" value={house.fulfillmentMethod} />
+          </div>
 
           <label className="flex flex-col gap-xs">
             <span className="font-label-caps text-label-caps uppercase text-on-surface-variant">
-              Day
+              Preferred Day
             </span>
             <select name="preferredDay" defaultValue={preference.day ?? ''} className={FIELD}>
               <option value="">No preference</option>
