@@ -18,7 +18,7 @@ export function BottomNav({ basketHasUpdates = false }: BottomNavProps) {
   return (
     <nav
       aria-label="Primary"
-      className="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-2 py-2 pb-safe bg-primary border-t border-primary/10 shadow-lg"
+      className="md:hidden fixed bottom-0 w-full z-50 flex justify-around items-center px-2 pt-2 pb-[max(0.75rem,calc(env(safe-area-inset-bottom,0px)+0.5rem))] bg-primary border-t border-primary/10 shadow-lg"
     >
       {TABS.map((tab) => {
         const isActive = active === tab.href;

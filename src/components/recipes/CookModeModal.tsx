@@ -316,7 +316,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
   if (!mounted) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[110] bg-[#121B17] text-white flex flex-col h-screen overflow-hidden select-none">
+    <div className="fixed inset-0 z-[110] bg-[#121B17] text-white flex flex-col h-[100dvh] max-h-[100dvh] overflow-hidden select-none">
       {/* Optional QR Code modal to beam to phone */}
       {showQrModal && (
         <div className="fixed inset-0 z-[130] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
@@ -684,8 +684,8 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
             </div>
           </main>
 
-          {/* Anki Bottom Action Bar (Knuckle-Friendly) */}
-          <footer className="px-md py-3 shrink-0 bg-[#0E1512] border-t border-white/10 pb-safe">
+          {/* Anki Bottom Action Bar (Knuckle-Friendly with Android Home Button Clearance) */}
+          <footer className="px-md pt-3 pb-[max(1.25rem,calc(env(safe-area-inset-bottom,0px)+1rem))] shrink-0 bg-[#0E1512] border-t border-white/10 shadow-2xl">
             <div className="max-w-md mx-auto flex items-center gap-2">
               {/* Previous Card */}
               <button
@@ -911,7 +911,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
           </section>
 
           {/* Finish / Complete Button in Checklist Mode */}
-          <div className="pt-2 pb-8">
+          <div className="pt-2 pb-[max(2.5rem,calc(env(safe-area-inset-bottom,0px)+2rem))]">
             <button
               type="button"
               onClick={() => {
@@ -930,7 +930,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
       {/* Deck Overview & Ingredients Drawer */}
       {deckDrawerOpen && (
         <div className="fixed inset-0 z-[120] bg-black/60 backdrop-blur-sm flex items-end justify-center animate-fade-in">
-          <div className="bg-[#18241F] border-t border-white/20 rounded-t-3xl p-md w-full max-w-md max-h-[80vh] overflow-y-auto flex flex-col gap-md text-white pb-safe animate-fade-in-up">
+          <div className="bg-[#18241F] border-t border-white/20 rounded-t-3xl p-md w-full max-w-md max-h-[80vh] overflow-y-auto flex flex-col gap-md text-white pb-[max(1.5rem,calc(env(safe-area-inset-bottom,0px)+1rem))] animate-fade-in-up">
             <div className="flex items-center justify-between pb-sm border-b border-white/10">
               <div className="flex items-center gap-2">
                 <Icon name="layers" className="text-secondary text-lg" />

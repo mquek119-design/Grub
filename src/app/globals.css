@@ -65,10 +65,9 @@
   }
 }
 
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .pb-safe {
-    padding-bottom: env(safe-area-inset-bottom);
-  }
+.pb-safe {
+  padding-bottom: 12px;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 12px);
 }
 
 /* Material Symbols — loaded from Google Fonts in layout.tsx */
