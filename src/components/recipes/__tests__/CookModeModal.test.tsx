@@ -50,4 +50,31 @@ describe('CookModeModal', () => {
     fireEvent.click(checklistTab);
     expect(screen.getByText(/Cooking Steps Checklist/i)).toBeInTheDocument();
   });
+
+  it('toggles dark and light mode via the moon/sun icon button without text', () => {
+    render(
+      <CookModeModal
+        recipe={mockRecipe}
+        servings={2}
+        onClose={jest.fn()}
+      />
+    );
+
+    // Initial state: light mode, button offers dark mode
+    const modeBtn = screen.getByRole('button', { name: /switch to dark mode/i });
+    expect(modeBtn).toBeInTheDocument();
+    expect(modeBtn.textContent).not.toContain('Flip');
+    expect(modeBtn.textContent).not.toContain('Dark');
+    expect(modeBtn.textContent).not.toContain('Light');
+
+    // Click to toggle to dark mode
+    fireEvent.click(modeBtn);
+
+    // Now button offers switch to light mode
+    expect(screen.getByRole('button', { name: /switch to light mode/i })).toBeInTheDocument();
+
+    // Click again to switch back to light mode
+    fireEvent.click(screen.getByRole('button', { name: /switch to light mode/i }));
+    expect(screen.getByRole('button', { name: /switch to dark mode/i })).toBeInTheDocument();
+  });
 });

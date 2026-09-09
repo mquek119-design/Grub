@@ -107,9 +107,25 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
   // Anki Flashcard State
   const [currentStep, setCurrentStep] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('grub_cook_mode_dark') === 'true';
+    }
+    return false;
+  });
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set([0]));
   const [finished, setFinished] = useState(false);
   const [deckDrawerOpen, setDeckDrawerOpen] = useState(false);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('grub_cook_mode_dark', String(next));
+      }
+      return next;
+    });
+  };
 
   // Step Timer State
   const [timerSecondsLeft, setTimerSecondsLeft] = useState<number | null>(null);
@@ -500,10 +516,20 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
           <main className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 overflow-hidden relative">
             <div className="relative w-full max-w-md mx-auto flex flex-col justify-center">
               {/* Layered Card 3 (Bottom Deck Shadow) */}
-              <div className="absolute -bottom-4 inset-x-6 h-full rounded-3xl bg-[#1C2C24] border border-white/5 -z-20 opacity-40 shadow-xs pointer-events-none" />
+              <div
+                className={clsx(
+                  'absolute -bottom-4 inset-x-6 h-full rounded-3xl border -z-20 opacity-40 shadow-xs pointer-events-none transition-colors',
+                  isDarkMode ? 'bg-[#0F1713] border-white/5' : 'bg-[#1C2C24] border-white/5'
+                )}
+              />
 
               {/* Layered Card 2 (Middle Deck Shadow) */}
-              <div className="absolute -bottom-2 inset-x-3 h-full rounded-3xl bg-[#23382E] border border-white/10 -z-10 opacity-75 shadow-sm pointer-events-none" />
+              <div
+                className={clsx(
+                  'absolute -bottom-2 inset-x-3 h-full rounded-3xl border -z-10 opacity-75 shadow-sm pointer-events-none transition-colors',
+                  isDarkMode ? 'bg-[#14201A] border-white/10' : 'bg-[#23382E] border-white/10'
+                )}
+              />
 
               {/* Active Flashcard */}
               <div
@@ -524,7 +550,11 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                 }}
                 className={clsx(
                   'w-full min-h-[340px] max-h-[68vh] sm:min-h-[420px] flex flex-col justify-between p-5 sm:p-8 rounded-3xl transition-all duration-200 cursor-pointer shadow-ambient-modal border touch-pan-y relative select-none',
-                  isFlipped
+                  isDarkMode
+                    ? isFlipped
+                      ? 'bg-[#14201A] text-white border-secondary/40 ring-1 ring-secondary/20 shadow-2xl'
+                      : 'bg-[#18261F] text-white border-white/15 ring-1 ring-white/10 shadow-2xl'
+                    : isFlipped
                     ? 'bg-[#1E2E25] border-secondary/50 text-white ring-1 ring-secondary/30'
                     : 'bg-[#FAF7F2] text-[#1B4332] border-white/20 shadow-2xl'
                 )}
@@ -550,13 +580,15 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                         'px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider font-label-caps border flex items-center gap-1',
                         isFlipped
                           ? 'bg-secondary-fixed/20 text-secondary border-secondary/30'
+                          : isDarkMode
+                          ? 'bg-white/10 text-white border-white/20'
                           : stepPhase.tone
                       )}
                     >
                       <Icon name={stepPhase.icon} className="text-xs" />
                       <span>{isFlipped ? 'INGREDIENTS & TECHNIQUE' : stepPhase.label}</span>
                     </span>
-                    <span className={clsx('font-label-caps text-xs font-bold', isFlipped ? 'text-white/60' : 'text-[#2D6A4F]/70')}>
+                    <span className={clsx('font-label-caps text-xs font-bold', (isFlipped || isDarkMode) ? 'text-white/60' : 'text-[#2D6A4F]/70')}>
                       STEP {String(currentStep + 1).padStart(2, '0')}
                     </span>
                   </div>
@@ -564,7 +596,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                   <div
                     className={clsx(
                       'flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border transition-colors',
-                      isFlipped
+                      isFlipped || isDarkMode
                         ? 'bg-white/10 text-white border-white/20'
                         : 'bg-[#1B4332]/10 text-[#1B4332] border-[#1B4332]/20'
                     )}
@@ -579,7 +611,10 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                   {!isFlipped ? (
                     /* FRONT: Big, bold knuckle-friendly action text */
                     <div className="flex flex-col gap-4">
-                      <p className="font-headline-sm sm:font-headline-md text-[22px] sm:text-[26px] font-bold leading-snug tracking-tight">
+                      <p className={clsx(
+                        'font-headline-sm sm:font-headline-md text-[22px] sm:text-[26px] font-bold leading-snug tracking-tight',
+                        isDarkMode ? 'text-white' : 'text-[#1B4332]'
+                      )}>
                         {formatInstruction(activeInstruction)}
                       </p>
 
@@ -589,9 +624,14 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                           {stepIngredients.map((item, i) => (
                             <span
                               key={i}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-[#1B4332]/10 text-[#1B4332] border border-[#1B4332]/20"
+                              className={clsx(
+                                'inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold border transition-colors',
+                                isDarkMode
+                                  ? 'bg-white/10 text-white border-white/20'
+                                  : 'bg-[#1B4332]/10 text-[#1B4332] border-[#1B4332]/20'
+                              )}
                             >
-                              <Icon name="check" className="text-xs text-[#2D6A4F]" />
+                              <Icon name="check" className={clsx('text-xs', isDarkMode ? 'text-secondary' : 'text-[#2D6A4F]')} />
                               <span>{item.name}:</span>
                               <span className="font-numeric-data">{item.amount}</span>
                             </span>
@@ -612,6 +652,8 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                               'inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-bold shadow-md transition-transform active:scale-95',
                               timerRunning
                                 ? 'bg-secondary text-on-secondary-container animate-pulse'
+                                : isDarkMode
+                                ? 'bg-white/15 hover:bg-white/20 text-white border border-white/20'
                                 : 'bg-[#1B4332] text-white'
                             )}
                           >
@@ -674,12 +716,15 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                 </div>
 
                 {/* Flashcard Footer Tip */}
-                <div className="flex items-center justify-between text-xs shrink-0 pt-2 border-t border-black/10 dark:border-white/10">
-                  <span className={clsx('font-label-caps text-[11px] font-semibold flex items-center gap-1.5', isFlipped ? 'text-white/60' : 'text-[#2D6A4F]/80')}>
+                <div className={clsx(
+                  'flex items-center justify-between text-xs shrink-0 pt-2 border-t',
+                  isFlipped || isDarkMode ? 'border-white/10' : 'border-black/10'
+                )}>
+                  <span className={clsx('font-label-caps text-[11px] font-semibold flex items-center gap-1.5', (isFlipped || isDarkMode) ? 'text-white/60' : 'text-[#2D6A4F]/80')}>
                     <Icon name="swipe" className="text-sm opacity-80" />
                     Swipe left/right to change card · Tap to flip
                   </span>
-                  <span className={clsx('font-numeric-data text-xs font-bold', isFlipped ? 'text-secondary' : 'text-[#1B4332]')}>
+                  <span className={clsx('font-numeric-data text-xs font-bold', (isFlipped || isDarkMode) ? 'text-secondary' : 'text-[#1B4332]')}>
                     {effectiveServings} Servings
                   </span>
                 </div>
@@ -701,14 +746,15 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                 <Icon name="arrow_back" className="text-xl" />
               </button>
 
-              {/* Flip Toggle Button */}
+              {/* Dark / Light Mode Toggle Button (Replaces Flip, Moon / Sun Icon Only, No Text) */}
               <button
                 type="button"
-                onClick={() => setIsFlipped((prev) => !prev)}
-                className="h-14 px-4 rounded-2xl bg-white/10 hover:bg-white/15 active:bg-white/20 text-white font-semibold text-xs flex items-center gap-1.5 transition-colors shrink-0"
+                onClick={toggleDarkMode}
+                aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                title={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                className="w-14 h-14 rounded-2xl bg-white/10 hover:bg-white/15 active:bg-white/20 text-white flex items-center justify-center transition-colors shrink-0"
               >
-                <Icon name="sync_alt" className="text-base" />
-                <span>Flip</span>
+                <Icon name={isDarkMode ? 'light_mode' : 'dark_mode'} className="text-xl" />
               </button>
 
               {/* Anki Next / Good Button */}
@@ -924,7 +970,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
               className="w-full py-4 rounded-2xl bg-secondary text-on-secondary-container font-title-md text-base font-bold shadow-lg flex items-center justify-center gap-2 hover:opacity-95 active:scale-98 transition-all"
             >
               <Icon name="verified" className="text-xl" />
-              <span>Finish Cooking & Save Portions 🎉</span>
+              <span>Finish Cooking 🎉</span>
             </button>
           </div>
         </main>
@@ -1020,17 +1066,10 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
             </p>
 
             <div className="flex flex-col gap-sm w-full">
-              <a
-                href="/leftovers"
-                className="w-full py-md rounded-2xl bg-secondary text-on-secondary-container font-title-md text-title-md font-bold btn-tactile flex items-center justify-center gap-xs shadow-md"
-              >
-                <Icon name="soup_kitchen" className="text-xl" />
-                <span>+ Put Extra Portions in Leftovers</span>
-              </a>
               <button
                 type="button"
                 onClick={onClose}
-                className="w-full py-md rounded-2xl bg-surface-container-high text-[#1B4332] font-title-md text-title-md font-semibold hover:bg-surface-container-highest transition-colors"
+                className="w-full py-md rounded-2xl bg-secondary text-on-secondary-container font-title-md text-title-md font-bold btn-tactile flex items-center justify-center gap-xs shadow-md hover:opacity-95 active:scale-98 transition-all"
               >
                 Done
               </button>

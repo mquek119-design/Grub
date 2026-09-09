@@ -1,10 +1,8 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { AvatarStack } from '@/components/avatars/Avatar';
 import { PaymentStatusList } from '@/components/feed/PaymentStatusList';
 import { Icon } from '@/components/media/Icon';
 import { CountdownCard } from '@/components/timers/CountdownCard';
-import { Badge } from '@/components/ui/Badge';
 import { Card } from '@/components/ui/Card';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageShell } from '@/components/ui/PageShell';
@@ -12,6 +10,7 @@ import { FirstRunTip } from '@/components/ui/FirstRunTip';
 import { NextActionCard } from '@/components/feed/NextActionCard';
 import { RunningLowStapleCard } from '@/components/feed/RunningLowStapleCard';
 import { TonightDinnerCard } from '@/components/feed/TonightDinnerCard';
+import { WeekPlanFeedCard } from '@/components/feed/WeekPlanFeedCard';
 import { InstallPrompt } from '@/components/pwa/InstallPrompt';
 import { nextAction } from '@/lib/nextAction';
 import { isCutoffPassed } from '@/lib/weeks';
@@ -26,26 +25,11 @@ import {
   getCollector,
   getPostedSplits,
 } from '@/lib/queries';
-import { WEEKDAYS, type Weekday } from '@/lib/types';
+import { WEEKDAYS } from '@/lib/types';
 
 export const dynamic = 'force-dynamic';
 
-const DAY_SHORT: Record<Weekday, string> = {
-  mon: 'MON',
-  tue: 'TUE',
-  wed: 'WED',
-  thu: 'THU',
-  fri: 'FRI',
-  sat: 'SAT',
-  sun: 'SUN',
-};
 
-function dayDate(weekStartDate: string, day: Weekday): string {
-  const index = WEEKDAYS.indexOf(day);
-  const date = new Date(`${weekStartDate}T00:00:00Z`);
-  date.setUTCDate(date.getUTCDate() + index);
-  return `${date.getUTCDate()} ${date.toLocaleString('en-GB', { month: 'short', timeZone: 'UTC' })}`;
-}
 
 export default async function FeedPage() {
   const currentUser = await getCurrentUser();
@@ -143,59 +127,15 @@ export default async function FeedPage() {
               : { href: '/plan?week=next', label: 'Plan next week' }}
           />
         ) : (
-          <Card padded={false} className="overflow-hidden interactive-card card-glow">
-            <div className="p-md flex items-center justify-between gap-sm border-b border-surface-container-highest">
-              <h2 className="font-title-md text-title-md text-on-surface font-bold">This Week&apos;s Plan</h2>
-              <Badge tone="solid-primary" className="font-numeric-data text-numeric-data shadow-xs">
-                {sharedMealCount} Shared Meal{sharedMealCount === 1 ? '' : 's'}
-              </Badge>
-            </div>
-
-            <div className="overflow-x-auto hide-scrollbar">
-              <ul
-                className="flex md:grid gap-sm p-md min-w-max md:min-w-0"
-                style={{ gridTemplateColumns: `repeat(${visibleDays.length}, minmax(0, 1fr))` }}
-              >
-                {visibleDays.map((day) => {
-                  const meals = plan.meals.filter((meal) => meal.day === day);
-                  const diners = meals
-                    .flatMap((meal) => meal.participants.map((p) => byId.get(p.userId)))
-                    .filter((user): user is NonNullable<typeof user> => Boolean(user));
-                  const hasHint = plan.overlaps.some((entry) => entry.day === day);
-                  const isToday = day === today;
-
-                  return (
-                    <li
-                      key={day}
-                      className={`flex flex-col items-center gap-xs w-16 md:w-auto rounded-xl py-2 px-1 transition-all duration-200 ${
-                        isToday ? 'bg-primary/8 border border-primary/25 shadow-xs' : 'hover:bg-surface-container/60'
-                      } ${
-                        hasHint ? 'bg-secondary-fixed/30 border border-secondary-container/30' : ''
-                      }`}
-                    >
-                      <span className="font-label-caps text-label-caps text-on-surface-variant flex flex-col items-center leading-tight">
-                        <span className={isToday ? 'text-primary font-bold' : ''}>{DAY_SHORT[day]}</span>
-                        <span className="font-numeric-data text-[10px] text-on-surface-variant/70 font-semibold">
-                          {dayDate(plan.weekStartDate, day)}
-                        </span>
-                      </span>
-                      {diners.length > 0 ? (
-                        <AvatarStack users={diners.slice(0, 3)} />
-                      ) : (
-                        <Link
-                          href="/plan"
-                          aria-label={`Add a meal on ${DAY_SHORT[day]}`}
-                          className="w-10 h-10 rounded-full border border-dashed border-outline-variant flex items-center justify-center text-outline-variant hover:border-primary hover:text-primary hover:bg-primary/5 transition-all btn-tactile"
-                        >
-                          <Icon name="add" className="text-[16px]" />
-                        </Link>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          </Card>
+          <WeekPlanFeedCard
+            plan={plan}
+            recipes={Object.fromEntries(plan.recipes)}
+            housemates={housemates}
+            currentUser={currentUser}
+            today={today}
+            visibleDays={visibleDays}
+            sharedMealCount={sharedMealCount}
+          />
         )}
       </div>
 
