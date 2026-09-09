@@ -1,12 +1,10 @@
 'use client';
 
-import { useEffect, useState, useActionState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '@/components/media/Icon';
 import { clsx } from '@/lib/clsx';
 import type { Recipe } from '@/lib/types';
-import { addLeftover, type LeftoverActionState } from '@/app/leftovers/actions';
-import { useSubmitState } from '@/components/ui/SubmitButton';
 import { formatRecipeTitle, formatInstruction } from '@/lib/recipeFormatting';
 
 interface CookModeModalProps {
@@ -14,8 +12,6 @@ interface CookModeModalProps {
   servings: number;
   onClose: () => void;
 }
-
-const LEFTOVER_INITIAL: LeftoverActionState = { status: 'idle', message: '' };
 
 /**
  * Categorizes an instruction into a primary cooking phase for the Anki flashcard badge.
@@ -119,10 +115,11 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
   const [timerRunning, setTimerRunning] = useState(false);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Leftovers action
-  const [showLeftoverForm, setShowLeftoverForm] = useState(false);
-  const [leftoverState, leftoverAction] = useActionState(addLeftover, LEFTOVER_INITIAL);
-  const { pending } = useSubmitState();
+  // Touch Swipe Gesture Handling for Mobile Flashcards
+  const [dragX, setDragX] = useState(0);
+  const [isSwiping, setIsSwiping] = useState(false);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  const didSwipeRef = useRef(false);
 
   const instructions = recipe.instructions || [];
   const totalSteps = instructions.length;
@@ -223,7 +220,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
   // Keyboard navigation shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (finished || showLeftoverForm) return;
+      if (finished) return;
       if (e.key === 'ArrowRight' || e.key === 'Enter') {
         e.preventDefault();
         handleNextStep();
@@ -237,9 +234,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [currentStep, totalSteps, finished, showLeftoverForm]);
-
-  if (!mounted) return null;
+  }, [currentStep, totalSteps, finished]);
 
   function handleSelectStep(idx: number) {
     setCurrentStep(idx);
@@ -266,12 +261,6 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
       setFinished(true);
     }
   }
-
-  // Touch Swipe Gesture Handling for Mobile Flashcards
-  const [dragX, setDragX] = useState(0);
-  const [isSwiping, setIsSwiping] = useState(false);
-  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
-  const didSwipeRef = useRef(false);
 
   function handleTouchStart(e: React.TouchEvent) {
     if (!e.touches || !e.touches[0]) return;
@@ -323,6 +312,8 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
   // Format timer minutes/seconds
   const timerMins = timerSecondsLeft !== null ? Math.floor(timerSecondsLeft / 60) : 0;
   const timerSecs = timerSecondsLeft !== null ? timerSecondsLeft % 60 : 0;
+
+  if (!mounted) return null;
 
   return createPortal(
     <div className="fixed inset-0 z-[110] bg-[#121B17] text-white flex flex-col h-screen overflow-hidden select-none">
@@ -1025,60 +1016,22 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
               You completed all {totalSteps} cards for <strong className="text-[#1B4332]">{recipe.title}</strong>.
             </p>
 
-            {showLeftoverForm ? (
-              <form action={leftoverAction} className="w-full flex flex-col gap-sm p-md rounded-xl bg-white border border-[#1B4332]/20 text-left shadow-xs">
-                <span className="font-title-md text-sm font-bold text-[#1B4332]">
-                  Put Spare Portions on Leftovers Board
-                </span>
-                <input
-                  type="text"
-                  name="description"
-                  defaultValue={recipe.title}
-                  required
-                  maxLength={80}
-                  className="px-sm py-2 rounded-lg border border-outline-variant text-sm bg-surface-container-lowest"
-                />
-                <div className="flex items-center justify-between gap-sm">
-                  <label className="text-xs font-semibold text-[#2D6A4F]">Portions</label>
-                  <input
-                    type="number"
-                    name="portions"
-                    defaultValue={2}
-                    min={1}
-                    max={10}
-                    className="w-16 px-sm py-1.5 rounded-lg border text-center font-bold text-sm"
-                  />
-                </div>
-                {leftoverState.message && (
-                  <p className="text-xs font-bold text-primary">{leftoverState.message}</p>
-                )}
-                <button
-                  type="submit"
-                  disabled={pending}
-                  className="w-full py-2.5 bg-[#1B4332] text-white rounded-xl font-bold text-xs btn-tactile"
-                >
-                  {pending ? 'Saving...' : 'Post to Leftovers Board'}
-                </button>
-              </form>
-            ) : (
-              <div className="flex flex-col gap-sm w-full">
-                <button
-                  type="button"
-                  onClick={() => setShowLeftoverForm(true)}
-                  className="w-full py-md rounded-2xl bg-secondary text-on-secondary-container font-title-md text-title-md font-bold btn-tactile flex items-center justify-center gap-xs shadow-md"
-                >
-                  <Icon name="soup_kitchen" className="text-xl" />
-                  <span>+ Put Extra Portions in Leftovers</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="w-full py-md rounded-2xl bg-surface-container-high text-[#1B4332] font-title-md text-title-md font-semibold hover:bg-surface-container-highest transition-colors"
-                >
-                  Done
-                </button>
-              </div>
-            )}
+            <div className="flex flex-col gap-sm w-full">
+              <a
+                href="/leftovers"
+                className="w-full py-md rounded-2xl bg-secondary text-on-secondary-container font-title-md text-title-md font-bold btn-tactile flex items-center justify-center gap-xs shadow-md"
+              >
+                <Icon name="soup_kitchen" className="text-xl" />
+                <span>+ Put Extra Portions in Leftovers</span>
+              </a>
+              <button
+                type="button"
+                onClick={onClose}
+                className="w-full py-md rounded-2xl bg-surface-container-high text-[#1B4332] font-title-md text-title-md font-semibold hover:bg-surface-container-highest transition-colors"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}
