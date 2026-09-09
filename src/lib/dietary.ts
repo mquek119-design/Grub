@@ -27,6 +27,9 @@ export const VIBES: VibeOption[] = [
   { id: 'budget_king', label: 'Budget King (<£1.50)', hint: 'Pasta bakes & dahl', icon: 'savings' },
   { id: 'fakeaway', label: 'Fakeaway Night', hint: 'Curry, burgers & stir-fry', icon: 'takeout_dining' },
   { id: 'comfort_food', label: 'Comfort Food', hint: 'Sunday roast & stews', icon: 'soup_kitchen' },
+  { id: 'one_pot', label: 'One-Pot & Trays', hint: 'Sheet pans & minimal wash-up', icon: 'skillet' },
+  { id: 'meal_prep', label: 'Batch & Meal Prep', hint: 'Cook once, eat for days', icon: 'inventory_2' },
+  { id: 'fresh_greens', label: 'Fresh & Veg-Packed', hint: 'Crisp salads & wholesome bowls', icon: 'eco' },
 ];
 
 export function getBudgetTier(budget: number) {
