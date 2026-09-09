@@ -70,28 +70,29 @@ export default async function RecipesPage({
 
   return (
     <PageShell wide>
-      <div className="flex flex-col gap-sm mb-xs">
-        <div className="flex flex-wrap items-center justify-between gap-md">
-          <KitchenSubNav current="recipes" />
-          <div className="flex items-center gap-sm">
+      <div className="flex flex-col gap-md mb-xs">
+        <KitchenSubNav current="recipes" />
+
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col gap-xs min-w-0">
+            <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-background font-bold">
+              Recipe Book
+            </h1>
+            <p className="font-body-sm text-body-sm text-on-surface-variant">
+              {planningForDay
+                ? `Pick something for ${WEEKDAY_LABELS[planningForDay]}${week === 'next' ? ' next week' : ''}.`
+                : 'Everything the house can cook. Tap one to put it on a night.'}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-sm shrink-0">
             <span className="hidden sm:inline-block font-label-caps text-xs text-on-surface-variant font-medium">
               {recipes.length} {recipes.length === 1 ? 'recipe' : 'recipes'}
             </span>
-            <ButtonLink href="/recipes/new" icon="add" className="shrink-0">
+            <ButtonLink href="/recipes/new" icon="add" size="sm" className="shrink-0">
               Add Recipe
             </ButtonLink>
           </div>
-        </div>
-
-        <div className="flex flex-col gap-xs pt-xs">
-          <h1 className="font-headline-lg-mobile text-headline-lg-mobile md:font-headline-lg md:text-headline-lg text-on-background font-bold">
-            Recipe Book
-          </h1>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            {planningForDay
-              ? `Pick something for ${WEEKDAY_LABELS[planningForDay]}${week === 'next' ? ' next week' : ''}.`
-              : 'Everything the house can cook. Tap one to put it on a night.'}
-          </p>
         </div>
       </div>
 

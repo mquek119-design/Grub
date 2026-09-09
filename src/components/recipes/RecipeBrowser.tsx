@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
-import { useFormStatus } from 'react-dom';
+import { useFormStatus, createPortal } from 'react-dom';
 import { useActionState } from 'react';
 import { FoodImage } from '@/components/media/FoodImage';
 import { Icon } from '@/components/media/Icon';
@@ -183,7 +183,12 @@ function QuickAddSheet({
   const [state, action] = useActionState(addMealToPlan, INITIAL);
   const [day, setDay] = useState<Weekday>(initialDay);
   const [mealType, setMealType] = useState<MealType>('dinner');
+  const [mounted, setMounted] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Close on success only. Staying open after an error is the point — the
   // message is inside the sheet.
@@ -193,16 +198,18 @@ function QuickAddSheet({
     onPlanned();
   }, [day, onPlanned, recipe.title, state.status, toast]);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+  if (!mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center animate-fade-in">
       <button
         type="button"
         aria-label="Close"
         onClick={onClose}
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/50 backdrop-blur-xs"
       />
 
-      <div className="relative w-full sm:max-w-md bg-surface-container-lowest rounded-t-xl sm:rounded-xl border border-surface-container-highest shadow-ambient-card p-lg flex flex-col gap-md max-h-[85vh] overflow-y-auto">
+      <div className="relative w-full sm:max-w-md bg-surface-container-lowest rounded-t-2xl sm:rounded-2xl border border-surface-container-highest shadow-ambient-modal p-5 sm:p-lg pb-[calc(1.5rem+env(safe-area-inset-bottom,16px))] sm:pb-lg flex flex-col gap-md max-h-[85vh] overflow-y-auto">
         <div className="flex items-start gap-sm">
           <FoodImage
             seed={recipe.id}
@@ -295,7 +302,8 @@ function QuickAddSheet({
           )}
         </form>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -477,8 +485,13 @@ export function RecipeBrowser({
                     {badges.length > 0 && (
                       <span className="absolute top-1.5 left-1.5 flex flex-wrap gap-1">
                         {badges.map((badge) => (
-                          <Badge key={badge.label} tone="photo" icon={badge.icon}>
-                            {badge.label}
+                          <Badge
+                            key={badge.label}
+                            tone="photo"
+                            icon={badge.icon}
+                            className="p-1 sm:px-2 sm:py-1 rounded-full sm:rounded shadow-xs"
+                          >
+                            <span className="sr-only sm:not-sr-only">{badge.label}</span>
                           </Badge>
                         ))}
                       </span>

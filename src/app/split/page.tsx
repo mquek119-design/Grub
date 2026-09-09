@@ -18,8 +18,49 @@ import {
   getWeeklyPlan,
 } from '@/lib/queries';
 
-export const metadata = { title: 'Split · Grub', description: 'See this week\'s split and settle up with your housemates.' };
-export const dynamic = 'force-dynamic';
+interface ParsedWorking {
+  itemName: string;
+  brandTag: string | null;
+  calculation: string | null;
+}
+
+function parseWorkingLabel(raw: string): ParsedWorking {
+  // Extract calculation suffix e.g. " (1/2 of £3.20)" or " (all of £4.50)"
+  const calcMatch = raw.match(/\s*\(([^)]+(?:of\s+[£\d.]+|\d+\/\d+)[^)]*)\)\s*$/i);
+  const calculation = calcMatch ? calcMatch[1] : null;
+  const withoutCalc = calcMatch ? raw.slice(0, calcMatch.index).trim() : raw.trim();
+
+  // Tier / brand prefixes to separate into discrete tags
+  const brandPatterns: [RegExp, string][] = [
+    [/^tesco\s+finest\s+/i, 'Finest'],
+    [/^finest\s+/i, 'Finest'],
+    [/^tesco\s+everyday\s+value\s+/i, 'Value'],
+    [/^tesco\s+value\s+/i, 'Value'],
+    [/^hearty\s+food\s+co\.?\s+/i, 'Hearty Food Co'],
+    [/^eastman'?s\s+/i, "Eastman's"],
+    [/^stockwell\s*(&\s*co)?\.?\s+/i, 'Stockwell'],
+    [/^ms\s+molly'?s\s+/i, "Ms Molly's"],
+    [/^grower'?s\s+harvest\s+/i, "Grower's Harvest"],
+    [/^tesco\s+/i, 'Tesco'],
+  ];
+
+  let brandTag: string | null = null;
+  let itemName = withoutCalc;
+
+  for (const [pattern, tag] of brandPatterns) {
+    if (pattern.test(itemName)) {
+      brandTag = tag;
+      itemName = itemName.replace(pattern, '').trim();
+      break;
+    }
+  }
+
+  if (itemName.length > 0) {
+    itemName = itemName.charAt(0).toUpperCase() + itemName.slice(1);
+  }
+
+  return { itemName, brandTag, calculation };
+}
 
 export default async function SplitPage() {
   const currentUser = await getCurrentUser();
@@ -153,16 +194,37 @@ export default async function SplitPage() {
 
               {/* Every row here traces to a real basket line. An opaque split is
                   the fastest way to lose trust in a shared house. */}
-              <dl className="p-md flex flex-col gap-xs">
-                {line.workings.map((working) => (
-                  <div
-                    key={working.label}
-                    className="flex items-center justify-between gap-md text-body-sm text-on-surface-variant"
-                  >
-                    <dt className="min-w-0 truncate">{working.label}</dt>
-                    <dd className="font-numeric-data text-right shrink-0">{working.value}</dd>
-                  </div>
-                ))}
+              <dl className="p-md flex flex-col gap-2">
+                {line.workings.map((working) => {
+                  const { itemName, brandTag, calculation } = parseWorkingLabel(working.label);
+                  return (
+                    <div
+                      key={working.label}
+                      className="flex items-start justify-between gap-3 text-body-sm py-1 border-b border-surface-container-highest/40 last:border-b-0"
+                    >
+                      <dt className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="font-medium text-on-surface leading-snug">
+                            {itemName}
+                          </span>
+                          {brandTag && (
+                            <span className="px-1.5 py-0.2 rounded text-[10px] font-semibold tracking-wider uppercase bg-surface-container-high text-on-surface-variant border border-outline-variant/30 shrink-0">
+                              {brandTag}
+                            </span>
+                          )}
+                        </div>
+                        {calculation && (
+                          <span className="text-[11.5px] text-on-surface-variant block mt-0.5">
+                            {calculation}
+                          </span>
+                        )}
+                      </dt>
+                      <dd className="font-numeric-data font-semibold text-right text-on-surface shrink-0 pt-0.5">
+                        {working.value}
+                      </dd>
+                    </div>
+                  );
+                })}
               </dl>
             </div>
           ))}

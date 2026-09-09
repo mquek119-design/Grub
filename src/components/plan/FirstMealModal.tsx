@@ -61,7 +61,7 @@ export function FirstMealModal({ recipes, weekStartDate }: FirstMealModalProps) 
   return (
     <>
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-black/40 z-40" />
+      <div className="fixed inset-0 bg-black/40 z-[90]" />
 
       {/* Modal */}
       <div
@@ -70,7 +70,7 @@ export function FirstMealModal({ recipes, weekStartDate }: FirstMealModalProps) 
         aria-modal="true"
         aria-labelledby="first-meal-title"
         tabIndex={-1}
-        className="fixed inset-0 z-50 flex items-center justify-center p-sm md:p-lg"
+        className="fixed inset-0 z-[100] flex items-center justify-center p-sm md:p-lg"
       >
         <div className="flex max-h-[calc(100dvh-2rem)] w-full max-w-md flex-col overflow-hidden rounded-xl bg-surface-0 p-md shadow-lg animate-fade-in-up md:max-h-[calc(100dvh-3rem)]">
             <div className="flex min-h-0 flex-col gap-md">

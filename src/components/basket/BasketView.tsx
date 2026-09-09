@@ -11,12 +11,8 @@ import { formatRecipeTitle } from '@/lib/recipeFormatting';
 import { basketLineTotal, basketSavings, basketTotal } from '@/lib/calc';
 import type { BasketItem, IngredientCategory, User } from '@/lib/types';
 import { updateBasketItemQuantity } from '@/app/basket/actions';
-import { checkTescoSession, syncBasketToTesco, startTescoCheckout } from '@/app/basket/tescoActions';
-import { HostedHandoffBanner } from '@/components/basket/HostedHandoffBanner';
+import { checkTescoSession } from '@/app/basket/tescoActions';
 import { BrandSwapModal } from '@/components/basket/BrandSwapModal';
-
-// Inside BasketView:
-import { TESCO_ORDERING_UNAVAILABLE_MESSAGE } from '@/lib/tescoOrdering';
 
 /**
  * Basket review — the collector's screen before the order goes to Tesco.
@@ -52,7 +48,7 @@ export function BasketView({
   housemates,
   isCollector,
   collectorName,
-  planId,
+  planId: _planId,
   orderingEnabled,
   hasCookies: initialHasCookies = false,
   recipesByItem,
@@ -65,7 +61,6 @@ export function BasketView({
   // Categories start open: a basket you have to unfold before you can check it
   // is a basket nobody checks. Collapsing is for after you have read a section.
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
-  const [actualTotalCost, setActualTotalCost] = useState<number | null>(null);
   const [selectedSwapItem, setSelectedSwapItem] = useState<{
     id: string;
     ingredientId: string | null;
@@ -73,10 +68,7 @@ export function BasketView({
   } | null>(null);
   const [isSwapModalOpen, setIsSwapModalOpen] = useState(false);
 
-  // isSyncing drives the disabled states, so the transition's own pending
-  // flag is not needed.
   const [, startTransition] = useTransition();
-  const [isSyncing, setIsSyncing] = useState(false);
   const [sessionAuth, setSessionAuth] = useState(initialHasCookies);
   const [sessionExpiry, setSessionExpiry] = useState<string | undefined>();
   const [syncStatusMsg, setSyncStatusMsg] = useState<string | null>(null);
@@ -151,69 +143,8 @@ export function BasketView({
     return Number.isFinite(ms) ? Math.floor(ms / 86_400_000) : null;
   })();
 
-  async function handleCheckoutClick() {
-    if (!orderingEnabled) {
-      setSyncStatusMsg(TESCO_ORDERING_UNAVAILABLE_MESSAGE);
-      return;
-    }
-
-    if (!sessionAuth) {
-      setSyncStatusMsg('Tesco session required. Please set up your Tesco session cookies in House Settings.');
-      return;
-    }
-    if (!planId) {
-      setSyncStatusMsg('No active weekly plan ID.');
-      return;
-    }
-
-    // Open a blank tab synchronously during user click gesture to bypass popup blockers
-    const newTab = window.open('', '_blank');
-    if (newTab) {
-      newTab.document.write(
-        '<p style="font-family:sans-serif;text-align:center;margin-top:20%;color:#006b3f;font-weight:bold;">Syncing your HouseGrocer basket to Tesco... Please wait.</p>'
-      );
-    }
-
-    setIsSyncing(true);
-    setSyncStatusMsg('Pushing items to Tesco online basket...');
-    const res = await syncBasketToTesco(planId);
-    setIsSyncing(false);
-
-    if (res.status === 'error') {
-      setSyncStatusMsg(`Sync error: ${res.message}`);
-      if (newTab) newTab.close();
-    } else {
-      if (newTab) {
-        newTab.location.href = 'https://www.tesco.com/groceries/en-GB/trolley';
-      } else {
-        window.open('https://www.tesco.com/groceries/en-GB/trolley', '_blank');
-      }
-
-      // Fetch actual checkout cost dynamically
-      setSyncStatusMsg('Fetching actual Tesco checkout cost...');
-      const checkoutRes = await startTescoCheckout();
-      if (checkoutRes.status === 'success' && checkoutRes.totalCost !== undefined) {
-        setActualTotalCost(checkoutRes.totalCost);
-        setSyncStatusMsg(null); // Clear success message - keep it silent as requested
-      } else {
-        setSyncStatusMsg(`Synced successfully, but could not fetch checkout total: ${checkoutRes.message}`);
-      }
-    }
-  }
-
   return (
     <div className="pb-[140px] flex flex-col gap-md">
-      {/* On mobile, HostedHandoffBanner gives quick access to the trolley sync; on desktop, DesktopCheckoutCard in the right sidebar handles it */}
-      <div className="lg:hidden">
-        <HostedHandoffBanner
-          planId={planId}
-          isCollector={isCollector}
-          collectorName={collectorName}
-          itemCount={liveItems.length}
-          hasCookies={sessionAuth}
-          sessionDaysLeft={sessionDaysLeft}
-        />
-      </div>
 
     {selectedSwapItem && (
       <BrandSwapModal
@@ -555,7 +486,7 @@ export function BasketView({
       {orderingEnabled && sessionAuth && sessionDaysLeft !== null && sessionDaysLeft <= 2 && (
         <div
           role="status"
-          className="flex items-start gap-sm p-md rounded-lg bg-secondary-fixed/40 border border-secondary-container/40"
+          className="hidden lg:flex items-start gap-sm p-md rounded-lg bg-secondary-fixed/40 border border-secondary-container/40"
         >
           <Icon name="schedule" filled className="text-secondary mt-0.5 text-[18px]" />
           <p className="font-body-sm text-body-sm text-on-surface-variant">
@@ -566,38 +497,31 @@ export function BasketView({
         </div>
       )}
 
-      {/* Floating Checkout Bar for Mobile & Tablet Devices (< lg). Floats above BottomNav and is hidden on Desktop */}
+      {/* Floating Total Bar for Mobile & Tablet Devices (< lg). Floats above BottomNav and is hidden on Desktop */}
       <div className="lg:hidden fixed bottom-[calc(56px+env(safe-area-inset-bottom,16px))] md:bottom-0 left-0 w-full glass-panel p-md shadow-ambient-modal z-40 transition-all border-t border-outline-variant/30">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-md px-margin-mobile">
           <div className="flex flex-col">
             <span className="font-label-caps text-label-caps text-on-surface-variant font-semibold">
-              {actualTotalCost !== null ? 'Tesco Actual Total' : 'Estimated Total'}
+              Estimated Total
             </span>
             <span className="font-numeric-data text-headline-lg-mobile text-primary font-bold">
-              {actualTotalCost !== null ? formatPence(actualTotalCost) : formatPence(total)}
+              {formatPence(total)}
+            </span>
+            <span className="text-[11px] text-on-surface-variant">
+              {liveItems.length} item{liveItems.length === 1 ? '' : 's'}{savings > 0 ? ` · Saved ${formatPence(savings)}` : ''}
             </span>
           </div>
-          <button
-            type="button"
-            disabled={!orderingEnabled || !isCollector || liveItems.length === 0 || isSyncing}
-            onClick={handleCheckoutClick}
-            title={
-              !orderingEnabled
-                ? TESCO_ORDERING_UNAVAILABLE_MESSAGE
-                : isCollector
-                ? undefined
-                : `Only ${collectorName} can place this week's order from their Tesco account.`
-            }
-            className="bg-secondary text-on-secondary-container font-title-md text-title-md px-lg py-md rounded-2xl btn-tactile shadow-md hover:shadow-lg transition-all flex-1 text-center font-bold disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {!orderingEnabled
-              ? 'Open locally to checkout'
-              : isSyncing
-              ? 'Syncing...'
-              : isCollector
-                ? 'Proceed to Checkout'
-                : `${collectorName} checks out`}
-          </button>
+
+          <div className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-surface-container-high text-on-surface-variant text-xs font-medium border border-outline-variant/30 text-right shrink-0">
+            <Icon name="desktop_windows" className="text-base text-primary shrink-0" />
+            <span>
+              {isCollector ? (
+                <>Ordered on desktop</>
+              ) : (
+                <><strong className="font-semibold text-on-surface">{collectorName}</strong> orders on desktop</>
+              )}
+            </span>
+          </div>
         </div>
       </div>
     </div>
