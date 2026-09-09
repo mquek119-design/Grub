@@ -20,7 +20,7 @@ export default async function LeftoversPage() {
         <KitchenSubNav current="leftovers" />
         <PageHeader
           title="Fridge Leftovers"
-          subtitle="Put spare portions on the fridge board before they disappear at the back of a shelf."
+          subtitle="Claim or offer spare portions before they expire."
         />
       </div>
       <LeftoversBoard leftovers={leftovers} housemates={housemates} />

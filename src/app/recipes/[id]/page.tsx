@@ -83,7 +83,7 @@ export default async function RecipePage({
             <strong className="font-semibold capitalize">
               {targetDay} {targetMealType ?? 'meal'}
             </strong>{' '}
-            to share ingredients with your housemates and save money on the shop.
+            to share ingredients and save money on the shop.
           </p>
         </div>
       )}

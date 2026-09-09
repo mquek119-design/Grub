@@ -131,9 +131,7 @@ export default async function PlanPage({
 
       {week === 'next' && (
         <Notice tone="info" icon="event_upcoming">
-          The basket is only ever built from the week the house is actually eating, so nothing here
-          is costed or ordered yet. This becomes the current week on Monday and the shop follows
-          from it.
+          Planning ahead. This week locks and moves to the basket next Monday.
         </Notice>
       )}
 

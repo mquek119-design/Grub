@@ -96,7 +96,7 @@ export default async function FeedPage() {
           ) : (
             <Card className="flex flex-col justify-center gap-sm">
               <h2 className="font-title-md text-title-md">{plan.status === 'delivered' ? 'Delivery checked' : 'Delivery check pending'}</h2>
-              <p className="font-body-sm text-body-sm text-on-surface-variant">Keep this week’s meals handy, or start choosing what you fancy next week.</p>
+              <p className="font-body-sm text-body-sm text-on-surface-variant">Keep this week’s meals handy, or start choosing next week’s.</p>
               <Link href="/plan?week=next" className="text-primary font-semibold underline">Plan next week</Link>
             </Card>
           )}

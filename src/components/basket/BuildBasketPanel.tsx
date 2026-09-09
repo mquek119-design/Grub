@@ -121,7 +121,7 @@ export function BuildBasketPanel({
           <p className="font-body-sm text-body-sm text-on-surface-variant mt-0.5 leading-relaxed">
             {mealCount === 0
               ? 'Plan some meals first in the Plan tab.'
-              : `Synced with ${mealCount} planned meal${mealCount === 1 ? '' : 's'}. Shared ingredients are pooled automatically to minimize cost.`}
+              : `Synced with ${mealCount} planned meal${mealCount === 1 ? '' : 's'}. Shared ingredients are pooled automatically.`}
           </p>
         </div>
         {overlapSavings > 0 && (

@@ -33,7 +33,7 @@ export function RunningLowStapleCard() {
         <div className="flex items-center gap-xs">
           <Icon name="inventory_2" className="text-secondary text-lg" />
           <h3 className="font-title-md text-title-md font-bold text-on-surface">
-            Quick Flag: Running Low in the House?
+            Running low in the house?
           </h3>
         </div>
         <span className="font-label-caps text-[10px] uppercase text-secondary font-bold tracking-wider">
@@ -42,7 +42,7 @@ export function RunningLowStapleCard() {
       </div>
 
       <p className="font-body-sm text-body-sm text-on-surface-variant">
-        Tap shared household items (kitchen towels, foil, toilet paper) running low so they get added to the next shop.
+        Tap shared items running low so they get added to the next shop.
       </p>
 
       <div className="flex flex-wrap gap-xs mt-xs">

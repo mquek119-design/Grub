@@ -101,7 +101,7 @@ export default async function PantryPage() {
         <KitchenSubNav current="pantry" />
         <PageHeader
           title="House Pantry"
-          subtitle="What you already have. The optimiser skips these when building the basket."
+          subtitle="What you already have. The shop won't buy these twice."
         />
       </div>
 
@@ -111,8 +111,8 @@ export default async function PantryPage() {
             <Icon name="soup_kitchen" className="text-base" />
           </span>
           <div className="min-w-0">
-            <p className="font-title-md text-[13px] font-bold text-on-surface truncate">Looking for cooked leftovers & spare portions?</p>
-            <p className="font-body-sm text-[11px] text-on-surface-variant truncate">Check the fridge board to claim or offer food before it expires.</p>
+            <p className="font-title-md text-[13px] font-bold text-on-surface truncate">Cooked meals and leftovers</p>
+            <p className="font-body-sm text-[11px] text-on-surface-variant truncate">Check the fridge board before food goes out of date.</p>
           </div>
         </div>
         <Link

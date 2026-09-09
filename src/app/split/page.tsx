@@ -156,7 +156,7 @@ export default async function SplitPage() {
 
       {unpriced > 0 && (
         <Notice tone="check" icon="warning" role="alert">
-          This total leaves out <strong>{unpriced}</strong> unpriced basket item{unpriced === 1 ? '' : 's'}. Add pack details on the Basket tab for accurate calculations.
+          {unpriced} unpriced item{unpriced === 1 ? '' : 's'} on the Basket tab need pack details to price accurately.
         </Notice>
       )}
 
@@ -243,10 +243,8 @@ export default async function SplitPage() {
 
           {breakdownTotal !== split.amount && (
             <Notice tone="check" icon="difference" role="alert">
-              The item breakdown has changed since this split was posted. The posted share is{' '}
-              <strong>{formatPence(split.amount)}</strong>; the current breakdown comes to{' '}
-              <strong>{formatPence(breakdownTotal)}</strong>. The collector can re-post the split to
-              bring the two together.
+              Breakdown changed since posting ({formatPence(split.amount)} posted vs{' '}
+              {formatPence(breakdownTotal)} now). The collector can re-post to sync.
             </Notice>
           )}
         </div>

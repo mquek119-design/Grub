@@ -232,7 +232,6 @@ export function OverlapHints({
             </ul>
 
             <p className="font-body-sm text-[12px] text-on-surface-variant">
-              Nobody has to change anything — cooking what you fancy is the point.{' '}
               {overlap.missedSaving > 0 ? (
                 <>
                   Buying the same ingredients twice costs the house about{' '}
@@ -241,7 +240,7 @@ export function OverlapHints({
                   </span>.
                 </>
               ) : (
-                <>Sharing ingredients reduces duplicate multi-packs and cuts down on food waste.</>
+                <>Sharing ingredients reduces duplicate packs.</>
               )}
             </p>
           </div>

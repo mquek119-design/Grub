@@ -41,8 +41,7 @@ export function ReopenPlanningBanner({ status }: { status: PlanStatus }) {
           <h2 className="font-title-md text-title-md">Planning is closed</h2>
           <p className="font-body-sm text-body-sm text-on-surface-variant">
             {EXPLANATION[status as Exclude<PlanStatus, 'planning'>] ?? 'This week is closed.'}{' '}
-            Reopen it if you still need to change meals — the basket is rebuilt from the plan, so
-            nothing is lost.
+            Reopen it to make changes before building the basket.
           </p>
         </div>
       </div>
