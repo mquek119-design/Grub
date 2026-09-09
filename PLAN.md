@@ -103,3 +103,9 @@ Legend: ✅ Done · 🟡 Partial / Verify at Deploy · 🏠 Handled by Host (Ver
 
 ## Out of Scope (Deliberate MVP Boundaries)
 Multi-supermarket live price scraping, native iOS/Android App Store builds, and open-banking direct debit pulls.
+
+---
+
+## Future Experiments & Ideas (On Hold)
+
+- **Brain Rot Mode (Experimental Toggle)**: Documented in `VOICE.md` §9. An opt-in Easter-egg copy theme for flatmates wanting exaggerated student TikTok humour. Kept on hold as an experimental concept until fully thought out and evaluated. Standard Grub voice remains active across all live screens.

@@ -81,7 +81,7 @@ export function FirstMealModal({ recipes, weekStartDate }: FirstMealModalProps) 
                     Nobody&apos;s picked anything
                   </h2>
                   <p className="font-body-sm text-body-sm text-on-surface-variant">
-                    You&apos;re all just going to wing it again aren&apos;t you. Start with one of these.
+                    Nobody has picked a meal yet. Start with one of these.
                   </p>
                 </div>
                 <button
