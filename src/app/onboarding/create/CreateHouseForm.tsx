@@ -4,7 +4,7 @@ import { useActionState, useState } from 'react';
 import { SubmitButton } from '@/components/ui/SubmitButton';
 import { Icon } from '@/components/media/Icon';
 import { WEEKDAYS, WEEKDAY_LABELS } from '@/lib/types';
-import { KitchenScene, KITCHEN_APPLIANCES } from '@/components/onboarding/KitchenScene';
+import { KitchenScene } from '@/components/onboarding/KitchenScene';
 import { clsx } from '@/lib/clsx';
 import { createHouse, type OnboardingState } from '../actions';
 

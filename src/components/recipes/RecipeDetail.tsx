@@ -74,11 +74,11 @@ export function RecipeDetail({
           )}
         </div>
 
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex flex-col items-stretch sm:items-end gap-1 w-full sm:w-auto mt-1 sm:mt-0">
           <button
             type="button"
             onClick={() => setCookModeModalOpen(true)}
-            className="inline-flex items-center gap-xs px-xl py-sm rounded-2xl bg-secondary text-on-secondary-container font-bold text-sm btn-tactile shadow-md hover:shadow-lg transition-all"
+            className="inline-flex items-center justify-center gap-xs px-xl py-3 sm:py-sm rounded-2xl bg-secondary text-on-secondary-container font-bold text-sm btn-tactile shadow-md hover:shadow-lg transition-all w-full sm:w-auto"
           >
             <Icon name="skillet" className="text-lg" />
             <span>Start Cook Mode</span>

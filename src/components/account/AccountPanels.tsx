@@ -2,7 +2,7 @@
 
 import { useState, useRef, useTransition, useActionState } from 'react';
 import { Avatar, ACCENT_CLASSES } from '@/components/avatars/Avatar';
-import { AvatarGlyph, AVATAR_OPTIONS, parseAvatarUrl, isAvatarId, type AvatarId } from '@/components/avatars/AvatarGlyphs';
+import { AvatarGlyph, AVATAR_OPTIONS, parseAvatarUrl, type AvatarId } from '@/components/avatars/AvatarGlyphs';
 import { Stocky } from '@/components/mascot/Stocky';
 import { DIETS, VIBES, getBudgetTier, parseDietaryPreferences } from '@/lib/dietary';
 import { Icon } from '@/components/media/Icon';
@@ -146,7 +146,7 @@ export function ProfileInfoPanel({
               </button>
             )}
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
             {AVATAR_OPTIONS.map((opt) => {
               const isSelected = selectedAvatar === opt.id;
               const takenBy = otherHousemates.find(
@@ -578,7 +578,7 @@ export function DietaryPanel({ user }: { user: User }) {
                 }
               }}
               placeholder="Add custom allergy (e.g. shellfish, peanuts)"
-              className="flex-1 h-10 px-3 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:ring-2 focus:ring-primary text-body-sm text-[13px]"
+              className="flex-1 h-10 px-3 rounded-xl bg-surface-container-lowest border border-outline-variant/60 focus:ring-2 focus:ring-primary text-base sm:text-body-sm"
             />
             <button
               type="button"
@@ -667,7 +667,7 @@ export function DietaryPanel({ user }: { user: User }) {
                 placeholder="e.g. 2200"
                 min="1000"
                 max="6000"
-                className="w-full h-10 px-3 rounded-xl bg-surface-container-low border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-sm font-numeric-data"
+                className="w-full h-10 px-3 rounded-xl bg-surface-container-low border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:ring-2 focus:ring-primary/20 text-base sm:text-body-sm font-numeric-data"
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -679,7 +679,7 @@ export function DietaryPanel({ user }: { user: User }) {
                 placeholder="e.g. 140"
                 min="30"
                 max="400"
-                className="w-full h-10 px-3 rounded-xl bg-surface-container-low border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:ring-2 focus:ring-primary/20 text-body-sm font-numeric-data"
+                className="w-full h-10 px-3 rounded-xl bg-surface-container-low border border-outline-variant/60 focus:bg-surface-container-lowest focus:border-primary focus:ring-2 focus:ring-primary/20 text-base sm:text-body-sm font-numeric-data"
               />
             </label>
           </div>

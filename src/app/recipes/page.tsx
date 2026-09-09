@@ -3,7 +3,6 @@ import { Icon } from '@/components/media/Icon';
 import { Marquee } from '@/components/motion/Marquee';
 import { ButtonLink } from '@/components/ui/Button';
 import { EmptyState } from '@/components/ui/EmptyState';
-import { PageHeader } from '@/components/ui/PageHeader';
 import { PageShell } from '@/components/ui/PageShell';
 import { KitchenSubNav } from '@/components/kitchen/KitchenSubNav';
 import { RecipeBrowser } from '@/components/recipes/RecipeBrowser';

@@ -81,8 +81,8 @@ export function AppChrome({
       <RealtimeListener houseId={currentUser.houseId} />
       <TopAppBar currentUser={currentUser} basketNeedsAttention={basketNeedsAttention} />
       {viewingAsName && <ViewAsBanner name={viewingAsName} />}
-      {/* Top padding clears the fixed app bar, plus the banner when it is up. */}
-      <div className={clsx('pb-[96px] md:pb-xl', viewingAsName ? 'pt-[108px]' : 'pt-[72px]')}>
+      {/* Top padding clears the fixed app bar, plus the banner when it is up; bottom padding clears mobile BottomNav */}
+      <div className={clsx('pb-[112px] md:pb-xl pb-safe', viewingAsName ? 'pt-[108px]' : 'pt-[72px]')}>
         {children}
       </div>
       <BottomNav basketHasUpdates={basketNeedsAttention} />

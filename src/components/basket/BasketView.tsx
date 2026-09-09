@@ -538,8 +538,8 @@ export function BasketView({
         </div>
       )}
 
-      {/* Floating Checkout Bar for Mobile & Tablet Devices (< lg). Hidden on Desktop to avoid obscuring Delivery Slot picker */}
-      <div className="lg:hidden fixed bottom-[76px] md:bottom-0 left-0 w-full glass-panel p-md shadow-ambient-modal z-40 transition-all border-t border-outline-variant/30">
+      {/* Floating Checkout Bar for Mobile & Tablet Devices (< lg). Floats above BottomNav and is hidden on Desktop */}
+      <div className="lg:hidden fixed bottom-[calc(56px+env(safe-area-inset-bottom,16px))] md:bottom-0 left-0 w-full glass-panel p-md shadow-ambient-modal z-40 transition-all border-t border-outline-variant/30">
         <div className="max-w-7xl mx-auto flex items-center justify-between gap-md px-margin-mobile">
           <div className="flex flex-col">
             <span className="font-label-caps text-label-caps text-on-surface-variant font-semibold">

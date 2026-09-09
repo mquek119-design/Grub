@@ -61,11 +61,11 @@ function SettleChip({
       type="submit"
       disabled={pending}
       className={clsx(
-        'flex items-center gap-xs pl-1 pr-sm py-1 rounded-full border text-[12px] font-semibold transition-colors',
+        'flex items-center gap-xs pl-1.5 pr-2.5 py-1.5 min-h-[36px] rounded-full border text-[12px] font-semibold transition-all btn-tactile cursor-pointer',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
         'disabled:opacity-60',
         settled
-          ? 'border-primary bg-primary/10 text-primary'
+          ? 'border-primary bg-primary/10 text-primary shadow-xs'
           : 'border-outline-variant text-on-surface-variant hover:bg-surface-container'
       )}
     >
@@ -74,7 +74,8 @@ function SettleChip({
       ) : (
         <Avatar user={user} size="xs" />
       )}
-      {user.name} {formatPence(amount)}
+      <span>{user.name}</span>
+      <span className="font-numeric-data">{formatPence(amount)}</span>
       <Icon
         name={settled ? 'check_circle' : 'radio_button_unchecked'}
         className="text-[14px]"
@@ -181,7 +182,7 @@ export function ExpensePanel({
 
   return (
     <Card className="flex flex-col gap-sm">
-      <div className="flex items-start justify-between gap-sm">
+      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-sm">
         <div className="min-w-0">
           <h2 className="font-title-md text-title-md">Other purchases</h2>
           <p className="font-body-sm text-body-sm text-on-surface-variant">
@@ -192,7 +193,7 @@ export function ExpensePanel({
           variant="ghost"
           icon={open ? 'close' : 'receipt_long'}
           onClick={() => setOpen((value) => !value)}
-          className="shrink-0 border border-primary"
+          className="self-start shrink-0 border border-primary"
         >
           {open ? 'Cancel' : 'Log a purchase'}
         </Button>

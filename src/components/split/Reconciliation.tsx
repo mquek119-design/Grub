@@ -195,7 +195,7 @@ export function Reconciliation({
       {/* Left Column: Received Items & Substitutions */}
       <div className="lg:col-span-7 xl:col-span-8 flex flex-col gap-lg min-w-0">
         <section className="flex flex-col gap-sm">
-          <div className="flex items-center justify-between gap-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-xs">
             <h2 className="font-title-md text-title-md text-on-surface flex items-center gap-xs">
               <Icon name="check_circle" className="text-primary text-lg" />
               Received Items ({items.length})
@@ -221,13 +221,13 @@ export function Reconciliation({
                       aria-label={`${item.name} received`}
                       onClick={() => toggleItemReceived(item.basketItemId)}
                       className={clsx(
-                        'w-8 h-8 border-2 rounded flex items-center justify-center shrink-0 transition-colors',
-                        isReceived ? 'bg-primary border-primary' : 'border-outline'
+                        'w-9 h-9 sm:w-8 sm:h-8 border-2 rounded-lg flex items-center justify-center shrink-0 transition-all btn-tactile cursor-pointer',
+                        isReceived ? 'bg-primary border-primary shadow-xs' : 'border-outline hover:border-primary/60'
                       )}
                     >
                       <Icon
                         name="check"
-                        className={clsx('text-white text-[14px]', !isReceived && 'opacity-0')}
+                        className={clsx('text-white text-[16px] sm:text-[14px]', !isReceived && 'opacity-0')}
                       />
                     </button>
 

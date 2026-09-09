@@ -210,7 +210,7 @@ export function LeftoversBoard({
                   id="leftover-days"
                   name="days"
                   defaultValue={3}
-                  className="w-full h-11 px-xs rounded-lg bg-surface-container-low border border-surface-container-highest text-body-sm font-semibold text-on-surface focus:ring-2 focus:ring-primary focus:outline-none"
+                  className="w-full h-11 px-xs rounded-lg bg-surface-container-low border border-surface-container-highest text-base sm:text-body-sm font-semibold text-on-surface focus:ring-2 focus:ring-primary focus:outline-none"
                 >
                   {SHELF_LIVES.map((option) => (
                     <option key={option.days} value={option.days}>

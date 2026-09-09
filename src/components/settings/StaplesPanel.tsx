@@ -55,7 +55,7 @@ function FrequencySelect({ staple }: { staple: HouseStaple }) {
         name="frequency"
         defaultValue={staple.frequency}
         onChange={(event) => event.currentTarget.form?.requestSubmit()}
-        className="h-9 pl-2 pr-6 rounded-full bg-surface-container-low border-none text-[13px] font-semibold text-on-surface-variant focus:ring-2 focus:ring-primary"
+        className="h-9 pl-2 pr-6 rounded-full bg-surface-container-low border-none text-base sm:text-[13px] font-semibold text-on-surface-variant focus:ring-2 focus:ring-primary"
       >
         {FREQUENCIES.map((frequency) => (
           <option key={frequency} value={frequency}>
@@ -130,26 +130,28 @@ export function StaplesPanel({
       )}
 
       <form action={action} className="flex flex-col gap-sm">
-        <div className="flex gap-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-sm">
           <input
             name="name"
             required
             maxLength={80}
             placeholder="Toilet roll"
-            className="flex-1 min-w-0 h-11 px-3 rounded-lg bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-body-lg"
+            className="w-full h-11 px-3 rounded-lg bg-surface-container-low border-none focus:ring-2 focus:ring-primary text-base sm:text-body-lg"
           />
-          <select
-            name="frequency"
-            defaultValue="weekly"
-            className="h-11 pl-2 pr-6 rounded-lg bg-surface-container-low border-none text-[13px] font-semibold text-on-surface-variant focus:ring-2 focus:ring-primary"
-          >
-            {FREQUENCIES.map((frequency) => (
-              <option key={frequency} value={frequency}>
-                {STAPLE_FREQUENCY_LABELS[frequency]}
-              </option>
-            ))}
-          </select>
-          <AddButton />
+          <div className="flex gap-sm">
+            <select
+              name="frequency"
+              defaultValue="weekly"
+              className="flex-1 sm:flex-initial h-11 pl-2 pr-6 rounded-lg bg-surface-container-low border-none text-base sm:text-[13px] font-semibold text-on-surface-variant focus:ring-2 focus:ring-primary"
+            >
+              {FREQUENCIES.map((frequency) => (
+                <option key={frequency} value={frequency}>
+                  {STAPLE_FREQUENCY_LABELS[frequency]}
+                </option>
+              ))}
+            </select>
+            <AddButton />
+          </div>
         </div>
 
         {staples.length === 0 && (

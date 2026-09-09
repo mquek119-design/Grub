@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { clsx } from '@/lib/clsx';
-import { Icon } from '@/components/media/Icon';
 import { Stocky } from '@/components/mascot/Stocky';
 
 export const STOCKY_PANTRY_QUOTES = [

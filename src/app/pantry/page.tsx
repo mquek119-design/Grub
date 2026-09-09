@@ -105,7 +105,7 @@ export default async function PantryPage() {
         />
       </div>
 
-      <div className="flex items-center justify-between p-sm px-md rounded-2xl bg-gradient-to-r from-secondary-fixed/40 via-surface-container-low to-secondary-fixed/20 border border-secondary/30 text-xs interactive-card card-glow">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-sm p-sm px-md rounded-2xl bg-gradient-to-r from-secondary-fixed/40 via-surface-container-low to-secondary-fixed/20 border border-secondary/30 text-xs interactive-card card-glow">
         <div className="flex items-center gap-sm min-w-0">
           <span className="size-8 rounded-xl bg-secondary/15 flex items-center justify-center text-secondary shrink-0">
             <Icon name="soup_kitchen" className="text-base" />
@@ -117,7 +117,7 @@ export default async function PantryPage() {
         </div>
         <Link
           href="/leftovers"
-          className="shrink-0 font-bold text-secondary hover:text-on-secondary-fixed-variant px-3 py-1.5 rounded-full bg-secondary-fixed/60 border border-secondary/30 hover:bg-secondary-fixed transition-all flex items-center gap-1 btn-tactile shadow-xs"
+          className="self-start sm:self-auto shrink-0 font-bold text-secondary hover:text-on-secondary-fixed-variant px-3 py-1.5 rounded-full bg-secondary-fixed/60 border border-secondary/30 hover:bg-secondary-fixed transition-all flex items-center gap-1 btn-tactile shadow-xs"
         >
           <span>Leftovers Board</span>
           <Icon name="arrow_forward" className="text-sm" />

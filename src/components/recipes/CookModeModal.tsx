@@ -1013,7 +1013,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
               All Cards Mastered! 🎉
             </h3>
             <p className="font-body-sm text-body-md text-[#2D6A4F]">
-              You completed all {totalSteps} cards for <strong className="text-[#1B4332]">{recipe.title}</strong>.
+              You completed all {totalSteps} cards for <strong className="text-[#1B4332]">{formatRecipeTitle(recipe.title)}</strong>.
             </p>
 
             <div className="flex flex-col gap-sm w-full">

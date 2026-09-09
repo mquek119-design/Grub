@@ -37,14 +37,14 @@ export function PantryItemRow({ item }: { item: PantryItem }) {
         </Badge>
       )}
 
-      <div className="flex items-center gap-xs shrink-0">
+      <div className="flex items-center gap-sm shrink-0">
         <button
           type="button"
           disabled={isPending}
           title="Mark used up"
           aria-label={`Mark ${item.name} used up`}
           onClick={handleMarkUsedUp}
-          className="w-9 h-9 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-50"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container transition-all btn-tactile disabled:opacity-50"
         >
           <Icon name="remove_shopping_cart" className="text-[18px]" />
         </button>
@@ -54,7 +54,7 @@ export function PantryItemRow({ item }: { item: PantryItem }) {
           title="Add to basket"
           aria-label={`Add ${item.name} to basket`}
           onClick={handleAddToBasket}
-          className="w-9 h-9 rounded-full flex items-center justify-center text-primary hover:bg-primary/10 transition-colors disabled:opacity-50"
+          className="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-primary/10 transition-all btn-tactile disabled:opacity-50"
         >
           <Icon name="add_shopping_cart" className="text-[18px]" />
         </button>

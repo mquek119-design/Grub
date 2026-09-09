@@ -5,7 +5,6 @@ import { WeekPlan } from '@/components/plan/WeekPlan';
 import { WeekSwitcher } from '@/components/plan/WeekSwitcher';
 import { ReopenPlanningBanner } from '@/components/plan/ReopenPlanningBanner';
 import { FirstMealModal } from '@/components/plan/FirstMealModal';
-import { Icon } from '@/components/media/Icon';
 import { Stocky } from '@/components/mascot/Stocky';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Notice } from '@/components/ui/Notice';
