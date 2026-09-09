@@ -88,8 +88,8 @@ export default async function PantryPage() {
         </div>
         <EmptyState
           icon="inventory_2"
-          title="Your cupboard is empty"
-          body="Add staple ingredients here so the basket optimiser knows not to re-buy them."
+          title="Your cupboard is giving nothing"
+          body="Probably accurate. Add staple ingredients here so the basket doesn't buy another bag of salt."
         />
       </PageShell>
     );

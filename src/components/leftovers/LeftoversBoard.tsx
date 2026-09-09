@@ -149,9 +149,9 @@ export function LeftoversBoard({
               <div className="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant mb-xs">
                 <Icon name="set_meal" className="text-2xl" />
               </div>
-              <p className="font-title-md text-title-md text-on-surface">The fridge board is empty</p>
+              <p className="font-title-md text-title-md text-on-surface">The fridge board is clear</p>
               <p className="font-body-sm text-body-sm text-on-surface-variant max-w-sm">
-                Got extra portions from dinner? Share them here so housemates can grab a bite instead of wasting good food.
+                Got extra portions from dinner? Post them here before they disappear at the back of shelf two.
               </p>
             </div>
           )}

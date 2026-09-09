@@ -136,7 +136,7 @@ export default async function FeedPage() {
             icon="ti-calendar"
             title="Nobody's picked anything"
             body={plan.status === 'planning' && !isCutoffPassed(plan.cutoffAt)
-              ? 'Pick something you fancy and give the house a meal to join.'
+              ? "You're all just going to wing it again aren't you. Pick a meal and give the house something to join before everyone defaults to cereal."
               : 'Nothing was planned for this shop. Get a start on next week.'}
             action={plan.status === 'planning' && !isCutoffPassed(plan.cutoffAt)
               ? { href: '/plan', label: 'Start planning' }

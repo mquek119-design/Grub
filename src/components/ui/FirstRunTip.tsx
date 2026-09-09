@@ -10,19 +10,19 @@ const TIP_STORAGE_PREFIX = 'grub:first-run-tip:';
 const TIPS = {
   feed: {
     title: 'Your house at a glance',
-    body: 'See the cutoff, this week’s meals, jobs for tonight and anything the house needs to settle.',
+    body: "Tonight's cook, this week's meals, and whoever still owes money from last Thursday.",
   },
   plan: {
     title: 'Build the week together',
-    body: 'Pick meals or join a housemate before the cutoff. Shared ingredients are combined when the basket is built.',
+    body: 'Pick what you fancy before the cutoff. If two of you need onions, you buy one bag instead of two.',
   },
   basket: {
     title: 'Check the shop before it goes',
-    body: 'Review quantities, pack matches and swaps here. Only the collector sends the finished basket to Tesco.',
+    body: 'Quantities, own-brand swaps, and assumed packs. The collector pushes the final cart to Tesco.',
   },
   split: {
     title: 'Pay for what you share',
-    body: 'Your share is calculated item by item. After delivery, reconcile any changes before everyone settles up.',
+    body: 'Calculated item by item down to the penny. No round numbers, no guessing, no kitchen debates.',
   },
 } as const;
 
