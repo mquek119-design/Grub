@@ -124,16 +124,28 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
   const [leftoverState, leftoverAction] = useActionState(addLeftover, LEFTOVER_INITIAL);
   const { pending } = useSubmitState();
 
-  const totalSteps = recipe.instructions.length;
-  const scale = servings / recipe.servings;
-  const activeInstruction = recipe.instructions[currentStep] || '';
+  const instructions = recipe.instructions || [];
+  const totalSteps = instructions.length;
+  const effectiveServings = Math.max(1, servings || recipe.servings || 1);
+  const baseServings = Math.max(1, recipe.servings || 1);
+  const scale = effectiveServings / baseServings;
+  const activeInstruction = instructions[currentStep] || '';
 
   const stepPhase = useMemo(() => getStepPhase(activeInstruction), [activeInstruction]);
   const stepIngredients = useMemo(
-    () => getStepIngredients(activeInstruction, recipe.ingredients, scale),
+    () => getStepIngredients(activeInstruction, recipe.ingredients || [], scale),
     [activeInstruction, recipe.ingredients, scale]
   );
   const detectedSeconds = useMemo(() => extractStepTimer(activeInstruction), [activeInstruction]);
+
+  // Prevent background body scroll while Cook Mode is active on mobile
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
 
   // Reset timer and flip state on card advance
   useEffect(() => {
@@ -158,7 +170,11 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
           setTimerRunning(false);
           playTimerChime();
           if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-            navigator.vibrate([200, 100, 200]);
+            try {
+              navigator.vibrate([200, 100, 200]);
+            } catch {
+              // Ignore device vibration restrictions
+            }
           }
           return 0;
         }
@@ -182,19 +198,25 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
     return () => window.removeEventListener('resize', checkDevice);
   }, []);
 
-  // Screen Wake Lock API for Mobile Cook Mode
+  // Screen Wake Lock API for Mobile Cook Mode with safe cleanup
   useEffect(() => {
     let wakeLock: any = null;
-    if ('wakeLock' in navigator) {
+    if (typeof navigator !== 'undefined' && 'wakeLock' in navigator) {
       (navigator as any).wakeLock
-        .request('screen')
-        .then((lock: any) => {
+        ?.request?.('screen')
+        ?.then((lock: any) => {
           wakeLock = lock;
         })
-        .catch((err: any) => console.log('Wake Lock error:', err));
+        ?.catch((err: any) => console.log('Wake Lock error:', err));
     }
     return () => {
-      if (wakeLock) wakeLock.release();
+      if (wakeLock && typeof wakeLock.release === 'function') {
+        try {
+          wakeLock.release().catch(() => {});
+        } catch {
+          // ignore
+        }
+      }
     };
   }, []);
 
@@ -252,6 +274,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
   const didSwipeRef = useRef(false);
 
   function handleTouchStart(e: React.TouchEvent) {
+    if (!e.touches || !e.touches[0]) return;
     const touch = e.touches[0];
     touchStartRef.current = { x: touch.clientX, y: touch.clientY };
     setIsSwiping(true);
@@ -259,7 +282,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
   }
 
   function handleTouchMove(e: React.TouchEvent) {
-    if (!touchStartRef.current) return;
+    if (!touchStartRef.current || !e.touches || !e.touches[0]) return;
     const touch = e.touches[0];
     const diffX = touch.clientX - touchStartRef.current.x;
     const diffY = touch.clientY - touchStartRef.current.y;
@@ -284,6 +307,13 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
     setDragX(0);
     setIsSwiping(false);
     touchStartRef.current = null;
+  }
+
+  function handleTouchCancel() {
+    setDragX(0);
+    setIsSwiping(false);
+    touchStartRef.current = null;
+    didSwipeRef.current = false;
   }
 
   const cookUrl = typeof window !== 'undefined'
@@ -427,7 +457,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
               </button>
             ) : (
               <span className="font-numeric-data text-xs px-2.5 py-1 rounded-full bg-white/10 text-white/90 font-bold">
-                {servings} portions
+                {effectiveServings} portions
               </span>
             )}
           </div>
@@ -495,12 +525,13 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
+                onTouchCancel={handleTouchCancel}
                 style={{
                   transform: dragX !== 0 ? `translateX(${dragX}px) rotate(${dragX * 0.035}deg)` : undefined,
                   transition: isSwiping ? 'none' : 'transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1)',
                 }}
                 className={clsx(
-                  'w-full min-h-[420px] max-h-[72vh] flex flex-col justify-between p-6 sm:p-8 rounded-3xl transition-all duration-200 cursor-pointer shadow-ambient-modal border touch-pan-y relative select-none',
+                  'w-full min-h-[340px] max-h-[68vh] sm:min-h-[420px] flex flex-col justify-between p-5 sm:p-8 rounded-3xl transition-all duration-200 cursor-pointer shadow-ambient-modal border touch-pan-y relative select-none',
                   isFlipped
                     ? 'bg-[#1E2E25] border-secondary/50 text-white ring-1 ring-secondary/30'
                     : 'bg-[#FAF7F2] text-[#1B4332] border-white/20 shadow-2xl'
@@ -606,7 +637,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                     /* BACK: Flashcard Answer / Recipe Technique & Full Ingredients Breakdown */
                     <div className="flex flex-col gap-3 text-left">
                       <span className="font-label-caps text-xs uppercase tracking-wider text-secondary font-bold">
-                        Ingredients for this recipe ({servings} portions):
+                        Ingredients for this recipe ({effectiveServings} portions):
                       </span>
                       <ul className="grid grid-cols-1 gap-1.5 max-h-[36vh] overflow-y-auto pr-1">
                         {recipe.ingredients.map((ing) => {
@@ -655,7 +686,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                     Swipe left/right to change card · Tap to flip
                   </span>
                   <span className={clsx('font-numeric-data text-xs font-bold', isFlipped ? 'text-secondary' : 'text-[#1B4332]')}>
-                    {servings} Servings
+                    {effectiveServings} Servings
                   </span>
                 </div>
               </div>

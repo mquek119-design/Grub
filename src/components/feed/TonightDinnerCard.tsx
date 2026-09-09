@@ -98,7 +98,7 @@ export function TonightDinnerCard({
       {cookModeOpen && recipe && (
         <CookModeModal
           recipe={recipe}
-          servings={mouths}
+          servings={mouths > 0 ? mouths : (recipe.servings || 2)}
           onClose={() => setCookModeOpen(false)}
         />
       )}
