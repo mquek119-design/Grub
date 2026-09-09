@@ -127,7 +127,7 @@ export function KitchenPanel({
                     ) : null}
                   </div>
 
-                  <h3 className="font-title-md text-title-md truncate mt-0.5 font-bold text-on-surface">
+                  <h3 className="font-title-md text-title-md line-clamp-2 leading-snug mt-0.5 font-bold text-on-surface">
                     <Link href={`/recipes/${meal.recipeId}`} className="hover:underline">
                       {meal.recipeTitle}
                     </Link>
@@ -187,7 +187,7 @@ export function KitchenPanel({
                               className="flex items-center justify-between gap-sm px-md py-sm rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors"
                             >
                               <span className="min-w-0">
-                                <span className="font-body-lg text-body-lg font-semibold block truncate">
+                                <span className="font-body-lg text-body-lg font-semibold block line-clamp-2 leading-snug">
                                   {suggestion.recipe.title}
                                 </span>
                                 <span className="font-body-sm text-[12px] text-on-surface-variant">

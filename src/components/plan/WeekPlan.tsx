@@ -153,26 +153,27 @@ const MealRow = memo(function MealRow({
   return (
     <article
       className={clsx(
-        'flex flex-col gap-xs px-3 md:px-4 py-2 md:py-2.5 transition-all duration-200',
+        'flex flex-col gap-1.5 px-3 md:px-4 py-2.5 md:py-3 transition-all duration-200',
         joined ? 'bg-primary-fixed/25 border-l-4 border-l-primary' : 'hover:bg-surface-container-low/60'
       )}
     >
-      <div className="flex items-center gap-2.5 md:gap-3 min-w-0">
+      {/* Top section: Dish thumbnail, Eyebrow & Full-Width Recipe Title */}
+      <div className="flex items-start gap-2.5 md:gap-3 min-w-0">
         <Link
           href={`/recipes/${meal.recipeId}`}
-          className="shrink-0 rounded-xl overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-xs group"
+          className="shrink-0 rounded-xl overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary shadow-xs group mt-0.5"
         >
           <FoodImage
             seed={meal.recipeId}
             src={recipe?.imageUrl}
             alt={meal.recipeTitle}
-            className="w-10 h-10 md:w-11 md:h-11 rounded-xl text-[18px] object-cover transition-transform duration-300 group-hover:scale-105"
+            className="w-11 h-11 md:w-12 md:h-12 rounded-xl text-[18px] object-cover transition-transform duration-300 group-hover:scale-105"
           />
         </Link>
 
         <div className="min-w-0 flex-1 flex flex-col justify-center">
           {/* Sitting eyebrow placed cleanly on its own line above the dish name */}
-          <div className="flex items-center gap-1 font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant font-bold leading-none mb-0.5">
+          <div className="flex items-center gap-1 font-label-caps text-[10px] uppercase tracking-wider text-on-surface-variant font-bold leading-none mb-1">
             <Icon name={MEAL_TYPE_ICONS[meal.mealType]} className="text-[12px] text-primary" />
             <span>{MEAL_TYPE_LABELS[meal.mealType]}</span>
             {full && (
@@ -183,101 +184,105 @@ const MealRow = memo(function MealRow({
           </div>
 
           <Link href={`/recipes/${meal.recipeId}`} className="min-w-0 hover:underline block group">
-            <h4 className="font-title-md text-[13.5px] md:text-[14.5px] font-bold text-on-surface leading-tight truncate group-hover:text-primary transition-colors">
+            <h4 className="font-title-md text-[14px] md:text-[15px] font-bold text-on-surface leading-snug line-clamp-2 group-hover:text-primary transition-colors">
               {meal.recipeTitle}
             </h4>
           </Link>
-
-          <div className="flex items-center gap-x-2.5 gap-y-0.5 flex-wrap font-body-sm text-[11px] text-on-surface-variant mt-0.5 leading-tight">
-            {diners.length > 0 ? (
-              <span className="flex items-center gap-1.5">
-                <span className="flex items-center -space-x-1.5">
-                  {diners.slice(0, 5).map(({ user }) => (
-                    <Avatar
-                      key={user.id}
-                      user={user}
-                      size="xs"
-                      className="ring-2 ring-surface-container-lowest"
-                    />
-                  ))}
-                </span>
-                <span className="font-numeric-data font-medium">
-                  {mouths}
-                  {meal.maxDiners !== null && ` of ${meal.maxDiners}`} in
-                </span>
-              </span>
-            ) : (
-              // "0 in" reads like a bug. This is a meal waiting for someone.
-              <span className="italic">Nobody&apos;s in yet</span>
-            )}
-
-            <span className={clsx('flex items-center gap-1', !cook && 'italic opacity-70')}>
-              <Icon name="skillet" className="text-[13px]" />
-              {cook ? (
-                <>
-                  {cook.name}
-                  {coCook && ` & ${coCook.name}`}
-                  {coCook ? ' cook' : ' cooks'}
-                </>
-              ) : (
-                'No cook yet'
-              )}
-            </span>
-
-            {cleaner && (
-              <span
-                className="flex items-center gap-1 text-primary font-medium"
-                title={`${cleaner.name} is on wash-up duty`}
-              >
-                <Icon name="cleaning_services" className="text-[13px]" />
-                {cleaner.id === currentUser.id ? 'you clean' : `${cleaner.name} cleans`}
-              </span>
-            )}
-
-            {/* A pending hand-over is worth seeing from the week: it is the one
-                state where the person on the meal is not the person who will
-                end up cooking it. */}
-            {offeredTo && (
-              <span
-                className="flex items-center gap-1 text-on-secondary-fixed"
-                title={`${cook?.name ?? 'They'} asked ${offeredTo.name} to take it`}
-              >
-                <Icon name="pending" className="text-[13px]" />
-                {askedMe ? 'they asked you' : `asked ${offeredTo.name}`}
-              </span>
-            )}
-
-            {(mine?.guests ?? 0) > 0 && (
-              <span className="flex items-center gap-1">
-                <Icon name="person_add" className="text-[13px]" />
-                you +{mine?.guests}
-              </span>
-            )}
-
-            {/* Read-only for everybody but the owner, so a cap is never a
-                mystery — you can see the number and whose call it was. */}
-            {meal.maxDiners !== null && !isOwner && (
-              <span
-                className="flex items-center gap-1 text-on-secondary-fixed"
-                title={
-                  ownerName
-                    ? `${ownerName} is cooking for ${meal.maxDiners}`
-                    : `Cooked for ${meal.maxDiners}`
-                }
-              >
-                <Icon name="lock" className="text-[13px]" />
-                Cooking for {meal.maxDiners}
-              </span>
-            )}
-          </div>
         </div>
+      </div>
 
-        {recipe && (
-          <DietaryWarning
-            recipe={recipe}
-            currentUser={currentUser}
-          />
-        )}
+      {/* Dietary warning if applicable */}
+      {recipe && (
+        <DietaryWarning
+          recipe={recipe}
+          currentUser={currentUser}
+        />
+      )}
+
+      {/* Bottom section: Metadata (who's in, cook, cleaner) + Action buttons */}
+      <div className="flex items-center justify-between gap-2 pt-1 border-t border-surface-container-highest/40">
+        <div className="flex items-center gap-x-2.5 gap-y-1 flex-wrap font-body-sm text-[11.5px] text-on-surface-variant leading-tight min-w-0">
+          {diners.length > 0 ? (
+            <span className="flex items-center gap-1.5 shrink-0">
+              <span className="flex items-center -space-x-1.5">
+                {diners.slice(0, 5).map(({ user }) => (
+                  <Avatar
+                    key={user.id}
+                    user={user}
+                    size="xs"
+                    className="ring-2 ring-surface-container-lowest"
+                  />
+                ))}
+              </span>
+              <span className="font-numeric-data font-medium">
+                {mouths}
+                {meal.maxDiners !== null && ` of ${meal.maxDiners}`} in
+              </span>
+            </span>
+          ) : (
+            // "0 in" reads like a bug. This is a meal waiting for someone.
+            <span className="italic shrink-0">Nobody&apos;s in yet</span>
+          )}
+
+          <span className={clsx('flex items-center gap-1 shrink-0', !cook && 'italic opacity-70')}>
+            <Icon name="skillet" className="text-[13px]" />
+            {cook ? (
+              <>
+                {cook.name}
+                {coCook && ` & ${coCook.name}`}
+                {coCook ? ' cook' : ' cooks'}
+              </>
+            ) : (
+              'No cook yet'
+            )}
+          </span>
+
+          {cleaner && (
+            <span
+              className="flex items-center gap-1 text-primary font-medium shrink-0"
+              title={`${cleaner.name} is on wash-up duty`}
+            >
+              <Icon name="cleaning_services" className="text-[13px]" />
+              {cleaner.id === currentUser.id ? 'you clean' : `${cleaner.name} cleans`}
+            </span>
+          )}
+
+          {/* A pending hand-over is worth seeing from the week: it is the one
+              state where the person on the meal is not the person who will
+              end up cooking it. */}
+          {offeredTo && (
+            <span
+              className="flex items-center gap-1 text-on-secondary-fixed shrink-0"
+              title={`${cook?.name ?? 'They'} asked ${offeredTo.name} to take it`}
+            >
+              <Icon name="pending" className="text-[13px]" />
+              {askedMe ? 'they asked you' : `asked ${offeredTo.name}`}
+            </span>
+          )}
+
+          {(mine?.guests ?? 0) > 0 && (
+            <span className="flex items-center gap-1 shrink-0">
+              <Icon name="person_add" className="text-[13px]" />
+              you +{mine?.guests}
+            </span>
+          )}
+
+          {/* Read-only for everybody but the owner, so a cap is never a
+              mystery — you can see the number and whose call it was. */}
+          {meal.maxDiners !== null && !isOwner && (
+            <span
+              className="flex items-center gap-1 text-on-secondary-fixed shrink-0"
+              title={
+                ownerName
+                  ? `${ownerName} is cooking for ${meal.maxDiners}`
+                  : `Cooked for ${meal.maxDiners}`
+              }
+            >
+              <Icon name="lock" className="text-[13px]" />
+              Cooking for {meal.maxDiners}
+            </span>
+          )}
+        </div>
 
         {!locked && (
           <div className="flex items-center gap-xs shrink-0 ml-auto">
@@ -425,7 +430,7 @@ export function WeekPlan({
             >
             <header
               className={clsx(
-                'flex items-center justify-between gap-sm px-md py-sm border-b rounded-t-xl',
+                'flex items-center justify-between gap-sm px-3 md:px-md py-2 md:py-sm border-b rounded-t-xl',
                 isToday
                   ? 'bg-primary-fixed border-primary/20'
                   : cutoffPassed && !locked
@@ -433,10 +438,10 @@ export function WeekPlan({
                     : 'bg-surface-container-low/60 border-surface-container-highest'
               )}
             >
-              <div className="flex items-baseline gap-sm min-w-0">
+              <div className="flex items-baseline gap-1.5 sm:gap-sm min-w-0 flex-wrap">
                 <h3
                   className={clsx(
-                    'font-title-md text-title-md',
+                    'font-title-md text-[15px] sm:text-title-md',
                     isToday
                       ? 'text-on-primary-fixed'
                       : isPast || (cutoffPassed && !locked)
@@ -461,7 +466,7 @@ export function WeekPlan({
               {/* One meal the whole table is on is the outcome the app exists
                   to produce, so it gets said out loud. */}
               {shared && (
-                <Badge tone="primary" className="shrink-0 max-w-[50%] truncate">
+                <Badge tone="primary" className="shrink-0">
                   ALL IN
                 </Badge>
               )}

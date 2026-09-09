@@ -109,21 +109,21 @@ export default async function PlanPage({
       {week === 'this' && <ReopenPlanningBanner status={thisWeek.status} />}
 
       {week === 'this' && plan.sharedSavings > 0 && (
-        <div className="flex items-center justify-between gap-md px-lg py-md rounded-2xl bg-gradient-to-r from-primary via-primary-container to-primary text-on-primary shadow-md border border-primary-fixed/30 interactive-card">
-          <div className="flex items-center gap-sm">
-            <div className="p-1 rounded-xl bg-on-primary/10 flex items-center justify-center shrink-0">
+        <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 sm:px-5 sm:py-3.5 rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary via-primary-container to-primary text-on-primary shadow-md border border-primary-fixed/30 interactive-card">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="p-1 rounded-lg sm:rounded-xl bg-on-primary/10 flex items-center justify-center shrink-0">
               <Stocky mood="smug" size="sm" />
             </div>
-            <div className="flex flex-col">
-              <span className="font-label-caps text-[11px] uppercase tracking-widest opacity-90 font-semibold">
+            <div className="flex flex-col min-w-0">
+              <span className="font-label-caps text-[10px] sm:text-[11px] uppercase tracking-wider opacity-90 font-semibold leading-tight">
                 Overlap Optimiser Active
               </span>
-              <span className="font-title-md text-body-lg font-bold">
+              <span className="font-title-md text-[13.5px] sm:text-body-lg font-bold leading-tight">
                 House Shared Savings
               </span>
             </div>
           </div>
-          <span className="font-numeric-data text-headline-lg-mobile font-bold text-secondary">
+          <span className="font-numeric-data text-title-lg sm:text-headline-lg-mobile font-bold text-secondary shrink-0">
             {formatPence(plan.sharedSavings)}
           </span>
         </div>

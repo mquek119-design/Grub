@@ -175,21 +175,21 @@ export function OverlapHints({
               {overlap.suggestions.map((suggestion) => (
                 <li
                   key={suggestion.recipeId}
-                  className="flex items-center justify-between gap-sm px-md py-sm rounded-lg bg-surface-container-lowest border border-surface-container-highest hover:border-secondary-container transition-colors"
+                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-sm px-3 py-2.5 sm:px-md sm:py-sm rounded-lg bg-surface-container-lowest border border-surface-container-highest hover:border-secondary-container transition-colors"
                 >
                   <Link
                     href={`/recipes/${suggestion.recipeId}?day=${overlap.day}&mealType=${overlap.mealType}&week=${week}`}
                     className="min-w-0 flex-1 hover:opacity-90 transition-opacity"
                   >
-                    <span className="font-body-lg text-body-lg font-semibold block truncate">
+                    <span className="font-body-md sm:font-body-lg font-semibold block line-clamp-2 leading-snug">
                       {suggestion.title}
                     </span>
-                    <span className="font-body-sm text-[12px] text-on-surface-variant">
+                    <span className="font-body-sm text-[11.5px] sm:text-[12px] text-on-surface-variant">
                       Shares {suggestion.shares.join(', ')}
                     </span>
                   </Link>
 
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex items-center justify-end gap-2 shrink-0 self-end sm:self-auto pt-1 sm:pt-0">
                     {myMeal && otherCookId && (
                       myMeal.proposalCreatedBy === currentUserId &&
                       myMeal.proposalToUserId === otherCookId &&

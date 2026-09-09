@@ -58,7 +58,7 @@ export function WeekSwitcher({
     <div
       role="tablist"
       aria-label="Which week"
-      className="grid grid-cols-2 gap-1.5 p-1.5 rounded-2xl bg-surface-container-low border border-surface-container-highest shadow-xs"
+      className="grid grid-cols-2 gap-1.5 p-1 sm:p-1.5 rounded-2xl bg-surface-container-low border border-surface-container-highest shadow-xs"
     >
       {options.map((option) => {
         const active = option.key === week;
@@ -69,33 +69,43 @@ export function WeekSwitcher({
             role="tab"
             aria-selected={active}
             className={clsx(
-              'flex flex-col gap-0.5 px-md py-sm rounded-xl transition-all duration-200 btn-tactile',
+              'flex flex-col gap-1 px-2.5 py-2 sm:px-md sm:py-sm rounded-xl transition-all duration-200 btn-tactile',
               'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
               active
                 ? 'bg-surface-container-lowest shadow-ambient-card border border-primary/25 font-semibold'
                 : 'hover:bg-surface-container/70 opacity-75 hover:opacity-100'
             )}
           >
-            <span className="flex items-center gap-xs min-w-0">
+            <span className="flex items-center gap-1.5 min-w-0">
               <Icon
                 name={option.icon}
                 className={clsx(
-                  'text-[17px] shrink-0',
+                  'text-[16px] sm:text-[17px] shrink-0',
                   active ? 'text-primary' : 'text-on-surface-variant'
                 )}
               />
               <span
                 className={clsx(
-                  'font-title-md text-title-md truncate',
+                  'font-title-md text-[13.5px] sm:text-title-md leading-tight',
                   active ? 'text-on-surface font-bold' : 'text-on-surface-variant'
                 )}
               >
                 {option.label}
               </span>
             </span>
-            <span className="font-numeric-data text-[11px] text-on-surface-variant truncate">
-              {option.range} · {option.note}
-            </span>
+            <div className="flex flex-col gap-0.5 text-left min-w-0 font-numeric-data">
+              <span className="text-[11px] sm:text-[12px] text-on-surface/90 font-medium leading-tight">
+                {option.range}
+              </span>
+              <span
+                className={clsx(
+                  'text-[10px] sm:text-[11px] font-medium leading-tight',
+                  active ? 'text-primary font-semibold' : 'text-on-surface-variant/80'
+                )}
+              >
+                {option.note}
+              </span>
+            </div>
           </Link>
         );
       })}

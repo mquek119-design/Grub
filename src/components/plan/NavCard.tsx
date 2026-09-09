@@ -46,8 +46,8 @@ export function NavCard({
       </span>
 
       <span className="min-w-0 flex-1">
-        <span className="block font-title-md text-title-md text-on-surface truncate">{title}</span>
-        <span className="block font-body-sm text-body-sm text-on-surface-variant truncate">
+        <span className="block font-title-md text-title-md text-on-surface">{title}</span>
+        <span className="block font-body-sm text-body-sm text-on-surface-variant line-clamp-2 leading-snug">
           {detail}
         </span>
       </span>

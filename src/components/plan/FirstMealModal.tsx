@@ -159,7 +159,7 @@ function RecipeCard({ recipe, isSelected, onSelect, style }: RecipeCardProps) {
 
         {/* Content */}
         <div className="flex-1 text-left min-w-0">
-          <h3 className="font-semibold text-on-surface text-sm truncate">{recipe.title}</h3>
+          <h3 className="font-semibold text-on-surface text-sm line-clamp-2 leading-snug">{recipe.title}</h3>
           <div className="flex items-center gap-xs text-on-surface-variant text-xs mt-xs">
             <Icon name="schedule" className="text-sm" />
             <span>{recipe.cookTimeMins} mins</span>
