@@ -40,6 +40,11 @@ Everything derived is derived for real:
 - `PayPanel` shows the collector's own payment fields (bank, sort code, account number, link, note), each a copyable row, or says they haven't set any
 - A basket line with `unit_price === 0` renders as "No price" and is excluded from the total. Nothing in a supermarket is free, so a zero means "could not be priced" — see "Pack data" below
 
+### The voice
+
+All user-facing copy, notifications, buttons, empty states, and mascot dialogue adhere strictly to `VOICE.md`.
+Grub is built for UK student households: dry, plain, British English with 0% corporate fluff and zero exclamation marks. Money screens are 100% factual arithmetic. Stocky the mascot gives actionable culinary overlaps with zero guesswork. See `VOICE.md` for the full constitution, 70/30 register rules, and situational playbooks.
+
 ## Connecting Supabase
 
 1. Create a project at supabase.com.
