@@ -4,7 +4,16 @@ import { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Icon } from '@/components/media/Icon';
 
-const DEFAULT_STAPLES = ['Milk', 'Olive Oil', 'Eggs', 'Butter', 'Bread', 'Salt & Pepper'];
+const HOUSEHOLD_STAPLES = [
+  'Toilet Paper',
+  'Kitchen Towels',
+  'Aluminium Foil',
+  'Bin Bags',
+  'Washing Up Liquid',
+  'Sponges',
+  'Dishwasher Tablets',
+  'Hand Soap',
+];
 
 export function RunningLowStapleCard() {
   const [flagged, setFlagged] = useState<Set<string>>(new Set());
@@ -22,22 +31,22 @@ export function RunningLowStapleCard() {
     <Card className="flex flex-col gap-sm border border-secondary/30 bg-secondary-container/10">
       <div className="flex items-center justify-between gap-sm">
         <div className="flex items-center gap-xs">
-          <Icon name="report_problem" className="text-secondary text-lg" />
+          <Icon name="inventory_2" className="text-secondary text-lg" />
           <h3 className="font-title-md text-title-md font-bold text-on-surface">
-            Quick Flag: Running Low in Kitchen?
+            Quick Flag: Running Low in the House?
           </h3>
         </div>
         <span className="font-label-caps text-[10px] uppercase text-secondary font-bold tracking-wider">
-          Staple Alert
+          {flagged.size > 0 ? `${flagged.size} Flagged` : 'House Essentials'}
         </span>
       </div>
 
       <p className="font-body-sm text-body-sm text-on-surface-variant">
-        Tap common house staples below to flag them as running low so they get added to the next shop.
+        Tap shared household items (kitchen towels, foil, toilet paper) running low so they get added to the next shop.
       </p>
 
       <div className="flex flex-wrap gap-xs mt-xs">
-        {DEFAULT_STAPLES.map((item) => {
+        {HOUSEHOLD_STAPLES.map((item) => {
           const isLow = flagged.has(item);
           return (
             <button
@@ -46,7 +55,7 @@ export function RunningLowStapleCard() {
               onClick={() => toggleStaple(item)}
               className={`inline-flex items-center gap-xs px-md py-xs rounded-full border text-xs font-semibold transition-all ${
                 isLow
-                  ? 'border-secondary bg-secondary text-on-secondary shadow-sm'
+                  ? 'border-secondary bg-secondary text-on-secondary shadow-sm font-bold'
                   : 'border-outline-variant bg-surface text-on-surface-variant hover:bg-surface-container'
               }`}
             >
