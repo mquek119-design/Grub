@@ -88,6 +88,7 @@ export function TopAppBar({ currentUser, basketNeedsAttention = false }: TopAppB
             user={currentUser}
             size="sm"
             ring={pathname.startsWith('/account') ? 'secondary' : 'none'}
+            tooltipPlacement="bottom"
           />
         </Link>
       </div>

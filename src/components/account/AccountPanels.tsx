@@ -111,7 +111,7 @@ export function ProfileInfoPanel({
             </span>
             <span className="font-body-sm text-xs text-on-surface-variant">
               {selectedAvatar
-                ? `Using ${AVATAR_OPTIONS.find((o) => o.id === selectedAvatar)?.name} character avatar`
+                ? `Using ${AVATAR_OPTIONS.find((o) => o.id === selectedAvatar)?.name} character avatar · Initial tag '${myInitial}' shown for flatmates`
                 : `Using ${selectedAccent} color initials (${myInitial})`}
             </span>
             {selectedAvatar && (
