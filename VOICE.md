@@ -1,8 +1,8 @@
-# Grub — Voice & Tone Guide
+# Grub — Voice & Tone Guide: The UK Student Constitution
 
-This is the definitive reference for how Grub talks across every surface — buttons, notifications, banners, empty states, error messages, onboarding flows, and copyable group-chat nudges. 
+This is the definitive reference for how Grub speaks across every screen, button, notification, banner, empty state, and group-chat nudge.
 
-Grub is built for UK university shared houses. Its tone is grounded in the daily reality of 3–5 students living together, splitting bills, sharing shelves, and trying not to spend £14 at Tesco Express in the rain.
+Grub is built for UK university shared houses. Its tone is grounded in the lived reality of 3–5 students sharing a damp flat in Manchester, Leeds, Bristol, Nottingham, Birmingham, Newcastle, or London — splitting bills, negotiating fridge shelf borders, and trying not to spend £14 at Tesco Express in the rain.
 
 ---
 
@@ -11,113 +11,118 @@ Grub is built for UK university shared houses. Its tone is grounded in the daily
 Grub is **the organised housemate after two drinks**.
 
 - **Deadpan, sharp, and unmistakably British.** Faintly amused by domestic chaos, but ruthlessly practical about sorting it out.
-- **Speaks the true thing once and moves on.** Not performing for the group chat, not trying to be a lifestyle brand, not congratulating you for boiling pasta.
-- **Self-aware about being a grocery app.** Nobody wakes up thrilled to plan a weekly shop on a Sunday evening. We do it so everyone gets fed for £20 a week and nobody gets into an argument over £1.40 for butter.
-- **Acknowledge the awkward.** Chasing a housemate for an unpaid share, admitting you forgot to cook, or noticing someone borrowed your oat milk is inherently awkward. Grub recognises the social friction without getting preachy.
+- **Speaks the true thing once and moves on.** Not performing for the group chat, not trying to be a wellness brand, and never congratulating you for boiling water.
+- **Self-aware about being a grocery app.** Nobody dreams of meal planning on a Sunday evening. We do it so four people get fed decent scran for £20 a week and nobody gets into a passive-aggressive war over £1.40 for butter.
+- **Understands the social friction.** Chasing someone for a fiver, admitting you forgot to cook, or noticing someone's had the last of the milk is awkward. Grub acknowledges the awkwardness with dry wit instead of corporate politeness.
 
 ---
 
-## 2. Meet Stocky: The Mascot & Culinary Intelligence
+## 2. The Anti-Cringe Manifesto: UK New Gen vs Corporate "Gen Z"
 
-**Stocky** is Grub's resident brain — the dry, tactical stock cube who spots ingredient overlaps, flags own-brand bargains, and saves the house money before the order is placed.
+There is a massive divide between **how UK students actually communicate** and **how brands think Gen Z communicates**.
 
-### Stocky's Rules
-1. **Zero guesswork.** Stocky only speaks when the numbers or ingredients back it up. No vague "Save money by eating well" fluff.
-2. **Tactical culinary ally.** Stocky doesn't lecture on nutrition or carbon footprints. Stocky says: *"You're both cooking with Greek yoghurt on Wednesday. Buy the 500g tub together, split 50/50, save £1.40."*
-3. **Short and punchy.** Stocky delivers the insight in one crisp sentence, shows the math, and gets out of the way.
+### The Difference
+| Try-Hard Brand Slop (CRINGE — BANNED) | Authentic UK Student Tone (GRUB VOICE) |
+|---|---|
+| *"Hey besties! No cap, our algorithm has mad rizz! Let's get this bread fr fr!"* | *"Four of you bought onions this week. There are currently twelve onions in this flat."* |
+| *"Adulting is hard! Slay your weekly shop goals with this hack!"* | *"Stop buying four bags of pasta. Meal plan together, shop once, split fair."* |
+| *"Oopsie! You have an outstanding balance to settle!"* | *"You owe Sarah £8.50 from Thursday's shop. Pay up before she stops buying milk."* |
+| *"Yay, great job! You cooked a meal!"* | *"Done. Screen off."* |
+| *"It's giving budget-friendly vibes!"* | *"Swapped Tesco Finest for Stockwell. Saved £4.28. Literally no one noticed."* |
+
+### Why We Never Use Forced Internet Slang
+- **Slang ages in 20 minutes.** If a word was trending on TikTok three weeks ago, putting it in app copy makes Grub look like a 48-year-old marketing director trying to blend in at fresher's week.
+- **British humour is understated, dry, and observational.** It relies on shared domestic absurdities (unwashed baking trays, people eating dry toast for dinner, dodging eye contact when you owe someone money), not buzzword stacking.
+- **Zero exclamation marks. Ever.** Enthusiasm reads as fake almost immediately. Let the cadence and word choice carry the personality.
 
 ---
 
-## 3. The 70/30 Split
+## 3. Meet Stocky: The Mascot & Culinary Intelligence
+
+**Stocky** is Grub's resident brain — the dry, savvy stock cube who spots ingredient overlaps, flags own-brand bargains, and saves the house money before the order goes in.
+
+### Stocky's Personality
+- **Culinary street-smart.** Stocky knows you only have one decent frying pan and a blunt knife. He doesn't recommend recipes requiring fresh tarragon or a food processor.
+- **Zero guesswork.** Stocky only speaks when the numbers or ingredients back it up. No vague lifestyle tips.
+- **Practical overlap ally:** *"You're both cooking with Greek yoghurt on Wednesday. Buy the 500g tub together, split 50/50, save £1.40."*
+- **Tone:** Smart, compact, smug when he finds a saving, deadpan when someone overspends.
+
+---
+
+## 4. The 70/30 Register Split
 
 Grub operates on two distinct registers:
 
-### 70% — The Dry Track (Default)
-Applied across roughly seven screens out of ten, and **100% of money screens without exception**.
+### 70% — The Dry Track (Default Utility & Money)
+Applied across seven screens out of ten, and **100% of money screens without exception**.
 - Plain, direct, factual, British English.
-- Numbers, names, and concrete items carry the weight.
-- No comedy, no jokes, no personality flourishes that could be mistaken for a figure or an instruction.
-- The person reading this is standing in a noisy kitchen, speed-reading at 11pm, or checking their banking app.
+- Numbers, names, and concrete items carry all the weight.
+- No jokes, no puns, no decorative fluff near financial figures or checkout totals.
+- The user is standing in an Aldi or Tesco aisle, speed-reading at 11pm, or checking their Monzo balance. Make it instant.
 
-### 30% — The Loud Track (Seasoning)
+### 30% — The Loud Track (Seasoning & Social Dynamics)
 Allowed **only** on a narrow, named set of surfaces:
-- **Empty states** (nothing on screen competes for attention).
-- **Onboarding** (establishes the house culture once at the beginning).
-- **Milestones & Streaks** (rare, earned moments).
+- **Empty states** (nothing else competes for attention).
+- **Onboarding** (sets the flat culture once at the start).
+- **Milestones & Streaks** (rare, earned house wins).
 - **Group chat copyable nudges** (deliberately written for WhatsApp / iMessage dynamics).
 
 ---
 
-## 4. The Golden Laws
+## 5. The House Dynamic: The Cast of Flat 4B
 
-### Law 1: Brain rot is seasoning, not the dish
-One subtle cultural nod per screen, maximum. Never stack slang. If a line does personality without carrying real information (what happened, what it costs, what to do next), **cut it**. Voice is the seasoning on clear data — it never replaces the data.
+Grub's tone is written for the distinct personalities found in every UK student house:
 
-### Law 2: Zero exclamation marks. Ever.
-Energy comes from word choice, rhythm, and dry cadence — never punctuation. Exclamation marks read as false corporate cheer or manic enthusiasm. A full stop or no punctuation at all.
+1. **The Ghoster:** Never opens the group chat or the app until the food arrives. Needs a direct, unignorable nudge before the cutoff.
+2. **The Cereal Dinner Housemate:** Survives on Weetabix and toast unless someone drags them into a shared chilli or curry.
+3. **The Borrowing Optimist:** Thinks butter, olive oil, and eggs regenerate naturally in the cupboard.
+4. **The Over-Buyer:** Buys a fourth bag of penne because they couldn't be bothered to check the shelf.
+5. **The Collector:** The brave soul holding the Tesco account and slot, stressed out that someone won't transfer their share.
 
-### Law 3: Absolute clarity on money
-Never decorate balances, splits, payments, or checkout totals with jokes or slang. A £31.40 debt is not "lowkey cooked" or "a bit cheeky" — it is £31.40 owed to Sarah for Thursday's delivery.
-
-### Law 4: No defensive hedging
-Never apologise for how the app works or soften bad news. No *"Nobody has to change anything..."*, no *"Unfortunately your slot expired..."*, no *"We hope you enjoy..."*. State the reality plainly.
-
-### Law 5: British vocabulary only
-Grub is built for UK student houses. It sounds like someone from Manchester, Bristol, Leeds, or London talking in the kitchen — never an American tech company.
+Grub speaks to all five without sounding like their mum or their landlord.
 
 ---
 
-## 5. Lexicon & Style Guide
+## 6. Lexicon & Vocabulary Guide
 
-### Approved British Terms
-| Use This | Not That | Reason |
-|---|---|---|
-| **Shop** | Grocery run / groceries | Natural UK terminology |
-| **Basket** | Cart | Supermarket standard |
-| **Tesco Express in the rain** | Going to the store | The universal UK student tax |
-| **Cupboard / Fridge** | Pantry / icebox | Realistic flat vernacular |
-| **Sorted** | Completed / resolved | Natural, concise |
-| **Wing it** | Go without a plan | Recognisable student default |
-| **Quid / pence / p** | Bucks / cents | UK currency |
-| **Own-brand** | Generic / store-brand | UK grocery standard |
-| **Housemate / Flatmate** | Roommate | In the UK, roommates share a bedroom |
-| **Bank transfer / Monzo** | Venmo / CashApp | Actual UK payment methods |
-| **The lot** | Everything | Punchy, conversational |
+### Approved UK Student Terms
+| Term | Context & Meaning |
+|---|---|
+| **Shop** | The grocery run / order (*"This week's shop"*, *"before the shop locks"*) |
+| **Basket** | Supermarket basket / cart |
+| **Scran** | Good, satisfying food (*"Decent scran for under £2"* — used sparingly) |
+| **Sorted** | Resolved / complete (*"One house. One shop. Sorted."*) |
+| **We move** | Getting on with it after an inconvenience (*"Mozzarella was out of stock. Swapped for cheddar. We move."*) |
+| **Tesco Express in the rain** | The universal £14 tax on poor planning |
+| **The big Tesco** | The destination where real money is saved |
+| **Own-brand / Stockwell** | Supermarket value tier (*"Stockwell over Finest"*) |
+| **Monzo / Bank transfer** | How students actually settle up (*"Monzo link"*, *"Bank transfer"*) |
+| **Quid / fiver / tenner / p** | Natural UK currency terms |
+| **Cupboard / Fridge** | Not "pantry" or "icebox" |
+| **Clock's ticking** | Urgency indicator on leftovers or cutoff |
+| **Working overtime** | When one ingredient covers 4 meals (*"That tin of tomatoes is working overtime"*) |
+| **Wing it** | The default student strategy that Grub replaces |
+| **The lot** | Everything (*"Deletes the lot"*) |
+| **Your move** | Handing over agency (*"Basket's full. Jordan — your move."*) |
 
 ### Banned Words & Anti-Patterns
-- **Corporate padding:** *"Please", "Successfully", "We apologize for the inconvenience", "Great choice!", "Awesome!"*
-- **Try-hard corporate slang:** Stacking TikTok buzzwords (*"skibidi", "gyatt", "rizz", "no cap", "bestie"* on repeat). If it sounds like a 45-year-old brand manager trying to sound 19, delete it immediately.
-- **Vague advice:** *"Consider choosing budget-friendly options"* (Say: *"Swap Tesco Finest for Stockwell — saves £4.28"*).
-- **Passive voice:** *"Payment has been received"* (Say: *"Marked as paid"*).
-- **Scolding & moralising:** Never lecture on food waste or spending habits. Let social visibility do the heavy lifting.
-
----
-
-## 6. Where Each Register Applies
-
-| Surface / Screen | Register | Rule & Rationale |
-|---|---|---|
-| **Money / Split / Payments** | **Dry only (Strict)** | Numbers must be unquestionable. Exact arithmetic, exact names, exact pennies. |
-| **Basket / Tesco Checkout** | **Dry** | Functional order management. One dry observation permitted on own-brand swaps. |
-| **Cook Mode / Recipe Steps** | **Dry & Hands-Free** | User has raw chicken or garlic on their hands. Large type, zero friction, clear steps. |
-| **Settings / Account** | **Neutral & Plain** | Pure administrative utility. Not a social conversation. |
-| **Errors & Failures** | **Dry & Direct** | Acknowledge what broke without grovelling, state the fix, provide the CTA. |
-| **Empty States** | **Loud allowed** | High real estate, zero data risk. Great spot for wry student house observations. |
-| **Onboarding** | **Loud allowed** | Sets the tone once when founding the house or joining Flat 4B. |
-| **Milestones / Streaks** | **Loud allowed** | A genuine achievement (e.g. 4 weeks paid on time). Celebrate with dry wit. |
-| **Group Chat Nudges** | **Loud allowed** | Formatted to be pasted directly into WhatsApp; leverages peer humor to get action. |
+- **Corporate padding:** *"Please", "Successfully", "We apologize for any inconvenience", "Great choice!", "Awesome!"*
+- **US Slang / Americanisms:** *"Groceries"*, *"Cart"*, *"Store"*, *"Bucks"*, *"Venmo"*, *"Roommate"* (in the UK, roommates share a bedroom; students have *housemates* or *flatmates*).
+- **Try-hard TikTok meme soup:** *"Gyatt", "skibidi", "rizz", "no cap", "bestie", "slay", "era", "manifesting"*.
+- **Defensive hedging:** *"Nobody has to change anything...", "We think you might want to consider...", "Unfortunately..."*.
+- **Moralising / lecturing:** Don't lecture about nutrition, healthy eating, or food waste. State the pounds saved and let peer visibility work.
 
 ---
 
 ## 7. Situational Copy Playbook
 
 ### 1. Feed & Daily Dashboard
-- **Greeting / Header:** "This week in Flat 4B."
+- **Header:** "This week in Flat 4B."
 - **Cutoff approaching (Dry):** "Lock is in 3 hours. After that you eat whatever everyone else picked."
 - **Running low card (Dry):** "Running low in the house?"
 - **Running low subtitle (Dry):** "Tap shared items running low so they get added to the next shop."
 - **Next action card (Dry):** "Keep this week's meals handy, or start choosing next week's."
-- **Delivery countdown (Dry):** "Delivery booked for Thursday 6pm–8pm. Someone needs to be home."
+- **Delivery countdown (Dry):** "Delivery booked for Thursday 6pm–8pm. Someone needs to actually be in the flat."
 
 ### 2. Plan & Overlap Optimiser
 - **Empty plan (Loud):** "Nobody's picked anything. You're all just going to wing it again aren't you."
@@ -132,6 +137,7 @@ Grub is built for UK student houses. It sounds like someone from Manchester, Bri
 - **Scraped recipe (Stocky):** "Pulled the ingredients. £1.85 a portion. This works."
 - **Cook mode header (Dry):** "Cook Mode. Screen stays on."
 - **Cook mode subtitle (Dry):** "Hands covered in garlic. Step by step."
+- **Final step button (Dry):** "Done"
 - **Stocky badge (Stocky):** "Zero guesswork" / "Tesco match" / "Finest swap"
 
 ### 4. Pantry & Leftovers
@@ -158,20 +164,20 @@ Grub is built for UK student houses. It sounds like someone from Manchester, Bri
 - **All settled (Dry):** "Everyone's paid up. Clean slate."
 
 ### 7. Shareable Group Chat Nudges (WhatsApp / iMessage)
-*Deliberately crafted for copy-pasting when in-app notifications are ignored.*
+*Pre-baked lines formatted specifically to be dropped into the house group chat.*
 - **To the housemate ghosting the plan:**
   > "Shop locks in 3 hours and you haven't picked. Pick now or you're eating lentil soup all week: [link]"
 - **To the housemate who hasn't paid:**
   > "You owe Sarah £8.50 for Thursday's Tesco shop. Pay up before she stops buying milk: [link]"
 - **To the collector lagging on checkout:**
-  > "Basket is full and slots are disappearing. Jordan — your move: [link]"
+  > "Basket is full and delivery slots are disappearing. Jordan — your move: [link]"
 - **To the house on delivery day:**
   > "Tesco van arriving between 6pm and 8pm. Someone actually be in the flat."
 
 ### 8. Errors & System States
-- **Tesco session expired (Dry):** "Tesco logged you out. The collector needs to sign back in — takes about 30 seconds."
-- **Delivery slot taken (Dry):** "Thursday 6–8pm was taken while you were deciding. Next available is Friday 7–9pm."
-- **Out of stock (Dry):** "Mozzarella is out of stock. Swapped for the next cheapest option."
+- **Tesco session expired (Dry):** "Tesco logged you out. Classic. Collector needs to sign back in — 30 seconds tops."
+- **Delivery slot taken (Dry):** "Thursday 6–8pm got taken while you were deciding. Next available is Friday 7–9pm."
+- **Out of stock (Dry):** "Mozzarella is out of stock. Swapped for the next cheapest option. We move."
 - **Network error (Dry):** "Couldn't reach the server. Check your connection and try again."
 
 ### 9. Account & Destructive Actions
@@ -180,14 +186,14 @@ Grub is built for UK student houses. It sounds like someone from Manchester, Bri
 
 ---
 
-## 8. The Pre-Flight Copy Test
+## 8. The 7-Question Pre-Flight Copy Test
 
-Before merging or deploying any user-facing string, run this checklist:
+Before merging or deploying any user-facing copy, test it against these 7 questions:
 
-1. **Does it say something specific and true?** (A real pound figure, a real housemate name, a real ingredient, a real state.)
-2. **Can it be understood in one pass at 11pm on a cracked phone screen?** If someone has to read it twice to get it, rewrite it.
-3. **Is it a money screen?** If yes, **dry only**. Strip all jokes and slang.
-4. **Is it on the loud list?** If it's not an empty state, onboarding screen, milestone, or group-chat nudge, keep it dry.
-5. **Is there an exclamation mark?** If yes, delete it immediately.
-6. **Does it sound like a person or a brand?** If it sounds like a corporate brand trying to sound relatable, rewrite in deadpan plain English.
-7. **Is there already a joke on this screen?** Max one piece of personality per view.
+1. **Does it sound like a person or a brand?** If it sounds like a company trying to be friendly, rewrite in deadpan plain English.
+2. **Does it use try-hard TikTok slang?** If yes, delete it immediately. Real UK student wit is dry observation, not buzzword salad.
+3. **Does it say something specific and true?** (A real pound figure, a real name, a real ingredient, a real state.)
+4. **Can it be understood in one pass at 11pm on a cracked phone screen?** If someone has to re-read it to understand the joke, the joke has failed.
+5. **Is it a money screen?** If yes, **dry only**. Zero jokes near debts, splits, or bank details.
+6. **Is it on the loud list?** If it's not an empty state, onboarding screen, milestone, or group-chat nudge, keep it dry.
+7. **Is there an exclamation mark?** If yes, delete it. Full stop or nothing.

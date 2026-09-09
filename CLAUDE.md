@@ -43,7 +43,7 @@ Everything derived is derived for real:
 ### The voice
 
 All user-facing copy, notifications, buttons, empty states, and mascot dialogue adhere strictly to `VOICE.md`.
-Grub is built for UK student households: dry, plain, British English with 0% corporate fluff and zero exclamation marks. Money screens are 100% factual arithmetic. Stocky the mascot gives actionable culinary overlaps with zero guesswork. See `VOICE.md` for the full constitution, 70/30 register rules, and situational playbooks.
+Grub is built for UK student households: authentic new-gen UK flat dynamic without the cringe, dry deadpan British English with 0% corporate fluff and zero exclamation marks. Money screens are 100% factual arithmetic. Stocky the mascot gives actionable culinary overlaps with zero guesswork. See `VOICE.md` for the full constitution, 70/30 register rules, anti-cringe manifesto, and situational playbooks.
 
 ## Connecting Supabase
 
