@@ -5,6 +5,8 @@ import { WeekPlan } from '@/components/plan/WeekPlan';
 import { WeekSwitcher } from '@/components/plan/WeekSwitcher';
 import { ReopenPlanningBanner } from '@/components/plan/ReopenPlanningBanner';
 import { FirstMealModal } from '@/components/plan/FirstMealModal';
+import { CookOfferPrompt } from '@/components/plan/CookOfferPrompt';
+import { OverlapProposalPrompt } from '@/components/plan/OverlapProposalPrompt';
 import { Stocky } from '@/components/mascot/Stocky';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Notice } from '@/components/ui/Notice';
@@ -57,21 +59,28 @@ export default async function PlanPage({
   const thisWeekLocked = thisWeek.status === 'ordered' || thisWeek.status === 'delivered';
   const showKitchen = week === 'this' && thisWeekLocked;
 
+  const proposals = plan.meals.filter(
+    (m) => m.proposalToUserId === currentUser.id && m.proposalCreatedBy !== currentUser.id
+  );
+  const cookOffers = plan.meals.filter((m) => m.cookOfferTo === currentUser.id);
+
   const switcher = (
-    <WeekSwitcher
-      week={week}
-      thisWeekLocked={thisWeekLocked}
-      nextWeekMealCount={nextWeek?.meals.length ?? 0}
-    />
+    <div className="flex items-center justify-between gap-sm flex-wrap">
+      <WeekSwitcher
+        week={week}
+        thisWeekLocked={thisWeekLocked}
+        nextWeekMealCount={nextWeek?.meals.length ?? 0}
+      />
+    </div>
   );
 
   if (showKitchen) {
     return (
       <PageShell wide>
         <PageHeader
-          title="Your Week"
-          subtitle="Shop's in. This is what you're working with."
-          action={<PlanActionsMenu plan={thisWeek} />}
+          title="This Week's Kitchen"
+          subtitle="The shop is in. Here's what the house is eating and who's down to cook."
+          action={<PlanActionsMenu plan={plan} />}
         />
         <FirstRunTip tab="plan" />
         {switcher}
@@ -84,7 +93,7 @@ export default async function PlanPage({
   return (
     <PageShell wide>
       <PageHeader
-        title="Your Week"
+        title="Weekly Plan"
         subtitle={
           week === 'next'
             ? "Nothing here is bought yet. Get ahead while this week cooks itself."
@@ -141,6 +150,14 @@ export default async function PlanPage({
         <>
           {week === 'this' && plan.meals.length === 0 && (
             <FirstMealModal recipes={recipes} weekStartDate={plan.weekStartDate} />
+          )}
+          {cookOffers.length > 0 && <CookOfferPrompt offers={cookOffers} housemates={housemates} />}
+          {proposals.length > 0 && (
+            <OverlapProposalPrompt
+              proposals={proposals}
+              housemates={housemates}
+              recipes={plan.recipes}
+            />
           )}
           <WeekPlan plan={plan} housemates={housemates} currentUser={currentUser} week={week} />
           <OverlapHints

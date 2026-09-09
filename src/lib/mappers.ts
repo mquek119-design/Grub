@@ -144,6 +144,9 @@ export function toPlannedMeal(
     maxDiners: row.max_diners ?? null,
     coCookUserId: (row as unknown as { co_cook_user_id?: string | null }).co_cook_user_id ?? null,
     cleanerUserId: (row as unknown as { cleaner_user_id?: string | null }).cleaner_user_id ?? null,
+    proposalToUserId: (row as unknown as { proposal_to_user_id?: string | null }).proposal_to_user_id ?? null,
+    proposalRecipeId: (row as unknown as { proposal_recipe_id?: string | null }).proposal_recipe_id ?? null,
+    proposalCreatedBy: (row as unknown as { proposal_created_by?: string | null }).proposal_created_by ?? null,
     // `?? 'planned'` so the app still works against a database where 0013 has
     // not been applied — the column is simply absent, not null.
     status: row.status ?? 'planned',

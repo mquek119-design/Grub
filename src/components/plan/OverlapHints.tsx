@@ -5,10 +5,72 @@ import Link from 'next/link';
 import { Icon } from '@/components/media/Icon';
 import { Stocky } from '@/components/mascot/Stocky';
 import { formatPence } from '@/lib/money';
-import { switchMeal, type PlanActionState } from '@/app/plan/actions';
+import { switchMeal, proposeOverlapMerge, cancelOverlapProposal, type PlanActionState } from '@/app/plan/actions';
 import type { PlanOverlap, PlannedMeal } from '@/lib/types';
 import type { WeekChoice } from '@/lib/weeks';
 import { MEAL_TYPE_LABELS, WEEKDAY_LABELS } from '@/lib/types';
+
+function CancelProposalButton({ mealId }: { mealId: string }) {
+  const [state, formAction, isPending] = useActionState<PlanActionState, FormData>(
+    cancelOverlapProposal,
+    { status: 'idle', message: '' }
+  );
+
+  return (
+    <form action={formAction} className="inline-flex items-center">
+      <input type="hidden" name="mealId" value={mealId} />
+      <button
+        type="submit"
+        disabled={isPending}
+        className="px-2 py-0.5 text-[11px] font-semibold rounded text-on-surface-variant hover:text-error hover:bg-error/10 transition-colors"
+        title="Withdraw proposal"
+      >
+        {isPending ? 'Cancelling…' : 'Cancel'}
+      </button>
+      {state.status === 'error' && state.message && (
+        <span className="text-[11px] text-error font-medium">{state.message}</span>
+      )}
+    </form>
+  );
+}
+
+function ProposeShareButton({
+  myMealId,
+  targetMealId,
+  targetUserId,
+  targetRecipeId,
+}: {
+  myMealId: string;
+  targetMealId?: string;
+  targetUserId: string;
+  targetRecipeId: string;
+}) {
+  const [state, formAction, isPending] = useActionState<PlanActionState, FormData>(
+    proposeOverlapMerge,
+    { status: 'idle', message: '' }
+  );
+
+  return (
+    <form action={formAction} className="inline-flex items-center gap-1">
+      <input type="hidden" name="myMealId" value={myMealId} />
+      <input type="hidden" name="targetMealId" value={targetMealId ?? ''} />
+      <input type="hidden" name="targetUserId" value={targetUserId} />
+      <input type="hidden" name="targetRecipeId" value={targetRecipeId} />
+      <button
+        type="submit"
+        disabled={isPending}
+        className="px-2.5 py-1 text-xs font-semibold rounded-md bg-secondary text-on-secondary-container hover:opacity-90 disabled:opacity-50 transition-all flex items-center gap-1 shrink-0"
+        title="Propose sharing this recipe to pool ingredients (both parties must agree)"
+      >
+        <Icon name="handshake" className="text-[14px]" />
+        <span>{isPending ? 'Proposing…' : 'Propose to share'}</span>
+      </button>
+      {state.status === 'error' && state.message && (
+        <span className="text-[11px] text-error font-medium">{state.message}</span>
+      )}
+    </form>
+  );
+}
 
 function SwitchMealButton({
   oldMealId,
@@ -85,6 +147,14 @@ export function OverlapHints({
             )
           : undefined;
 
+        const otherMeal = planMeals.find(
+          (m) =>
+            m.day === overlap.day &&
+            m.mealType === overlap.mealType &&
+            m.id !== myMeal?.id
+        );
+        const otherCookId = otherMeal?.cookedByUserId ?? overlap.userIds.find((id) => id !== currentUserId);
+
         return (
           <div
             key={`${overlap.day}-${overlap.mealType}`}
@@ -120,7 +190,27 @@ export function OverlapHints({
                   </Link>
 
                   <div className="flex items-center gap-2 shrink-0">
-                    {myMeal && (
+                    {myMeal && otherCookId && (
+                      myMeal.proposalCreatedBy === currentUserId &&
+                      myMeal.proposalToUserId === otherCookId &&
+                      myMeal.proposalRecipeId === suggestion.recipeId ? (
+                        <div className="flex items-center gap-1.5 bg-secondary-container/40 border border-secondary/30 rounded-md px-2 py-0.5">
+                          <span className="text-[11px] font-semibold text-secondary flex items-center gap-1">
+                            <Icon name="schedule" className="text-[13px]" />
+                            <span>Proposed</span>
+                          </span>
+                          <CancelProposalButton mealId={myMeal.id} />
+                        </div>
+                      ) : (
+                        <ProposeShareButton
+                          myMealId={myMeal.id}
+                          targetMealId={otherMeal?.id}
+                          targetUserId={otherCookId}
+                          targetRecipeId={suggestion.recipeId}
+                        />
+                      )
+                    )}
+                    {myMeal && !otherCookId && (
                       <SwitchMealButton
                         oldMealId={myMeal.id}
                         newRecipeId={suggestion.recipeId}

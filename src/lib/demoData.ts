@@ -290,6 +290,85 @@ export const DEMO_RECIPES: DemoRecipe[] = [
       { name: 'Fresh basil', quantity: 1, unit: 'each', category: 'fresh' },
     ],
   },
+  {
+    title: 'Chili Con Carne',
+    cookTimeMins: 45,
+    difficulty: 'easy',
+    servings: 4,
+    tags: ['Mexican', 'Beef', 'Spicy'],
+    instructions: [
+      'Brown minced beef with diced onion and minced garlic in a hot pan.',
+      'Add chili powder and cumin, cooking for 1 minute.',
+      'Pour in chopped tomatoes and drained kidney beans, then simmer for 25 minutes.',
+      'Serve warm over fluffy white rice.',
+    ],
+    ingredients: [
+      { name: 'Minced beef', quantity: 500, unit: 'g', category: 'fresh' },
+      { name: 'Onion', quantity: 1, unit: 'each', category: 'fresh' },
+      { name: 'Garlic', quantity: 2, unit: 'each', category: 'fresh' },
+      { name: 'Chopped tomatoes', quantity: 800, unit: 'g', category: 'cupboard' },
+      { name: 'Kidney beans', quantity: 400, unit: 'g', category: 'cupboard' },
+      { name: 'Rice', quantity: 300, unit: 'g', category: 'cupboard' },
+    ],
+  },
+  {
+    title: 'Creamy Tomato & Basil Pasta',
+    cookTimeMins: 20,
+    difficulty: 'easy',
+    servings: 4,
+    tags: ['Western', 'Italian', 'Pasta'],
+    instructions: [
+      'Boil penne in salted water until al dente.',
+      'Simmer passata with garlic and torn fresh basil for 10 minutes.',
+      'Stir through mozzarella until melted and smooth.',
+      'Toss pasta into sauce and garnish with extra basil.',
+    ],
+    ingredients: [
+      { name: 'Penne pasta', quantity: 400, unit: 'g', category: 'cupboard' },
+      { name: 'Passata', quantity: 500, unit: 'g', category: 'cupboard' },
+      { name: 'Mozzarella cheese', quantity: 200, unit: 'g', category: 'fresh' },
+      { name: 'Garlic', quantity: 2, unit: 'each', category: 'fresh' },
+      { name: 'Fresh basil', quantity: 1, unit: 'each', category: 'fresh' },
+    ],
+  },
+  {
+    title: 'Chicken Fajitas',
+    cookTimeMins: 25,
+    difficulty: 'easy',
+    servings: 4,
+    tags: ['Mexican', 'Chicken', 'Quick'],
+    instructions: [
+      'Slice chicken and toss with fajita spices.',
+      'Sear chicken strips, sliced peppers, and sliced onions in a smoking hot pan.',
+      'Warm tortilla wraps and top with grated cheddar cheese.',
+    ],
+    ingredients: [
+      { name: 'Chicken breast', quantity: 600, unit: 'g', category: 'fresh' },
+      { name: 'Bell peppers', quantity: 2, unit: 'each', category: 'fresh' },
+      { name: 'Onion', quantity: 1, unit: 'each', category: 'fresh' },
+      { name: 'Tortilla wraps', quantity: 8, unit: 'each', category: 'cupboard' },
+      { name: 'Cheddar cheese', quantity: 150, unit: 'g', category: 'fresh' },
+    ],
+  },
+  {
+    title: 'Chicken Fried Rice',
+    cookTimeMins: 20,
+    difficulty: 'easy',
+    servings: 3,
+    tags: ['Asian', 'Rice', 'Chicken'],
+    instructions: [
+      'Stir fry diced chicken in hot oil until golden.',
+      'Scramble eggs quickly in the wok.',
+      'Toss in cooked rice and soy sauce, folding through sliced spring onions.',
+    ],
+    ingredients: [
+      { name: 'Chicken breast', quantity: 400, unit: 'g', category: 'fresh' },
+      { name: 'Rice', quantity: 300, unit: 'g', category: 'cupboard' },
+      { name: 'Eggs', quantity: 3, unit: 'each', category: 'fresh' },
+      { name: 'Soy sauce', quantity: 40, unit: 'ml', category: 'cupboard' },
+      { name: 'Spring onions', quantity: 4, unit: 'each', category: 'fresh' },
+    ],
+  },
 ];
 
 interface DemoMeal {
@@ -309,31 +388,36 @@ interface DemoMeal {
 }
 
 export const DEMO_SCHEDULE: DemoMeal[] = [
-  // --- Mon: three people, three different dinners, nothing in common. -------
-  { day: 'mon', mealType: 'dinner', recipe: 'Sushi Roll', diners: ['me'] },
-  { day: 'mon', mealType: 'dinner', recipe: 'Classic Beef Burger', diners: ['Alex'] },
+  // --- Mon: Minced beef + tomatoes + onions + garlic overlap (Chili vs Bolognese)
+  { day: 'mon', mealType: 'dinner', recipe: 'Chili Con Carne', diners: ['me'] },
+  { day: 'mon', mealType: 'dinner', recipe: 'Spaghetti Bolognese', diners: ['Alex'] },
   { day: 'mon', mealType: 'dinner', recipe: 'Mac and Cheese', diners: ['Sam'] },
 
-  // --- Tue: a solo breakfast and two solo dinners. The breakfast exists to
-  //     prove a different sitting is not a clash — it must not warn. ---------
+  // --- Tue: Italian Passata + Mozzarella + Basil overlap (Pizza vs Creamy Tomato Pasta)
   { day: 'tue', mealType: 'breakfast', recipe: 'Scrambled Eggs on Toast', diners: ['me'] },
   { day: 'tue', mealType: 'dinner', recipe: 'Pizza Margherita', diners: ['Alex'] },
-  { day: 'tue', mealType: 'dinner', recipe: 'Chicken Miso Ramen', diners: ['Priya'] },
+  { day: 'tue', mealType: 'dinner', recipe: 'Creamy Tomato & Basil Pasta', diners: ['Priya'] },
 
-  // --- Wed: three solo dinners, and the stir fry vs green curry pair shares
-  //     no ingredient at all — this is the day the conflict warning fires. ---
-  { day: 'wed', mealType: 'dinner', recipe: 'Beef stir fry noodles', diners: ['me'], maxDiners: 3 },
-  { day: 'wed', mealType: 'dinner', recipe: 'Thai Green Curry', diners: ['Sam'] },
-  { day: 'wed', mealType: 'dinner', recipe: 'Chicken Caesar Salad', diners: ['Alex'] },
+  // --- Wed: Cheddar cheese + Onions + Beef strips overlap (Fajitas vs Burgers vs Stir Fry)
+  { day: 'wed', mealType: 'dinner', recipe: 'Chicken Fajitas', diners: ['me'], maxDiners: 3 },
+  { day: 'wed', mealType: 'dinner', recipe: 'Classic Beef Burger', diners: ['Sam'] },
+  { day: 'wed', mealType: 'dinner', recipe: 'Beef stir fry noodles', diners: ['Alex'] },
 
-  // --- Thu and Fri: one shared meal each. -----------------------------------
+  // --- Thu: Chicken + Eggs + Spring Onions overlap (Fried Rice vs Miso Ramen)
   {
     day: 'thu',
     mealType: 'dinner',
-    recipe: 'Spaghetti Bolognese',
-    diners: ['Alex', 'me', 'Sam', 'Maya', 'Priya'],
-    cook: 'Alex',
-    cookOfferTo: 'me', // Alex is cooking, but offered to hand it over to 'me'!
+    recipe: 'Chicken Fried Rice',
+    diners: ['Priya', 'me'],
+    cook: 'Priya',
+    cookOfferTo: 'me',
+  },
+  {
+    day: 'thu',
+    mealType: 'dinner',
+    recipe: 'Chicken Miso Ramen',
+    diners: ['Maya', 'Sam'],
+    cook: 'Maya',
   },
   {
     day: 'fri',

@@ -199,6 +199,10 @@ export interface PlannedMeal {
   coCookUserId?: string | null;
   /** Optional housemate on wash-up duty. */
   cleanerUserId?: string | null;
+  /** Mutual agreement fields for overlap optimization and meal consolidation. */
+  proposalToUserId?: string | null;
+  proposalRecipeId?: string | null;
+  proposalCreatedBy?: string | null;
   status: MealStatus;
   participants: MealParticipant[];
 }

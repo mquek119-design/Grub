@@ -386,6 +386,217 @@ export async function switchMeal(
   return DONE;
 }
 
+/**
+ * Proposes consolidating two meals on an overlap sitting into a shared recipe.
+ * Creates a pending proposal that must be agreed upon by the second party before meals merge.
+ */
+export async function proposeOverlapMerge(
+  _prev: PlanActionState,
+  formData: FormData
+): Promise<PlanActionState> {
+  const me = await getCurrentUser();
+  if (!me.houseId) return fail('Join a house first.');
+
+  const myMealId = String(formData.get('myMealId') ?? '').trim();
+  const targetMealId = String(formData.get('targetMealId') ?? '').trim();
+  const targetUserId = String(formData.get('targetUserId') ?? '').trim();
+  const targetRecipeId = String(formData.get('targetRecipeId') ?? '').trim();
+
+  if (!myMealId) return fail('Missing your meal ID.');
+  if (!targetUserId) return fail('Pick a housemate to propose to.');
+  if (!targetRecipeId) return fail('Pick a recipe to propose.');
+  if (targetUserId === me.id) return fail('Cannot propose to yourself.');
+
+  const context = await getMealContext(myMealId);
+  if (!context || context.planStatus !== 'planning') {
+    return fail('Planning has closed for this week.');
+  }
+
+  const supabase = await createClient();
+
+  // Set proposal fields on the caller's meal
+  const updateSource = await supabase
+    .from('planned_meals')
+    .update({
+      proposal_to_user_id: targetUserId,
+      proposal_recipe_id: targetRecipeId,
+      proposal_created_by: me.id,
+    })
+    .eq('id', myMealId);
+
+  if (updateSource.error) return fail(updateSource.error.message);
+
+  // Also record on target meal if present so recipient queries find it directly
+  if (targetMealId) {
+    await supabase
+      .from('planned_meals')
+      .update({
+        proposal_to_user_id: targetUserId,
+        proposal_recipe_id: targetRecipeId,
+        proposal_created_by: me.id,
+      })
+      .eq('id', targetMealId);
+  }
+
+  revalidatePath('/plan');
+  revalidatePath('/');
+  return { status: 'success', message: 'Proposal sent! Waiting for your housemate to agree.' };
+}
+
+/**
+ * Responds to an overlap consolidation proposal.
+ * If accepted, merges both meals into the proposed shared recipe.
+ * If declined, clears the proposal and leaves meals untouched.
+ */
+export async function respondToOverlapProposal(
+  _prev: PlanActionState,
+  formData: FormData
+): Promise<PlanActionState> {
+  const me = await getCurrentUser();
+  if (!me.houseId) return fail('Join a house first.');
+
+  const mealId = String(formData.get('mealId') ?? '').trim();
+  const accept = String(formData.get('accept') ?? '') === 'true';
+
+  if (!mealId) return fail('Missing meal.');
+
+  const supabase = await createClient();
+  const mealRes = await supabase
+    .from('planned_meals')
+    .select('*, participants:meal_participants(*)')
+    .eq('id', mealId)
+    .single();
+
+  if (mealRes.error || !mealRes.data) return fail('Meal not found.');
+  const meal = mealRes.data;
+
+  if (meal.proposal_to_user_id !== me.id) {
+    return fail('That proposal is not yours to answer.');
+  }
+
+  const proposerId = meal.proposal_created_by;
+  const targetRecipeId = meal.proposal_recipe_id;
+
+  if (!accept) {
+    // Declined: clear proposal fields across both meals in the sitting
+    await supabase
+      .from('planned_meals')
+      .update({
+        proposal_to_user_id: null,
+        proposal_recipe_id: null,
+        proposal_created_by: null,
+      })
+      .eq('day', meal.day)
+      .eq('meal_type', meal.meal_type)
+      .eq('plan_id', meal.plan_id);
+
+    revalidatePath('/plan');
+    revalidatePath('/');
+    return { status: 'success', message: 'Kept separate.' };
+  }
+
+  if (!proposerId) return fail('Proposer information missing.');
+
+  // Accepted: Both parties agreed!
+  // Find proposer's meal on this sitting
+  const proposerMealRes = await supabase
+    .from('planned_meals')
+    .select('*')
+    .eq('plan_id', meal.plan_id)
+    .eq('day', meal.day)
+    .eq('meal_type', meal.meal_type)
+    .eq('proposal_created_by', proposerId)
+    .neq('id', meal.id)
+    .maybeSingle();
+
+  const proposerMeal = proposerMealRes.data;
+
+  // 1. Update this meal to the target recipe, shared = true, clear proposals
+  await supabase
+    .from('planned_meals')
+    .update({
+      recipe_id: targetRecipeId ?? meal.recipe_id,
+      is_shared: true,
+      proposal_to_user_id: null,
+      proposal_recipe_id: null,
+      proposal_created_by: null,
+    })
+    .eq('id', meal.id);
+
+  // 2. Move participants from proposer's meal into this meal
+  if (proposerMeal) {
+    const participantsRes = await supabase
+      .from('meal_participants')
+      .select('*')
+      .eq('planned_meal_id', proposerMeal.id);
+
+    const participantsToMove = participantsRes.data ?? [];
+    for (const p of participantsToMove) {
+      await supabase
+        .from('meal_participants')
+        .upsert({
+          planned_meal_id: meal.id,
+          user_id: p.user_id,
+          opted_out: false,
+          guests: p.guests ?? 0,
+          guests_covered: p.guests_covered ?? true,
+        });
+    }
+
+    // Delete proposer's now-merged meal
+    await supabase.from('planned_meals').delete().eq('id', proposerMeal.id);
+  }
+
+  revalidatePath('/plan');
+  revalidatePath('/');
+  revalidatePath('/basket');
+  return { status: 'success', message: 'Agreed! Both meals merged into one shared cook.' };
+}
+
+/**
+ * Withdraws/cancels an unanswered overlap consolidation proposal.
+ */
+export async function cancelOverlapProposal(
+  _prev: PlanActionState,
+  formData: FormData
+): Promise<PlanActionState> {
+  const me = await getCurrentUser();
+  if (!me.houseId) return fail('Join a house first.');
+
+  const mealId = String(formData.get('mealId') ?? '').trim();
+  if (!mealId) return fail('Missing meal.');
+
+  const supabase = await createClient();
+  const mealRes = await supabase
+    .from('planned_meals')
+    .select('*')
+    .eq('id', mealId)
+    .single();
+
+  if (mealRes.error || !mealRes.data) return fail('Meal not found.');
+  const meal = mealRes.data;
+
+  if (meal.proposal_created_by !== me.id) {
+    return fail('Only the person who proposed can cancel.');
+  }
+
+  // Clear proposal fields across meals for this sitting
+  await supabase
+    .from('planned_meals')
+    .update({
+      proposal_to_user_id: null,
+      proposal_recipe_id: null,
+      proposal_created_by: null,
+    })
+    .eq('day', meal.day)
+    .eq('meal_type', meal.meal_type)
+    .eq('plan_id', meal.plan_id);
+
+  revalidatePath('/plan');
+  revalidatePath('/');
+  return { status: 'success', message: 'Proposal withdrawn.' };
+}
+
 /** Saves the caller's dietary constraints onto their profile. */
 export async function saveConstraints(
   _prev: PlanActionState,

@@ -12,6 +12,12 @@ jest.mock('next/navigation', () => ({
   useSearchParams: jest.fn(),
 }))
 
+// Provide useActionState polyfill in Jest test environment
+const React = require('react');
+if (!React.useActionState) {
+  React.useActionState = (action, initialState) => [initialState, action, false];
+}
+
 // Suppress console errors in tests (optional)
 global.console = {
   ...console,

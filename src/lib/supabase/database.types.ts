@@ -159,6 +159,10 @@ type PlannedMealRow = {
   max_diners: number | null;
   /** Who put the meal on the plan. Owns the capacity setting. */
   created_by: string | null;
+  /** Mutual agreement fields for overlap optimization and meal consolidation. */
+  proposal_to_user_id?: string | null;
+  proposal_recipe_id?: string | null;
+  proposal_created_by?: string | null;
 }
 
 type MealParticipantRow = {
@@ -331,7 +335,7 @@ export type Database = {
       recipes: TableDef<RecipeRow, Insertable<RecipeRow, 'id' | 'created_at' | 'house_id' | 'created_by' | 'source_url' | 'image_url' | 'cook_time_mins' | 'difficulty' | 'servings' | 'cost_per_portion' | 'tags' | 'instructions' | 'pro_tip'>>;
       recipe_ingredients: TableDef<RecipeIngredientRow, RecipeIngredientRow>;
       weekly_plans: TableDef<WeeklyPlanRow, Insertable<WeeklyPlanRow, 'id' | 'created_at' | 'status' | 'shared_savings' | 'slot_id' | 'slot_method' | 'slot_starts_at' | 'slot_ends_at' | 'slot_charge'>>;
-      planned_meals: TableDef<PlannedMealRow, Insertable<PlannedMealRow, 'id' | 'meal_type' | 'is_shared' | 'cooked_by_user_id' | 'cook_offer_to' | 'co_cook_user_id' | 'cleaner_user_id' | 'status' | 'max_diners' | 'created_by'>>;
+      planned_meals: TableDef<PlannedMealRow, Insertable<PlannedMealRow, 'id' | 'meal_type' | 'is_shared' | 'cooked_by_user_id' | 'cook_offer_to' | 'co_cook_user_id' | 'cleaner_user_id' | 'status' | 'max_diners' | 'created_by' | 'proposal_to_user_id' | 'proposal_recipe_id' | 'proposal_created_by'>>;
       meal_participants: TableDef<MealParticipantRow, Insertable<MealParticipantRow, 'opted_out' | 'bailed' | 'guests' | 'guests_covered'>>;
       expenses: TableDef<ExpenseRow, Insertable<ExpenseRow, 'id' | 'created_at' | 'spent_on' | 'note'>>;
       expense_shares: TableDef<ExpenseShareRow, Insertable<ExpenseShareRow, 'settled'>>;

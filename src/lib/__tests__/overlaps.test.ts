@@ -155,4 +155,96 @@ describe('findOverlapGaps', () => {
     // Never £0.00!
     expect(overlaps[0].missedSaving).toBeGreaterThan(0);
   });
+
+  it('optimises meals sharing staple ingredients like cheddar, pasta, and chicken across diverse cuisines', () => {
+    const recipeMac: Recipe = {
+      id: 'recipe-mac',
+      title: 'Mac and Cheese',
+      sourceUrl: null,
+      imageUrl: null,
+      cookTimeMins: 20,
+      servings: 2,
+      difficulty: 'easy',
+      tags: ['comfort', 'dinner'],
+      dietaryTags: [],
+      instructions: ['Boil pasta', 'Melt cheddar with milk and stir'],
+      proTip: null,
+      costPerPortion: 160,
+      ingredients: [
+        { ingredientId: 'ing-pasta', name: 'Penne pasta', quantity: 200, unit: 'g', category: 'cupboard', inPantry: false },
+        { ingredientId: 'ing-cheddar', name: 'Cheddar cheese', quantity: 100, unit: 'g', category: 'fresh', inPantry: false },
+        { ingredientId: 'ing-milk', name: 'Milk', quantity: 200, unit: 'ml', category: 'fresh', inPantry: false },
+      ],
+    };
+
+    const recipeFajitas: Recipe = {
+      id: 'recipe-fajitas',
+      title: 'Chicken Fajitas',
+      sourceUrl: null,
+      imageUrl: null,
+      cookTimeMins: 25,
+      servings: 2,
+      difficulty: 'easy',
+      tags: ['Mexican', 'dinner'],
+      dietaryTags: [],
+      instructions: ['Sear chicken with peppers and onions', 'Serve in wraps'],
+      proTip: null,
+      costPerPortion: 210,
+      ingredients: [
+        { ingredientId: 'ing-chicken', name: 'Chicken breast', quantity: 300, unit: 'g', category: 'fresh', inPantry: false },
+        { ingredientId: 'ing-peppers', name: 'Bell peppers', quantity: 2, unit: 'each', category: 'fresh', inPantry: false },
+        { ingredientId: 'ing-wraps', name: 'Tortilla wraps', quantity: 4, unit: 'each', category: 'cupboard', inPantry: false },
+      ],
+    };
+
+    const recipeSharedBake: Recipe = {
+      id: 'recipe-chicken-pasta-bake',
+      title: 'Cheesy Chicken Pasta Bake',
+      sourceUrl: null,
+      imageUrl: null,
+      cookTimeMins: 30,
+      servings: 4,
+      difficulty: 'easy',
+      tags: ['comfort', 'dinner'],
+      dietaryTags: [],
+      instructions: ['Combine pasta, chicken and cheddar', 'Bake until golden'],
+      proTip: null,
+      costPerPortion: 190,
+      ingredients: [
+        { ingredientId: 'ing-pasta', name: 'Penne pasta', quantity: 300, unit: 'g', category: 'cupboard', inPantry: false },
+        { ingredientId: 'ing-cheddar', name: 'Cheddar cheese', quantity: 150, unit: 'g', category: 'fresh', inPantry: false },
+        { ingredientId: 'ing-chicken', name: 'Chicken breast', quantity: 400, unit: 'g', category: 'fresh', inPantry: false },
+      ],
+    };
+
+    const meal1 = createMeal({
+      id: 'meal-wed-1',
+      day: 'wed',
+      mealType: 'dinner',
+      recipeId: 'recipe-mac',
+      cookedByUserId: 'user-sam',
+      participants: [{ userId: 'user-sam', optedOut: false, guests: 0 }],
+    });
+
+    const meal2 = createMeal({
+      id: 'meal-wed-2',
+      day: 'wed',
+      mealType: 'dinner',
+      recipeId: 'recipe-fajitas',
+      cookedByUserId: 'user-me',
+      participants: [{ userId: 'user-me', optedOut: false, guests: 0 }],
+    });
+
+    const overlaps = findOverlapGaps(
+      [meal1, meal2],
+      [recipeMac, recipeFajitas, recipeSharedBake],
+      { 'user-sam': 'Sam', 'user-me': 'Me' }
+    );
+
+    expect(overlaps).toHaveLength(1);
+    expect(overlaps[0].day).toBe('wed');
+    expect(overlaps[0].suggestions.length).toBeGreaterThan(0);
+    expect(overlaps[0].suggestions[0].recipeId).toBe('recipe-chicken-pasta-bake');
+    expect(overlaps[0].suggestions[0].shares.length).toBeGreaterThanOrEqual(2);
+  });
 });
