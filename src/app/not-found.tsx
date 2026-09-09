@@ -4,7 +4,7 @@ import { PageShell } from '@/components/ui/PageShell';
 
 export default function NotFound() {
   return (
-    <PageShell className="items-center text-center py-xl">
+    <PageShell className="items-center text-center pt-xl">
       <Icon name="search_off" className="text-[48px] text-outline" />
       <h1 className="font-headline-lg-mobile text-headline-lg-mobile">Not found</h1>
       <p className="font-body-sm text-body-sm text-on-surface-variant">

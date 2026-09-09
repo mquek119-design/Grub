@@ -102,7 +102,7 @@ export default async function FeedPage() {
   ) ?? plan.meals.find((meal) => meal.day === today);
 
   return (
-    <PageShell wide className="md:grid md:grid-cols-12 md:gap-lg md:items-start pb-8 md:pb-0">
+    <PageShell wide className="md:grid md:grid-cols-12 md:gap-lg md:items-start">
       <FirstRunTip tab="feed" />
       <div className="md:col-span-8 flex flex-col gap-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-md">

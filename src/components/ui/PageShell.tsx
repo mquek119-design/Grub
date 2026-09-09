@@ -18,7 +18,7 @@ export function PageShell({
       // out of the tab order — tabIndex -1 is programmatic focus only.
       tabIndex={-1}
       className={clsx(
-        'w-full mx-auto px-margin-mobile md:px-margin-desktop py-md md:py-lg flex flex-col gap-lg outline-none relative z-[1]',
+        'w-full mx-auto px-margin-mobile md:px-margin-desktop pt-md md:pt-lg pb-20 md:pb-lg flex flex-col gap-lg outline-none relative z-[1]',
         wide ? 'max-w-7xl' : 'max-w-4xl',
         className
       )}
