@@ -100,6 +100,7 @@ export function TonightDinnerCard({
           recipe={recipe}
           servings={mouths > 0 ? mouths : (recipe.servings || 2)}
           onClose={() => setCookModeOpen(false)}
+          onFinish={() => setCookModeOpen(false)}
         />
       )}
 

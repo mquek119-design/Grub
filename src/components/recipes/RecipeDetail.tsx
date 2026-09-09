@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/media/Icon';
 import { Stocky } from '@/components/mascot/Stocky';
 import { Card } from '@/components/ui/Card';
@@ -24,6 +25,7 @@ export function RecipeDetail({
   fixedServings?: number;
   initialCookMode?: boolean;
 }) {
+  const router = useRouter();
   const [servings, setServings] = useState(fixedServings ?? recipe.servings);
   const [cookModeModalOpen, setCookModeModalOpen] = useState(initialCookMode);
   const [done, setDone] = useState<Set<number>>(new Set());
@@ -46,7 +48,16 @@ export function RecipeDetail({
         <CookModeModal
           recipe={recipe}
           servings={servings}
-          onClose={() => setCookModeModalOpen(false)}
+          onClose={() => {
+            setCookModeModalOpen(false);
+            if (initialCookMode) {
+              router.push('/');
+            }
+          }}
+          onFinish={() => {
+            setCookModeModalOpen(false);
+            router.push('/');
+          }}
         />
       )}
 

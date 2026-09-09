@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/media/Icon';
 import { Stocky } from '@/components/mascot/Stocky';
 import { clsx } from '@/lib/clsx';
@@ -12,6 +13,7 @@ interface CookModeModalProps {
   recipe: Recipe;
   servings: number;
   onClose: () => void;
+  onFinish?: () => void;
 }
 
 /**
@@ -96,7 +98,8 @@ function playTimerChime() {
   }
 }
 
-export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps) {
+export function CookModeModal({ recipe, servings, onClose, onFinish }: CookModeModalProps) {
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const [showQrModal, setShowQrModal] = useState(false);
@@ -264,6 +267,15 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
       setCurrentStep((prev) => prev - 1);
     }
   }
+
+  const handleFinish = () => {
+    if (onFinish) {
+      onFinish();
+    } else {
+      onClose();
+      router.push('/');
+    }
+  };
 
   function handleNextStep() {
     setCompletedSteps((prev) => new Set(prev).add(currentStep));
@@ -771,7 +783,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                 {currentStep === totalSteps - 1 ? (
                   <>
                     <Icon name="verified" className="text-xl" />
-                    <span>Finish Cooking 🎉</span>
+                    <span>Done</span>
                   </>
                 ) : (
                   <>
@@ -970,7 +982,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
               className="w-full py-4 rounded-2xl bg-secondary text-on-secondary-container font-title-md text-base font-bold shadow-lg flex items-center justify-center gap-2 hover:opacity-95 active:scale-98 transition-all"
             >
               <Icon name="verified" className="text-xl" />
-              <span>Finish Cooking 🎉</span>
+              <span>Done</span>
             </button>
           </div>
         </main>
@@ -1059,7 +1071,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
             </div>
 
             <h3 className="font-headline-sm text-headline-sm font-bold text-[#1B4332]">
-              All Cards Mastered! 🎉
+              All cards completed
             </h3>
             <p className="font-body-sm text-body-md text-[#2D6A4F]">
               You completed all {totalSteps} cards for <strong className="text-[#1B4332]">{formatRecipeTitle(recipe.title)}</strong>.
@@ -1068,7 +1080,7 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
             <div className="flex flex-col gap-sm w-full">
               <button
                 type="button"
-                onClick={onClose}
+                onClick={handleFinish}
                 className="w-full py-md rounded-2xl bg-secondary text-on-secondary-container font-title-md text-title-md font-bold btn-tactile flex items-center justify-center gap-xs shadow-md hover:opacity-95 active:scale-98 transition-all"
               >
                 Done

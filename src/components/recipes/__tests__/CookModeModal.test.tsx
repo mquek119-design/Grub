@@ -77,4 +77,43 @@ describe('CookModeModal', () => {
     fireEvent.click(screen.getByRole('button', { name: /switch to light mode/i }));
     expect(screen.getByRole('button', { name: /switch to dark mode/i })).toBeInTheDocument();
   });
+
+  it('displays Done on the final step button and calls onFinish on completion', () => {
+    const onFinish = jest.fn();
+    const onClose = jest.fn();
+
+    render(
+      <CookModeModal
+        recipe={mockRecipe}
+        servings={2}
+        onClose={onClose}
+        onFinish={onFinish}
+      />
+    );
+
+    // Step 1 -> click Done · Next Step
+    const nextBtn1 = screen.getByRole('button', { name: /done · next step/i });
+    fireEvent.click(nextBtn1);
+
+    // Step 2 -> click Done · Next Step
+    const nextBtn2 = screen.getByRole('button', { name: /done · next step/i });
+    fireEvent.click(nextBtn2);
+
+    // Step 3 (final step) -> button now says Done
+    const doneBtn = screen.getByRole('button', { name: /^done$/i });
+    expect(doneBtn).toBeInTheDocument();
+    expect(screen.queryByText(/finish cooking/i)).not.toBeInTheDocument();
+
+    // Click Done to finish
+    fireEvent.click(doneBtn);
+
+    // Completion modal appears with All cards completed and Done button
+    expect(screen.getByText(/all cards completed/i)).toBeInTheDocument();
+    const doneButtons = screen.getAllByRole('button', { name: /^done$/i });
+    const modalDoneBtn = doneButtons[doneButtons.length - 1];
+    fireEvent.click(modalDoneBtn);
+
+    expect(onFinish).toHaveBeenCalledTimes(1);
+  });
 });
+
