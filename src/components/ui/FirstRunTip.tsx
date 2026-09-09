@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Icon } from '@/components/media/Icon';
+import { Stocky } from '@/components/mascot/Stocky';
 import { clsx } from '@/lib/clsx';
 
 const TIP_STORAGE_PREFIX = 'grub:first-run-tip:';
@@ -69,11 +70,11 @@ export function FirstRunTip({
         title="View page guide"
         aria-label={`Open ${tab} guide`}
         className={clsx(
-          'fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-30 w-10 h-10 rounded-full bg-secondary-fixed/90 text-secondary shadow-md hover:scale-105 transition-all flex items-center justify-center border border-secondary-container',
+          'fixed bottom-20 right-4 lg:bottom-6 lg:right-6 z-30 w-11 h-11 rounded-full bg-secondary-fixed text-secondary shadow-md hover:scale-105 active:scale-95 transition-all flex items-center justify-center border border-secondary-container/60 btn-tactile',
           className
         )}
       >
-        <Icon name="lightbulb" filled className="text-[20px]" />
+        <Stocky mood="smug" size="sm" />
       </button>
     );
   }
@@ -87,14 +88,14 @@ export function FirstRunTip({
       )}
     >
       <div className="flex items-start gap-sm">
-        <div className="w-8 h-8 rounded-full bg-secondary-container/40 flex items-center justify-center text-secondary shrink-0 mt-0.5">
-          <Icon name="lightbulb" filled className="text-[18px]" />
+        <div className="shrink-0 mt-0.5">
+          <Stocky mood="smug" size="sm" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center justify-between gap-xs mb-0.5">
             <p className="font-title-sm text-title-sm font-semibold text-on-surface">{tip.title}</p>
             <span className="text-[10px] font-bold uppercase tracking-wider text-secondary bg-secondary-container/40 px-2 py-0.5 rounded-full">
-              Tip
+              Stocky&apos;s Tip
             </span>
           </div>
           <p className="font-body-sm text-[13px] leading-snug text-on-surface-variant">{tip.body}</p>

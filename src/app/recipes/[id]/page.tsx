@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { FoodImage } from '@/components/media/FoodImage';
 import { Icon } from '@/components/media/Icon';
+import { Stocky } from '@/components/mascot/Stocky';
 import { RecipeDetail } from '@/components/recipes/RecipeDetail';
 import { Badge } from '@/components/ui/Badge';
 import { PageShell } from '@/components/ui/PageShell';
@@ -74,9 +75,11 @@ export default async function RecipePage({
 
       {targetDay && (
         <div className="flex items-center gap-sm px-md py-sm rounded-xl bg-secondary-fixed/50 border border-secondary-container/40 text-on-surface">
-          <Icon name="lightbulb" filled className="text-secondary text-[20px] shrink-0" />
+          <div className="shrink-0">
+            <Stocky mood="cooking" size="sm" />
+          </div>
           <p className="font-body-sm text-body-sm">
-            Suggested for{' '}
+            <strong className="font-semibold">Stocky&apos;s suggestion:</strong> Picked for{' '}
             <strong className="font-semibold capitalize">
               {targetDay} {targetMealType ?? 'meal'}
             </strong>{' '}

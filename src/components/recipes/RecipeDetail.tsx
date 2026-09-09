@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Icon } from '@/components/media/Icon';
+import { Stocky } from '@/components/mascot/Stocky';
 import { Card } from '@/components/ui/Card';
 import { clsx } from '@/lib/clsx';
 import { formatPence } from '@/lib/money';
@@ -219,9 +220,13 @@ export function RecipeDetail({
 
           {recipe.proTip && (
             <Card accent="secondary" className="flex items-start gap-sm">
-              <Icon name="lightbulb" filled className="text-secondary mt-0.5" />
+              <div className="shrink-0 mt-0.5">
+                <Stocky mood="smug" size="sm" />
+              </div>
               <div>
-                <h3 className="font-numeric-data text-numeric-data mb-1 font-bold">Mob Pro Tip</h3>
+                <h3 className="font-title-sm text-title-sm mb-1 font-bold text-on-surface">
+                  Stocky&apos;s Pro Tip
+                </h3>
                 <p className="font-body-sm text-body-sm text-on-surface-variant">
                   {formatInstruction(recipe.proTip)}
                 </p>

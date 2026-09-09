@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { Icon } from '@/components/media/Icon';
+import { Stocky } from '@/components/mascot/Stocky';
 import { clsx } from '@/lib/clsx';
 import type { Recipe } from '@/lib/types';
 import { formatRecipeTitle, formatInstruction } from '@/lib/recipeFormatting';
@@ -660,10 +661,12 @@ export function CookModeModal({ recipe, servings, onClose }: CookModeModalProps)
                         })}
                       </ul>
 
-                      <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-2 mt-1">
-                        <Icon name="lightbulb" filled className="text-secondary text-base shrink-0 mt-0.5" />
+                      <div className="p-3 rounded-2xl bg-white/5 border border-white/10 flex items-start gap-2.5 mt-1">
+                        <div className="shrink-0 mt-0.5">
+                          <Stocky mood="smug" size="sm" />
+                        </div>
                         <p className="text-xs text-white/90 leading-relaxed">
-                          <strong>Chef Tip:</strong> Keep heat consistent. Tap anywhere to flip back to the step action.
+                          <strong>Stocky&apos;s Cooking Tip:</strong> Keep heat consistent. Tap anywhere to flip back to the step action.
                         </p>
                       </div>
                     </div>
